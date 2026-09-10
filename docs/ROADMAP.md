@@ -56,3 +56,6 @@ Issues previstos:
 ## Fase 7 - Puente iOS nativo futuro
 
 Bloqueada hasta macOS, Apple Developer y pruebas en iPhone fisico.
+
+- Exponer un App Intent para registrar un movimiento desde Atajos con importe, comercio y tarjeta.
+- Evaluar en dispositivo el disparador de transaccion de Wallet y sus datos disponibles.

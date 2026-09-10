@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { getCycleId, normalizeMerchant, type Transaction } from './finance'
+import { createLocalId } from './storage'
 import { formatActivityDate, parseEuroToCents, summarizeCurrentCycle } from './summary'
 
 describe('money parsing', () => {
@@ -36,6 +37,12 @@ describe('financial summary', () => {
 describe('manual merchant fallback', () => {
   it('keeps manual entry available when no merchant was detected', () => {
     expect(normalizeMerchant('   ')).toBe('Movimiento manual')
+  })
+})
+
+describe('local identifiers', () => {
+  it('creates an identifier when randomUUID is unavailable', () => {
+    expect(createLocalId(null)).toMatch(/^[a-z0-9]+-[a-z0-9]+$/)
   })
 })
 

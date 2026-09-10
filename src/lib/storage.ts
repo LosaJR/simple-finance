@@ -26,6 +26,10 @@ class SimpleFinanceDatabase extends Dexie {
 
 export const db = new SimpleFinanceDatabase()
 
+export const createLocalId = (
+  randomUUID: (() => string) | null = globalThis.crypto?.randomUUID?.bind(globalThis.crypto) ?? null,
+) => randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
+
 export const ensureSeedData = async () => {
   const [methodCount, categoryCount] = await Promise.all([db.paymentMethods.count(), db.categories.count()])
 
@@ -79,7 +83,7 @@ export const listTransactions = async () => {
 
 export const createPaymentMethod = async (name: string) => {
   const paymentMethod: PaymentMethod = {
-    id: crypto.randomUUID(),
+    id: createLocalId(),
     name,
     type: 'card',
     color: '#315f8f',
@@ -93,7 +97,7 @@ export const createTransaction = async (draft: TransactionDraft) => {
   const timestamp = new Date().toISOString()
   const transaction: Transaction = {
     ...draft,
-    id: crypto.randomUUID(),
+    id: createLocalId(),
     cycleId: getCycleId(draft.occurredOn),
     createdAt: timestamp,
     updatedAt: timestamp,

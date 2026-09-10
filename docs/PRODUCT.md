@@ -28,6 +28,7 @@ El propietario y un circulo cerrado de testers. No se recopilan datos, no hay ba
 ## Limites que deben comunicarse
 
 - La PWA no puede leer Apple Pay ni Wallet.
-- La PWA no puede leer notificaciones de otras apps. Una app iOS tampoco puede inspeccionarlas de forma generica; cualquier captura automatica futura requerira una fuente autorizada y verificable, no el texto de una notificacion bancaria ajena.
+- La PWA no puede integrarse con App Intents ni recibir parametros desde Atajos. La futura app iOS si expondra un atajo para registrar un movimiento con importe, comercio y tarjeta cuando esos datos provengan de una fuente autorizada.
+- El disparador de transaccion de Wallet puede iniciar un atajo cuando se usa una tarjeta, pero no debe asumirse que entrega importe ni comercio; se validara en dispositivo antes de diseñar un flujo automatico sobre el.
 - La PWA no puede garantizar recordatorios con la app cerrada sin servicio adicional.
 - Capacidades nativas deben probarse en iPhone fisico antes de declararse disponibles.

@@ -118,17 +118,21 @@ function App() {
       return
     }
 
-    await createTransaction(parsed.data)
-    setFeedback('Movimiento registrado.')
-    setAmount('')
-    setDraft((current) => ({
-      ...initialDraft,
-      type: current.type,
-      categoryId: current.categoryId,
-      paymentMethodId: current.paymentMethodId,
-      occurredOn: todayInputValue(),
-    }))
-    await refreshData()
+    try {
+      await createTransaction(parsed.data)
+      setFeedback('Movimiento registrado.')
+      setAmount('')
+      setDraft((current) => ({
+        ...initialDraft,
+        type: current.type,
+        categoryId: current.categoryId,
+        paymentMethodId: current.paymentMethodId,
+        occurredOn: todayInputValue(),
+      }))
+      await refreshData()
+    } catch {
+      setFeedback('No se ha podido registrar el movimiento. Intentalo de nuevo.')
+    }
   }
 
   const handleAddCard = async () => {
@@ -138,12 +142,16 @@ function App() {
       return
     }
 
-    const card = await createPaymentMethod(cardName)
-    setDraft((current) => ({ ...current, paymentMethodId: card.id }))
-    setNewCardName('')
-    setIsAddingCard(false)
-    setFeedback('Tarjeta añadida.')
-    await refreshData()
+    try {
+      const card = await createPaymentMethod(cardName)
+      setDraft((current) => ({ ...current, paymentMethodId: card.id }))
+      setNewCardName('')
+      setIsAddingCard(false)
+      setFeedback('Tarjeta añadida.')
+      await refreshData()
+    } catch {
+      setFeedback('No se ha podido añadir la tarjeta. Intentalo de nuevo.')
+    }
   }
 
   const handleResetDemoData = async () => {

@@ -1,20 +1,20 @@
 :root {
-  --paper: #ffffff;
-  --bg: #f7f8f5;
-  --surface: #ffffff;
-  --field: #f2f4ef;
-  --text: #17201a;
-  --muted: #667368;
-  --ink: #18241d;
-  --summary-bg: #18241d;
-  --summary-text: #f8fbf8;
-  --accent: #256b53;
-  --positive: #16724d;
-  --danger: #b04444;
-  --line: #dfe5dd;
-  --line-strong: #bcc8bd;
-  --shadow: 0 18px 45px rgba(31, 41, 34, 0.08);
-  --button-shadow: 0 8px 20px rgba(31, 41, 34, 0.12);
+  --paper: #f4f7f8;
+  --bg: #e6edf0;
+  --surface: #f0f4f5;
+  --field: #e2eaed;
+  --text: #22303a;
+  --muted: #63737d;
+  --ink: #244653;
+  --summary-bg: #315f6d;
+  --summary-text: #f2f8f9;
+  --accent: #1c7c86;
+  --positive: #227256;
+  --danger: #b4525c;
+  --line: #c7d3d8;
+  --line-strong: #a7b8c0;
+  --shadow: 0 14px 34px rgba(43, 68, 79, 0.1);
+  --button-shadow: 0 6px 16px rgba(43, 68, 79, 0.12);
   color: var(--text);
   background: var(--bg);
   color-scheme: light;
@@ -28,22 +28,22 @@
 }
 
 :root[data-theme='dark'] {
-  --paper: #f6f3eb;
-  --bg: #111612;
-  --surface: #19211b;
-  --field: #101611;
-  --text: #eef2ed;
-  --muted: #9caa9f;
-  --ink: #edf3ea;
-  --summary-bg: #12382a;
-  --summary-text: #eef9f2;
-  --accent: #76c7a2;
-  --positive: #7dd3a9;
-  --danger: #ff9c91;
-  --line: #2b352e;
-  --line-strong: #445248;
-  --shadow: 0 18px 45px rgba(0, 0, 0, 0.24);
-  --button-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+  --paper: #edf4f5;
+  --bg: #1b2730;
+  --surface: #24323c;
+  --field: #1d2a33;
+  --text: #edf4f5;
+  --muted: #aebdc4;
+  --ink: #dfeaec;
+  --summary-bg: #1d5663;
+  --summary-text: #effafa;
+  --accent: #59bcc5;
+  --positive: #72c69d;
+  --danger: #f0949a;
+  --line: #3b4d59;
+  --line-strong: #58707d;
+  --shadow: 0 14px 34px rgba(7, 16, 22, 0.28);
+  --button-shadow: 0 6px 16px rgba(7, 16, 22, 0.3);
   color-scheme: dark;
 }
 
@@ -55,9 +55,7 @@ body {
   min-width: 320px;
   min-height: 100svh;
   margin: 0;
-  background:
-    linear-gradient(135deg, rgba(37, 107, 83, 0.08), transparent 36%),
-    linear-gradient(315deg, rgba(25, 70, 95, 0.08), transparent 32%), var(--bg);
+  background: var(--bg);
 }
 
 button,

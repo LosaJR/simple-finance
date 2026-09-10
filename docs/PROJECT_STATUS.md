@@ -10,7 +10,7 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
-Base local creada en la rama `feature/fase-0-base` con primera pantalla funcional para registrar movimientos en IndexedDB. La primera correccion de prueba iPhone elimina cuentas y efectivo, incorpora tarjetas, comercio manual opcional y filtros de actividad. Repositorio privado creado en GitHub como `LosaJR/simple-finance`.
+Base local creada en la rama `feature/fase-0-base` con primera pantalla funcional para registrar movimientos en IndexedDB. La correccion de prueba iPhone elimina la dependencia de `crypto.randomUUID` en HTTP local, incorpora tarjetas, comercio manual opcional y filtros de actividad. Repositorio privado creado en GitHub como `LosaJR/simple-finance`.
 
 ## Siguiente tarea
 
@@ -21,6 +21,7 @@ Revisar desde iPhone fisico los cambios de interfaz del PR #12. Despues abordar 
 - `pnpm run validate`: correcto.
 - GitHub Actions `validate` en PR #12: correcto.
 - Serena `project health-check`: correcto con salida UTF-8.
+- Registro de movimiento: verificado contra un origen HTTP de red local sin `crypto.randomUUID`; queda pendiente la confirmacion en iPhone fisico.
 - `pnpm e2e`: configurado, pero no ejecutado localmente porque la descarga de navegadores de Playwright desde `cdn.playwright.dev` agoto timeout.
 
 ## Bloqueos

@@ -23,4 +23,4 @@ No hay backend, analitica ni SDKs externos. Los datos quedan en IndexedDB del na
 
 ## Extension futura
 
-Capacitor debe envolver la PWA sin romper la capa de dominio. App Intents, Atajos, notificaciones locales, Face ID/PIN, widgets y Apple Watch viven en la fase nativa y requieren macOS, cuenta Apple Developer y pruebas en dispositivo fisico. La lectura generica de notificaciones de bancos u otras apps no es una capacidad disponible de iOS.
+Capacitor debe envolver la PWA sin romper la capa de dominio. App Intents, Atajos, notificaciones locales, Face ID/PIN, widgets y Apple Watch viven en la fase nativa y requieren macOS, cuenta Apple Developer y pruebas en dispositivo fisico. La app nativa expondra un App Intent de registro de movimiento parametrizado para que Atajos pueda invocarlo; los datos de una transaccion solo se aceptaran cuando una fuente autorizada los entregue.
