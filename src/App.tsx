@@ -15,18 +15,28 @@ import {
   createPaymentMethod,
   createTransaction,
   ensureSeedData,
+  getSettings,
   listCategories,
   listPaymentMethods,
   listTransactions,
+  savePaydayDay,
+  setPrimaryPaymentMethod,
 } from './lib/storage'
 import {
   formatActivityDate,
   formatCurrency,
+  formatMonthYear,
+  getDaysUntilPayday,
   parseEuroToCents,
   summarizeCurrentCycle,
+  summarizeMonthlyHistory,
 } from './lib/summary'
 
-const todayInputValue = () => new Date().toISOString().slice(0, 10)
+const todayInputValue = () => {
+  const today = new Date()
+  const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60_000)
+  return localDate.toISOString().slice(0, 10)
+}
 
 const initialDraft: TransactionDraft = {
   type: 'expense',
@@ -41,6 +51,8 @@ const initialDraft: TransactionDraft = {
 
 type ActivityTab = 'all' | 'expense' | 'income'
 type AppScreen = 'home' | 'entry' | 'activity' | 'cards'
+type QuickType = 'expense' | 'income'
+type QuickStep = 'type' | 'amount' | 'merchant' | 'category'
 
 const activityTabs: { id: ActivityTab; label: string }[] = [
   { id: 'all', label: 'Global' },
@@ -55,6 +67,8 @@ const screens: { id: AppScreen; label: string; title: string }[] = [
   { id: 'cards', label: 'Tarjetas', title: 'Tarjetas' },
 ]
 
+const quickSteps: QuickStep[] = ['type', 'amount', 'merchant', 'category']
+
 function App() {
   const [categories, setCategories] = useState<Category[]>([])
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
@@ -62,26 +76,42 @@ function App() {
   const [draft, setDraft] = useState<TransactionDraft>(initialDraft)
   const [amount, setAmount] = useState('')
   const [feedback, setFeedback] = useState('Datos guardados solo en este dispositivo.')
+  const [homeFeedback, setHomeFeedback] = useState('')
   const [isDark, setIsDark] = useState(false)
   const [activityTab, setActivityTab] = useState<ActivityTab>('all')
+  const [activityPaymentMethodId, setActivityPaymentMethodId] = useState('all')
   const [screen, setScreen] = useState<AppScreen>('home')
   const [isAddingCard, setIsAddingCard] = useState(false)
   const [newCardName, setNewCardName] = useState('')
+  const [paydayDay, setPaydayDay] = useState(1)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [settingsPaydayDay, setSettingsPaydayDay] = useState(1)
+  const [settingsFeedback, setSettingsFeedback] = useState('')
+  const [isQuickEntryOpen, setIsQuickEntryOpen] = useState(false)
+  const [quickStep, setQuickStep] = useState<QuickStep>('type')
+  const [quickType, setQuickType] = useState<QuickType>('expense')
+  const [quickAmount, setQuickAmount] = useState('')
+  const [quickMerchant, setQuickMerchant] = useState('')
+  const [quickCategoryId, setQuickCategoryId] = useState('')
+  const [quickFeedback, setQuickFeedback] = useState('')
 
   const refreshData = async () => {
     await ensureSeedData()
-    const [nextCategories, nextMethods, nextTransactions] = await Promise.all([
+    const [nextCategories, nextMethods, nextTransactions, nextSettings] = await Promise.all([
       listCategories(),
       listPaymentMethods(),
       listTransactions(),
+      getSettings(),
     ])
+    const primary = nextMethods.find((method) => method.isPrimary) ?? nextMethods[0]
     setCategories(nextCategories)
     setPaymentMethods(nextMethods)
     setTransactions(nextTransactions)
+    setPaydayDay(nextSettings.paydayDay)
     setDraft((current) => ({
       ...current,
       categoryId: current.categoryId || nextCategories[0]?.id || '',
-      paymentMethodId: current.paymentMethodId || nextMethods[0]?.id || '',
+      paymentMethodId: current.paymentMethodId || primary?.id || '',
     }))
   }
 
@@ -93,7 +123,16 @@ function App() {
     document.documentElement.dataset.theme = isDark ? 'dark' : 'light'
   }, [isDark])
 
-  const cycleSummary = useMemo(() => summarizeCurrentCycle(transactions), [transactions])
+  const primaryCard = useMemo(
+    () => paymentMethods.find((method) => method.isPrimary) ?? paymentMethods[0],
+    [paymentMethods],
+  )
+  const cycleSummary = useMemo(
+    () => summarizeCurrentCycle(transactions, paydayDay),
+    [paydayDay, transactions],
+  )
+  const daysUntilPayday = useMemo(() => getDaysUntilPayday(paydayDay), [paydayDay])
+  const monthlyHistory = useMemo(() => summarizeMonthlyHistory(transactions), [transactions])
   const categoryMap = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
     [categories],
@@ -104,47 +143,100 @@ function App() {
   )
   const visibleTransactions = useMemo(
     () =>
-      activityTab === 'all'
-        ? transactions
-        : transactions.filter((transaction) => transaction.type === activityTab),
-    [activityTab, transactions],
+      transactions.filter(
+        (transaction) =>
+          (activityTab === 'all' || transaction.type === activityTab) &&
+          (activityPaymentMethodId === 'all' || transaction.paymentMethodId === activityPaymentMethodId),
+      ),
+    [activityPaymentMethodId, activityTab, transactions],
+  )
+  const quickCategories = useMemo(
+    () => categories.filter((category) => category.allowedTypes.includes(quickType)),
+    [categories, quickType],
   )
   const currentScreen = screens.find((item) => item.id === screen) ?? screens[0]
+  const quickStepIndex = quickSteps.indexOf(quickStep)
 
   const navigateTo = (nextScreen: AppScreen) => {
     setScreen(nextScreen)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  const chooseQuickType = (type: QuickType) => {
+    setQuickType(type)
+    setQuickCategoryId(categories.find((category) => category.allowedTypes.includes(type))?.id ?? '')
+    setQuickStep('amount')
+  }
+
+  const openQuickEntry = () => {
+    setQuickType('expense')
+    setQuickAmount('')
+    setQuickMerchant('')
+    setQuickCategoryId(categories.find((category) => category.allowedTypes.includes('expense'))?.id ?? '')
+    setQuickFeedback('')
+    setQuickStep('type')
+    setIsQuickEntryOpen(true)
+  }
+
+  const closeQuickEntry = () => {
+    setIsQuickEntryOpen(false)
+    setQuickFeedback('')
+  }
+
+  const handleQuickSave = async () => {
+    const parsed = transactionDraftSchema.safeParse({
+      ...initialDraft,
+      type: quickType,
+      amountCents: parseEuroToCents(quickAmount),
+      merchant: normalizeMerchant(quickMerchant),
+      occurredOn: todayInputValue(),
+      paymentMethodId: primaryCard?.id ?? '',
+      categoryId: quickCategoryId,
+    })
+
+    if (!parsed.success) {
+      setQuickFeedback('Revisa el importe y la categoría.')
+      return
+    }
+
+    try {
+      await createTransaction(parsed.data, paydayDay)
+      await refreshData()
+      closeQuickEntry()
+      setHomeFeedback(`Movimiento registrado con ${primaryCard?.name ?? 'la tarjeta principal'}.`)
+    } catch {
+      setQuickFeedback('No se ha podido registrar el movimiento. Inténtalo de nuevo.')
+    }
+  }
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const amountCents = parseEuroToCents(amount)
     const parsed = transactionDraftSchema.safeParse({
       ...draft,
-      amountCents,
+      amountCents: parseEuroToCents(amount),
       merchant: normalizeMerchant(draft.merchant),
       note: draft.note?.trim() || undefined,
     })
 
     if (!parsed.success) {
-      setFeedback('Revisa el importe, la categoria y la tarjeta antes de guardar.')
+      setFeedback('Revisa el importe, la categoría y la tarjeta antes de guardar.')
       return
     }
 
     try {
-      await createTransaction(parsed.data)
+      await createTransaction(parsed.data, paydayDay)
       setFeedback('Movimiento registrado.')
       setAmount('')
       setDraft((current) => ({
         ...initialDraft,
         type: current.type,
         categoryId: current.categoryId,
-        paymentMethodId: current.paymentMethodId,
+        paymentMethodId: primaryCard?.id ?? '',
         occurredOn: todayInputValue(),
       }))
       await refreshData()
     } catch {
-      setFeedback('No se ha podido registrar el movimiento. Intentalo de nuevo.')
+      setFeedback('No se ha podido registrar el movimiento. Inténtalo de nuevo.')
     }
   }
 
@@ -156,15 +248,42 @@ function App() {
     }
 
     try {
-      const card = await createPaymentMethod(cardName)
-      setDraft((current) => ({ ...current, paymentMethodId: card.id }))
+      await createPaymentMethod(cardName)
       setNewCardName('')
       setIsAddingCard(false)
       setFeedback('Tarjeta añadida.')
       await refreshData()
     } catch {
-      setFeedback('No se ha podido añadir la tarjeta. Intentalo de nuevo.')
+      setFeedback('No se ha podido añadir la tarjeta. Inténtalo de nuevo.')
     }
+  }
+
+  const handleSetPrimaryCard = async (paymentMethodId: string) => {
+    try {
+      await setPrimaryPaymentMethod(paymentMethodId)
+      setDraft((current) => ({ ...current, paymentMethodId }))
+      setFeedback('Tarjeta principal actualizada.')
+      await refreshData()
+    } catch {
+      setFeedback('No se ha podido actualizar la tarjeta principal.')
+    }
+  }
+
+  const openSettings = () => {
+    setSettingsPaydayDay(paydayDay)
+    setSettingsFeedback('')
+    setIsSettingsOpen(true)
+  }
+
+  const handleSaveSettings = async () => {
+    if (!Number.isInteger(settingsPaydayDay) || settingsPaydayDay < 1 || settingsPaydayDay > 31) {
+      setSettingsFeedback('Elige un día entre 1 y 31.')
+      return
+    }
+
+    await savePaydayDay(settingsPaydayDay)
+    setPaydayDay(settingsPaydayDay)
+    setSettingsFeedback('Día de nómina guardado.')
   }
 
   const handleResetDemoData = async () => {
@@ -177,8 +296,8 @@ function App() {
     if (items.length === 0) {
       return (
         <div className="empty-state">
-          <strong>Sin movimientos todavia.</strong>
-          <button className="text-button" type="button" onClick={() => navigateTo('entry')}>
+          <strong>Sin movimientos todavía.</strong>
+          <button className="text-button" type="button" onClick={openQuickEntry}>
             Registrar el primero
           </button>
         </div>
@@ -195,7 +314,7 @@ function App() {
               <div>
                 <span className="merchant">{transaction.merchant}</span>
                 <span className="metadata">
-                  {category?.name ?? 'Sin categoria'} · {method?.name ?? 'Sin tarjeta'} ·{' '}
+                  {category?.name ?? 'Sin categoría'} · {method?.name ?? 'Sin tarjeta'} ·{' '}
                   {formatActivityDate(transaction.occurredOn, transaction.createdAt)}
                 </span>
               </div>
@@ -217,19 +336,19 @@ function App() {
           <p className="eyebrow">Simple Finance</p>
           <h1>{currentScreen.title}</h1>
         </div>
-        <button
-          className="icon-button"
-          type="button"
-          aria-label={isDark ? 'Activar tema claro' : 'Activar tema oscuro'}
-          title={isDark ? 'Activar tema claro' : 'Activar tema oscuro'}
-          onClick={() => setIsDark((value) => !value)}
-        >
-          {isDark ? 'Luz' : 'Noche'}
+        <button className="icon-button" type="button" aria-label="Configuración" onClick={openSettings}>
+          Ajustes
         </button>
       </header>
 
       {screen === 'home' ? (
         <section className="screen-stack" aria-label="Resumen del ciclo actual">
+          <article className="payday-banner">
+            <span>Próxima nómina</span>
+            <strong>{daysUntilPayday === 0 ? 'Cobras hoy' : `Faltan ${daysUntilPayday} días`}</strong>
+            <small>Día de cobro: {paydayDay}</small>
+          </article>
+
           <section className="dashboard">
             <article className="metric primary">
               <span>Ciclo actual</span>
@@ -252,17 +371,15 @@ function App() {
           </section>
 
           <div className="home-actions">
-            <button className="primary-action" type="button" onClick={() => navigateTo('entry')}>
+            <button className="primary-action" type="button" onClick={openQuickEntry}>
               Registrar movimiento
             </button>
-            <button className="secondary-action" type="button" onClick={() => navigateTo('activity')}>
-              Ver actividad
-            </button>
           </div>
+          {homeFeedback ? <p className="status-message" role="status">{homeFeedback}</p> : null}
 
-          <section className="compact-panel" aria-label="Ultimos movimientos">
+          <section className="compact-panel" aria-label="Últimos movimientos">
             <div className="section-title">
-              <h2>Ultimos movimientos</h2>
+              <h2>Últimos movimientos</h2>
               <button className="text-button" type="button" onClick={() => navigateTo('activity')}>
                 Ver todos
               </button>
@@ -287,7 +404,7 @@ function App() {
                 type="button"
                 onClick={() => setDraft((current) => ({ ...current, type }))}
               >
-                {type === 'expense' ? 'Gasto' : type === 'income' ? 'Ingreso' : 'Inversion'}
+                {type === 'expense' ? 'Gasto' : type === 'income' ? 'Ingreso' : 'Inversión'}
               </button>
             ))}
           </div>
@@ -307,9 +424,7 @@ function App() {
             <input
               placeholder="Añádelo si no se ha detectado"
               value={draft.merchant}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, merchant: event.target.value }))
-              }
+              onChange={(event) => setDraft((current) => ({ ...current, merchant: event.target.value }))}
             />
           </label>
 
@@ -319,9 +434,7 @@ function App() {
               <input
                 type="date"
                 value={draft.occurredOn}
-                onChange={(event) =>
-                  setDraft((current) => ({ ...current, occurredOn: event.target.value }))
-                }
+                onChange={(event) => setDraft((current) => ({ ...current, occurredOn: event.target.value }))}
               />
             </label>
             <label>
@@ -347,12 +460,10 @@ function App() {
           </div>
 
           <label>
-            Categoria
+            Categoría
             <select
               value={draft.categoryId}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, categoryId: event.target.value }))
-              }
+              onChange={(event) => setDraft((current) => ({ ...current, categoryId: event.target.value }))}
             >
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
@@ -387,6 +498,18 @@ function App() {
             </button>
           </div>
 
+          <label className="activity-method-filter">
+            Tarjeta
+            <select value={activityPaymentMethodId} onChange={(event) => setActivityPaymentMethodId(event.target.value)}>
+              <option value="all">Todas las tarjetas</option>
+              {paymentMethods.map((method) => (
+                <option key={method.id} value={method.id}>
+                  {method.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
           <div className="activity-tabs" role="tablist" aria-label="Filtro de actividad">
             {activityTabs.map((tab) => (
               <button
@@ -411,13 +534,9 @@ function App() {
           <div className="section-title">
             <div>
               <h2>Tus tarjetas</h2>
-              <p>La principal siempre aparece primero.</p>
+              <p>La tarjeta principal se usa por defecto.</p>
             </div>
-            <button
-              className="text-button"
-              type="button"
-              onClick={() => setIsAddingCard((current) => !current)}
-            >
+            <button className="text-button" type="button" onClick={() => setIsAddingCard((current) => !current)}>
               Añadir tarjeta
             </button>
           </div>
@@ -445,15 +564,26 @@ function App() {
                 <span className="card-swatch" style={{ backgroundColor: method.color }} aria-hidden="true" />
                 <div>
                   <strong>{method.name}</strong>
-                  <small>{method.id === 'card-main' ? 'Tarjeta principal' : 'Tarjeta activa'}</small>
+                  <small>{method.isPrimary ? 'Tarjeta principal' : 'Tarjeta activa'}</small>
                 </div>
+                {method.isPrimary ? (
+                  <span className="primary-tag">Principal</span>
+                ) : (
+                  <button
+                    className="secondary-action compact-action"
+                    type="button"
+                    onClick={() => handleSetPrimaryCard(method.id)}
+                  >
+                    Usar como principal
+                  </button>
+                )}
               </li>
             ))}
           </ul>
         </section>
       ) : null}
 
-      <nav className="bottom-nav" aria-label="Navegacion principal">
+      <nav className="bottom-nav" aria-label="Navegación principal">
         {screens.map((item) => (
           <button
             key={item.id}
@@ -466,6 +596,179 @@ function App() {
           </button>
         ))}
       </nav>
+
+      {isQuickEntryOpen ? (
+        <div className="modal-layer" role="dialog" aria-modal="true" aria-labelledby="quick-entry-title">
+          <section className="quick-sheet">
+            <div className="sheet-heading">
+              <div>
+                <p className="eyebrow">Registro rápido</p>
+                <h2 id="quick-entry-title">
+                  {quickStep === 'type'
+                    ? '¿Qué vas a registrar?'
+                    : quickStep === 'amount'
+                      ? '¿Qué importe es?'
+                      : quickStep === 'merchant'
+                        ? '¿Dónde ha sido?'
+                        : 'Elige una categoría'}
+                </h2>
+              </div>
+              <button className="close-button" type="button" aria-label="Cerrar registro rápido" onClick={closeQuickEntry}>
+                Cerrar
+              </button>
+            </div>
+
+            <div className="step-progress" aria-label={`Paso ${quickStepIndex + 1} de ${quickSteps.length}`}>
+              {quickSteps.map((step, index) => (
+                <span key={step} className={index <= quickStepIndex ? 'active' : ''} />
+              ))}
+            </div>
+
+            {quickStep === 'type' ? (
+              <div className="quick-type-actions">
+                <button className="primary-action" type="button" onClick={() => chooseQuickType('expense')}>
+                  Gasto
+                </button>
+                <button className="secondary-action" type="button" onClick={() => chooseQuickType('income')}>
+                  Ingreso
+                </button>
+              </div>
+            ) : null}
+
+            {quickStep === 'amount' ? (
+              <label className="quick-field">
+                Importe
+                <input
+                  autoFocus
+                  inputMode="decimal"
+                  placeholder="34,90"
+                  value={quickAmount}
+                  onChange={(event) => setQuickAmount(event.target.value)}
+                />
+              </label>
+            ) : null}
+
+            {quickStep === 'merchant' ? (
+              <label className="quick-field">
+                Concepto
+                <input
+                  autoFocus
+                  placeholder="Opcional"
+                  value={quickMerchant}
+                  onChange={(event) => setQuickMerchant(event.target.value)}
+                />
+              </label>
+            ) : null}
+
+            {quickStep === 'category' ? (
+              <div className="quick-categories" aria-label="Categoría">
+                {quickCategories.map((category) => (
+                  <button
+                    key={category.id}
+                    className={quickCategoryId === category.id ? 'active' : ''}
+                    type="button"
+                    onClick={() => setQuickCategoryId(category.id)}
+                  >
+                    {category.name}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            {quickFeedback ? <p className="status-message error" role="alert">{quickFeedback}</p> : null}
+
+            {quickStep !== 'type' ? (
+              <div className="sheet-actions">
+                <button
+                  className="secondary-action"
+                  type="button"
+                  onClick={() => setQuickStep(quickSteps[quickStepIndex - 1] ?? 'type')}
+                >
+                  Atrás
+                </button>
+                {quickStep === 'category' ? (
+                  <button className="primary-action" type="button" onClick={handleQuickSave}>
+                    Guardar movimiento
+                  </button>
+                ) : (
+                  <button
+                    className="primary-action"
+                    type="button"
+                    onClick={() => setQuickStep(quickSteps[quickStepIndex + 1] ?? 'category')}
+                  >
+                    Continuar
+                  </button>
+                )}
+              </div>
+            ) : null}
+          </section>
+        </div>
+      ) : null}
+
+      {isSettingsOpen ? (
+        <div className="modal-layer" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+          <section className="settings-sheet">
+            <div className="sheet-heading">
+              <div>
+                <p className="eyebrow">Simple Finance</p>
+                <h2 id="settings-title">Configuración</h2>
+              </div>
+              <button className="close-button" type="button" aria-label="Cerrar configuración" onClick={() => setIsSettingsOpen(false)}>
+                Cerrar
+              </button>
+            </div>
+
+            <section className="settings-section" aria-labelledby="theme-title">
+              <h3 id="theme-title">Tema</h3>
+              <div className="segmented theme-selector" aria-label="Tema">
+                <button className={!isDark ? 'active' : ''} type="button" onClick={() => setIsDark(false)}>
+                  Claro
+                </button>
+                <button className={isDark ? 'active' : ''} type="button" onClick={() => setIsDark(true)}>
+                  Noche
+                </button>
+              </div>
+            </section>
+
+            <section className="settings-section" aria-labelledby="payday-title">
+              <h3 id="payday-title">Nómina</h3>
+              <label>
+                Día de cobro
+                <input
+                  type="number"
+                  min="1"
+                  max="31"
+                  inputMode="numeric"
+                  value={settingsPaydayDay}
+                  onChange={(event) => setSettingsPaydayDay(Number(event.target.value))}
+                />
+              </label>
+              <button className="primary-action" type="button" onClick={handleSaveSettings}>
+                Guardar día de nómina
+              </button>
+              {settingsFeedback ? <p className="status-message" role="status">{settingsFeedback}</p> : null}
+            </section>
+
+            <section className="settings-section" aria-labelledby="history-title">
+              <h3 id="history-title">Meses anteriores</h3>
+              {monthlyHistory.length === 0 ? (
+                <p className="muted-copy">Aún no hay meses con movimientos.</p>
+              ) : (
+                <ul className="monthly-history">
+                  {monthlyHistory.map((month) => (
+                    <li key={month.month}>
+                      <strong>{formatMonthYear(month.month)}</strong>
+                      <span>
+                        Gastos {formatCurrency(month.expenseCents)} · Ingresos {formatCurrency(month.incomeCents)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </section>
+        </div>
+      ) : null}
     </main>
   )
 }

@@ -22,9 +22,11 @@ Issues previstos:
 ## Fase 1 - Fundamentos financieros
 
 - Dashboard responsive para iPhone.
-- Tarjeta principal, tarjetas adicionales y CRUD seguro de tarjetas y categorias.
+- Tarjeta principal configurable, tarjetas adicionales y CRUD seguro de tarjetas y categorias.
 - Registro manual completo de gastos, ingresos e inversiones.
+- Registro rapido diario de gasto o ingreso, con tarjeta principal y fecha/hora automaticas.
 - Actividad global, de gastos y de ingresos ordenada por fecha y hora.
+- Filtro de actividad por tarjeta, dia de cobro, cuenta atras de nomina e historial mensual resumido.
 
 ## Fase 2 - Limites y ciclos
 

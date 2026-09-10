@@ -31,3 +31,11 @@ Se separan los flujos base en Resumen, Registrar, Actividad y Tarjetas con una b
 ## 2026-09-10 - Material calido y sobrio
 
 El modo claro usa papel marfil y un grano local de muy bajo contraste; el modo oscuro usa tonos tinta y verde apagado, con la misma textura apenas perceptible. La imagen se sirve comprimida como WebP para que forme parte de la PWA sin superar el limite de precache.
+
+## 2026-09-10 - Registro rapido desde Resumen
+
+El flujo cotidiano abre una hoja superpuesta sin abandonar Resumen. Solo solicita gasto o ingreso, importe, concepto y categoria; la tarjeta principal y el momento de registro se asignan localmente. Las inversiones se mantienen en el formulario completo por ser una operacion menos frecuente.
+
+## 2026-09-10 - Dia de nomina local
+
+El dia de cobro se guarda en IndexedDB y determina la cuenta atras y el ciclo actual. El historial inicial se presenta por mes natural para que siga siendo interpretable aunque cambie el dia configurado. La notificacion de confirmacion de nomina queda pendiente de la aplicacion iOS nativa.

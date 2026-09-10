@@ -12,6 +12,12 @@ export interface PaymentMethod {
   color: string
   lastFour?: string
   active: boolean
+  isPrimary: boolean
+}
+
+export interface AppSettings {
+  id: 'app-settings'
+  paydayDay: number
 }
 
 export interface Category {
@@ -61,8 +67,14 @@ export const DEFAULT_PAYMENT_METHODS: PaymentMethod[] = [
     type: 'card',
     color: '#256b53',
     active: true,
+    isPrimary: true,
   },
 ]
+
+export const DEFAULT_SETTINGS: AppSettings = {
+  id: 'app-settings',
+  paydayDay: 1,
+}
 
 export const DEFAULT_CATEGORIES: Category[] = [
   {

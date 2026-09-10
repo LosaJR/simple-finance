@@ -11,15 +11,16 @@
 
 ## Interfaz movil
 
-La interfaz de fase 0 usa navegacion local en el cliente con una barra inferior fija. Las vistas Resumen, Registrar, Actividad y Tarjetas comparten el estado de IndexedDB, pero no se apilan en una pagina unica. La superficie usa una textura local comprimida para no penalizar la precache de la PWA.
+La interfaz de fase 0 usa navegacion local en el cliente con una barra inferior fija. Las vistas Resumen, Registrar, Actividad y Tarjetas comparten el estado de IndexedDB, pero no se apilan en una pagina unica. Resumen puede abrir un registro rapido como hoja modal sin abandonar el contexto. La superficie usa una textura local comprimida para no penalizar la precache de la PWA.
 
 ## Modelo local inicial
 
-- `PaymentMethod`: tarjeta, nombre, color, ultimos cuatro digitos opcional y activa. No se modelan cuentas ni efectivo.
+- `PaymentMethod`: tarjeta, nombre, color, ultimos cuatro digitos opcional, activa y bandera unica de tarjeta principal. No se modelan cuentas ni efectivo.
 - `Category`: nombre, icono textual, color, tipos permitidos, limite opcional y activo.
 - `Transaction`: tipo, importe en centimos, comercio, fecha local, metodo, categoria, nota, estado y ciclo.
+- `AppSettings`: dia de cobro configurado localmente para el ciclo, la cuenta atras y la futura notificacion nativa.
 
-Los importes se almacenan como enteros en centimos. Las fechas de movimientos usan formato `YYYY-MM-DD` y los calculos de ciclo se hacen con fecha local al mediodia para evitar desplazamientos por zona horaria.
+Los importes se almacenan como enteros en centimos. Las fechas de movimientos usan formato `YYYY-MM-DD` y los calculos de ciclo se hacen con fecha local al mediodia para evitar desplazamientos por zona horaria. El resumen actual calcula el ciclo contra el dia de cobro vigente, mientras que el historial de meses se agrupa por mes natural para una lectura estable.
 
 ## Privacidad
 
