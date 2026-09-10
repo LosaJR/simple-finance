@@ -145,6 +145,11 @@ export const getCycleId = (occurredOn: string, resetDay = 1) => {
   const year = date.getFullYear()
   const month = date.getMonth()
   const currentPayday = getPaydayDate(year, month, resetDay)
-  const scheduledCycle = date >= currentPayday ? new Date(year, month, 1) : new Date(year, month - 1, 1)
-  return `${scheduledCycle.getFullYear()}-${String(scheduledCycle.getMonth() + 1).padStart(2, '0')}`
+  const closingPayday =
+    date >= currentPayday
+      ? getPaydayDate(year, month + 1, resetDay)
+      : currentPayday
+  const finalCycleDay = new Date(closingPayday)
+  finalCycleDay.setDate(finalCycleDay.getDate() - 1)
+  return `${finalCycleDay.getFullYear()}-${String(finalCycleDay.getMonth() + 1).padStart(2, '0')}`
 }

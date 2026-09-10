@@ -46,7 +46,11 @@ Resumen se mantiene compacto y sin desplazamiento; la navegacion inferior es opa
 
 ## 2026-09-10 - Ciclos entre fechas efectivas de cobro
 
-Los ciclos se delimitan entre cobros efectivos, no por el limite natural del calendario. Si el dia configurado cae en fin de semana, se desplaza al lunes y ese retraso amplía el ciclo anterior. El calendario mantiene una casilla por mes de cobro programado para comparar, pero al pulsarla filtra el extracto del ciclo real.
+Los ciclos se delimitan entre cobros efectivos, no por el limite natural del calendario. Si el dia configurado cae en fin de semana, se desplaza al lunes y ese retraso amplía el ciclo anterior. El calendario etiqueta cada ciclo por su ultimo dia antes del siguiente cobro: tanto el intervalo 25 de agosto a 25 de septiembre como el de 1 de septiembre a 1 de octubre se consultan desde septiembre.
+
+## 2026-09-10 - Configuracion de acceso directo
+
+Tarjetas y categorias no usan una segunda capa de secciones plegables. Cada una se muestra como selector directo en Configuracion y ofrece un boton `+` lateral para abrir el alta correspondiente.
 
 ## 2026-09-10 - Correccion de movimientos desde Resumen
 

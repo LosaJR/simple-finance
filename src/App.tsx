@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { CalendarDays, Pencil, Trash2 } from 'lucide-react'
+import { CalendarDays, Pencil, Plus, Trash2 } from 'lucide-react'
 import './App.css'
 import {
   DEFAULT_CATEGORIES,
@@ -749,14 +749,10 @@ function App() {
             </div>
           </div>
 
-          <details className="settings-disclosure">
-            <summary>
-              <span>Tarjetas</span>
-              <small>{selectedCard?.name ?? 'Sin tarjetas'}</small>
-            </summary>
-            <div className="disclosure-content">
+          <section className="configuration-item" aria-label="Tarjetas">
+            <div className="configuration-select-row">
               <label>
-                Tarjeta utilizada por defecto
+                Tarjetas
                 <select value={selectedCard?.id ?? ''} onChange={(event) => setSelectedCardId(event.target.value)}>
                   {paymentMethods.map((method) => (
                     <option key={method.id} value={method.id}>
@@ -765,47 +761,45 @@ function App() {
                   ))}
                 </select>
               </label>
-              {selectedCard && !selectedCard.isPrimary ? (
-                <button
-                  className="secondary-action"
-                  type="button"
-                  onClick={() => handleSetPrimaryCard(selectedCard.id)}
-                >
-                  Usar como principal
-                </button>
-              ) : (
-                <span className="primary-tag">Tarjeta principal</span>
-              )}
-              <button className="text-button" type="button" onClick={() => setIsAddingCard((current) => !current)}>
-                Añadir tarjeta
+              <button
+                className="add-icon-button"
+                type="button"
+                aria-label="Añadir tarjeta"
+                title="Añadir tarjeta"
+                onClick={() => setIsAddingCard((current) => !current)}
+              >
+                <Plus size={19} aria-hidden="true" />
               </button>
-              {isAddingCard ? (
-                <div className="card-creator">
-                  <label>
-                    Nombre de la tarjeta
-                    <input
-                      autoFocus
-                      placeholder="Tarjeta de viajes"
-                      value={newCardName}
-                      onChange={(event) => setNewCardName(event.target.value)}
-                    />
-                  </label>
-                  <button className="primary-action" type="button" onClick={handleAddCard}>
-                    Guardar tarjeta
-                  </button>
-                </div>
-              ) : null}
             </div>
-          </details>
+            {selectedCard && !selectedCard.isPrimary ? (
+              <button className="secondary-action" type="button" onClick={() => handleSetPrimaryCard(selectedCard.id)}>
+                Usar como principal
+              </button>
+            ) : (
+              <span className="primary-tag">Tarjeta principal</span>
+            )}
+            {isAddingCard ? (
+              <div className="card-creator">
+                <label>
+                  Nombre de la tarjeta
+                  <input
+                    autoFocus
+                    placeholder="Tarjeta de viajes"
+                    value={newCardName}
+                    onChange={(event) => setNewCardName(event.target.value)}
+                  />
+                </label>
+                <button className="primary-action" type="button" onClick={handleAddCard}>
+                  Guardar tarjeta
+                </button>
+              </div>
+            ) : null}
+          </section>
 
-          <details className="settings-disclosure">
-            <summary>
-              <span>Categorías</span>
-              <small>{selectedCategory?.name ?? 'Sin categorías'}</small>
-            </summary>
-            <div className="disclosure-content">
+          <section className="configuration-item" aria-label="Categorías">
+            <div className="configuration-select-row">
               <label>
-                Categoría
+                Categorías
                 <select value={selectedCategory?.id ?? ''} onChange={(event) => setSelectedCategoryId(event.target.value)}>
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
@@ -814,27 +808,33 @@ function App() {
                   ))}
                 </select>
               </label>
-              <button className="text-button" type="button" onClick={() => setIsAddingCategory((current) => !current)}>
-                Añadir categoría
+              <button
+                className="add-icon-button"
+                type="button"
+                aria-label="Añadir categoría"
+                title="Añadir categoría"
+                onClick={() => setIsAddingCategory((current) => !current)}
+              >
+                <Plus size={19} aria-hidden="true" />
               </button>
-              {isAddingCategory ? (
-                <div className="card-creator">
-                  <label>
-                    Nombre de la categoría
-                    <input
-                      autoFocus
-                      placeholder="Mascotas"
-                      value={newCategoryName}
-                      onChange={(event) => setNewCategoryName(event.target.value)}
-                    />
-                  </label>
-                  <button className="primary-action" type="button" onClick={handleAddCategory}>
-                    Guardar categoría
-                  </button>
-                </div>
-              ) : null}
             </div>
-          </details>
+            {isAddingCategory ? (
+              <div className="card-creator">
+                <label>
+                  Nombre de la categoría
+                  <input
+                    autoFocus
+                    placeholder="Mascotas"
+                    value={newCategoryName}
+                    onChange={(event) => setNewCategoryName(event.target.value)}
+                  />
+                </label>
+                <button className="primary-action" type="button" onClick={handleAddCategory}>
+                  Guardar categoría
+                </button>
+              </div>
+            ) : null}
+          </section>
         </section>
       ) : null}
 

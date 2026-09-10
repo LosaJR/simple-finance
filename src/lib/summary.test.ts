@@ -18,15 +18,15 @@ describe('money parsing', () => {
 
 describe('cycle ids', () => {
   it('uses the configured local reset day', () => {
-    expect(getCycleId('2026-09-09', 10)).toBe('2026-08')
-    expect(getCycleId('2026-09-10', 10)).toBe('2026-09')
+    expect(getCycleId('2026-09-09', 10)).toBe('2026-09')
+    expect(getCycleId('2026-09-10', 10)).toBe('2026-10')
   })
 
   it('moves a weekend payday to the next working day', () => {
     const payday = getPaydayDate(2026, 4, 31)
     expect([payday.getFullYear(), payday.getMonth(), payday.getDate()]).toEqual([2026, 5, 1])
-    expect(getCycleId('2026-05-31', 31)).toBe('2026-04')
-    expect(getCycleId('2026-06-01', 31)).toBe('2026-05')
+    expect(getCycleId('2026-05-31', 31)).toBe('2026-05')
+    expect(getCycleId('2026-06-01', 31)).toBe('2026-06')
   })
 })
 
