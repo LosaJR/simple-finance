@@ -1,0 +1,29 @@
+name: Bug privado de tester
+description: Reportar un problema sin incluir datos financieros reales.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "No incluyas importes reales, comercios sensibles, capturas con datos personales ni exportaciones financieras."
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Que ha pasado
+      description: Describe el problema con datos ficticios si hace falta.
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Dispositivo y navegador
+      placeholder: "iPhone 15, iOS 18, Safari"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducir
+      placeholder: "1. Abrir la app..."
+    validations:
+      required: true
