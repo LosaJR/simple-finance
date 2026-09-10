@@ -19,6 +19,7 @@ Revisar/mergear PR #12. Despues abordar Fase 1 con CRUD completo de metodos y ca
 ## Verificaciones
 
 - `pnpm run validate`: correcto.
+- GitHub Actions `validate` en PR #12: correcto.
 - Serena `project health-check`: correcto con salida UTF-8.
 - `pnpm e2e`: configurado, pero no ejecutado localmente porque la descarga de navegadores de Playwright desde `cdn.playwright.dev` agoto timeout.
 
