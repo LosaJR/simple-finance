@@ -1,5 +1,9 @@
 # Roadmap
 
+## Seguimiento de avance
+
+El estado visible y actualizado de cada fase se mantiene en el issue de GitHub [Actualizacion Objetivos](https://github.com/LosaJR/simple-finance/issues/13). Debe actualizarse al cerrar un hito, cambiar el alcance de una fase o aparecer un bloqueo relevante. Este documento conserva el alcance tecnico de referencia.
+
 ## Fase 0 - Base del proyecto
 
 Estado: en curso.

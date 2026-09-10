@@ -6,6 +6,8 @@ Fecha: 2026-09-10
 
 Fase 0 lista para revision en PR #12: https://github.com/LosaJR/simple-finance/pull/12
 
+Seguimiento visible de fases y porcentajes: https://github.com/LosaJR/simple-finance/issues/13
+
 Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vitest, Playwright, Serena, GitHub Issues, milestones, GitHub Project y CI.
 
 ## Ultima tarea terminada
