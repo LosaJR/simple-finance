@@ -21,12 +21,13 @@ El propietario y un circulo cerrado de testers. No se recopilan datos, no hay ba
 - La navegacion movil separa Resumen, Registrar, Actividad y Configuracion en vistas propias; cada vista solo desplaza el contenido que necesita.
 - Resumen ofrece un registro rapido superpuesto con los pasos gasto o ingreso, importe, concepto y categoria; usa la tarjeta principal y el momento actual sin pedirlos.
 - Resumen mantiene los ultimos movimientos compactos y permite deslizarlos a la izquierda para editar o eliminar el movimiento.
+- Resumen es desplazable y prioriza los gastos del ciclo: un gráfico circular los distribuye por categoría, un calendario permite elegir año y mes para abrir el extracto de gastos, y una lista muestra solo las categorías usadas, su porcentaje y su consumo frente al límite cuando exista.
 - Registrar no pide notas; solo solicita los datos necesarios para crear el movimiento en una pantalla compacta.
 - Configuracion conserva el tema, el dia de cobro y la cantidad de nomina, y muestra selectores directos de tarjetas y categorias con acciones `+` para añadirlas.
 - Resumen muestra la cuenta atras para la proxima nomina y Actividad ofrece un calendario anual resumido de ingresos y gastos por ciclo de nomina; al elegir un ciclo muestra su extracto. Cada ciclo se etiqueta con el mes de su ultimo dia antes del siguiente cobro, de modo que los gastos entre el 25 de agosto y el 25 de septiembre, o entre el 1 de septiembre y el 1 de octubre, se muestran en septiembre.
 - Cuando la aplicacion se abre en la fecha de cobro efectiva o despues, registra una unica nomina como ingreso. Si el dia elegido cae en fin de semana, se desplaza al siguiente dia laborable.
 - Cada ciclo comienza en la fecha efectiva de cobro y termina al comenzar el siguiente. La nomina que abre el ciclo se asigna a ese ciclo, aunque la fecha efectiva caiga al principio del mes siguiente.
-- Categorias ilimitadas; las creadas por la persona sirven tanto para gastos como para ingresos. Iniciales: Ocio, Supermercado, Gasolina, Hogar y Suscripciones.
+- Categorias ilimitadas; las creadas por la persona sirven tanto para gastos como para ingresos. Cada categoría tiene color e icono visual, y puede tener un límite mensual opcional. Iniciales: Ocio, Supermercado, Gasolina, Hogar y Suscripciones.
 - Cada categoria puede tener limite opcional.
 - Ciclos con dia de reinicio configurable y cierre manual sin borrar historial.
 - Vista agregada y por metodo de pago.
@@ -42,3 +43,4 @@ El propietario y un circulo cerrado de testers. No se recopilan datos, no hay ba
 - La PWA no puede garantizar recordatorios con la app cerrada sin servicio adicional.
 - El dia de cobro se usa ya para el ciclo, la cuenta atras y el registro local de nomina al abrir la aplicacion. Una notificacion fiable con la app cerrada requiere la futura capa nativa y una prueba en iPhone fisico.
 - Capacidades nativas deben probarse en iPhone fisico antes de declararse disponibles.
+- El aviso cuando una categoría alcance el 90% de su límite requiere la futura capa nativa de notificaciones y no se anuncia todavía como disponible.

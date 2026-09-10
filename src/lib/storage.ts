@@ -152,6 +152,15 @@ export const createCategory = async (name: string) => {
   return category
 }
 
+export const updateCategoryLimit = async (categoryId: string, limitCents?: number) => {
+  const category = await db.categories.get(categoryId)
+  if (!category) {
+    throw new Error('Categoría no encontrada.')
+  }
+
+  await db.categories.update(categoryId, { limitCents })
+}
+
 export const createTransaction = async (draft: TransactionDraft, resetDay = 1) => {
   const timestamp = new Date().toISOString()
   const transaction: Transaction = {

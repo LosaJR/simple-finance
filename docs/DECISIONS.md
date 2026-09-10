@@ -56,6 +56,14 @@ Tarjetas y categorias no usan una segunda capa de secciones plegables. Cada una 
 
 La interfaz movil conserva una paleta neutra con acento verde, pero reduce bordes pesados y textura para priorizar lectura. Los iconos se reservan para orientacion, navegacion y acciones; las superficies se agrupan por tarea y la barra inferior mantiene icono y etiqueta para una navegacion inmediata. El balance separa ingresos y gastos dentro de la misma superficie, los movimientos usan un marcador por tipo y los campos se identifican con iconos de dominio.
 
+## 2026-09-10 - Resumen centrado en gasto por categoría
+
+Resumen deja de ser una vista fija de últimos movimientos. Pasa a ser desplazable y muestra la distribución de gastos del ciclo por categoría mediante un gráfico circular, más una lista de consumo y límite. El calendario de la propia vista selecciona el año y el mes, y abre Actividad con el filtro de gastos del ciclo elegido.
+
+## 2026-09-10 - Límites locales antes de avisos nativos
+
+El límite mensual se guarda en la categoría y se muestra junto al gasto del ciclo. La alerta del 90% no se simula en la PWA: se implementará junto con las notificaciones locales de la futura aplicación iOS.
+
 ## 2026-09-10 - Correccion de movimientos desde Resumen
 
 Los ultimos movimientos se pueden deslizar hacia la izquierda para descubrir acciones persistentes de editar y eliminar. Editar reaprovecha el formulario compacto sin nota; eliminar una nomina automatica evita que vuelva a crearse durante ese mismo ciclo.

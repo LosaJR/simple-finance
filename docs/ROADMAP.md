@@ -30,9 +30,12 @@ Issues previstos:
 
 ## Fase 2 - Limites y ciclos
 
-- Limites opcionales por categoria.
+Estado: iniciada.
+
+- Límite mensual opcional por categoría: disponible en Configuración y visible en Resumen.
 - Dia de reinicio configurable.
 - Reinicio manual con historial.
+- Aviso al aproximarse al 90% del límite mediante la futura capa de notificaciones nativas.
 - Pruebas de cambios de mes y reinicios.
 
 ## Fase 3 - Automatizacion personal
