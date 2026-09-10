@@ -12,18 +12,18 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
-Base local creada en la rama `feature/fase-0-base` con una experiencia funcional en IndexedDB. La correccion de prueba iPhone elimina la dependencia de `crypto.randomUUID` en HTTP local. La interfaz tiene Resumen, Registrar, Actividad y Tarjetas, registro rapido por pasos, tarjeta principal persistente, filtro de actividad por tarjeta, configuracion de tema y dia de nomina, cuenta atras e historial mensual resumido. Repositorio privado creado en GitHub como `LosaJR/simple-finance`.
+Base local creada en la rama `feature/fase-0-base` con una experiencia funcional en IndexedDB. La correccion de prueba iPhone elimina la dependencia de `crypto.randomUUID` en HTTP local. La interfaz tiene Resumen fijo, Registrar, Actividad y Tarjetas, registro rapido por pasos, tarjeta principal persistente, filtro por tarjeta, calendario anual de actividad, configuracion de tema y nomina, cuenta atras y registro diferido de nomina en dia laborable. Repositorio privado creado en GitHub como `LosaJR/simple-finance`.
 
 ## Siguiente tarea
 
-Revisar desde iPhone fisico la hoja de registro rapido, el dia de nomina, la tarjeta principal y los filtros. Despues completar el CRUD seguro de tarjetas y categorias.
+Revisar desde iPhone fisico el Resumen fijo, la barra inferior opaca, la hoja de registro rapido, la nomina y el calendario. Despues completar el CRUD seguro de tarjetas y categorias.
 
 ## Verificaciones
 
-- `pnpm run validate`: correcto con registro rapido, tarjeta principal, nomina e historial mensual.
+- `pnpm run validate`: correcto con Resumen fijo, nomina en dia laborable y calendario mensual.
 - GitHub Actions `validate` en PR #12: correcto.
 - Serena `project health-check`: correcto con salida UTF-8.
-- Registro de movimiento, configuracion de nomina, tarjeta principal y filtro por tarjeta: verificados contra un origen HTTP de red local a tamano iPhone; queda pendiente la confirmacion en iPhone fisico.
+- Registro de movimiento, nomina en dia laborable, tarjeta principal, filtro por tarjeta y calendario: verificados contra un origen HTTP de red local a tamano iPhone; queda pendiente la confirmacion en iPhone fisico.
 - `pnpm e2e`: configurado, pero no ejecutado localmente porque la descarga de navegadores de Playwright desde `cdn.playwright.dev` agoto timeout.
 
 ## Bloqueos

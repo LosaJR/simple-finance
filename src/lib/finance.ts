@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const transactionTypes = ['expense', 'income', 'investment'] as const
+export const transactionTypes = ['expense', 'income'] as const
 export type TransactionType = (typeof transactionTypes)[number]
 
 export type PaymentMethodType = 'card'
@@ -18,6 +18,7 @@ export interface PaymentMethod {
 export interface AppSettings {
   id: 'app-settings'
   paydayDay: number
+  paydayAmountCents: number
 }
 
 export interface Category {
@@ -40,6 +41,7 @@ export interface Transaction {
   categoryId: string
   note?: string
   status: 'posted' | 'pending'
+  source?: 'manual' | 'payroll'
   cycleId: string
   createdAt: string
   updatedAt: string
@@ -54,6 +56,7 @@ export const transactionDraftSchema = z.object({
   categoryId: z.string().min(1),
   note: z.string().max(240).optional(),
   status: z.enum(['posted', 'pending']).default('posted'),
+  source: z.enum(['manual', 'payroll']).default('manual'),
 })
 
 export type TransactionDraft = z.infer<typeof transactionDraftSchema>
@@ -74,6 +77,7 @@ export const DEFAULT_PAYMENT_METHODS: PaymentMethod[] = [
 export const DEFAULT_SETTINGS: AppSettings = {
   id: 'app-settings',
   paydayDay: 1,
+  paydayAmountCents: 0,
 }
 
 export const DEFAULT_CATEGORIES: Category[] = [
@@ -125,21 +129,22 @@ export const DEFAULT_CATEGORIES: Category[] = [
     allowedTypes: ['income'],
     active: true,
   },
-  {
-    id: 'investment',
-    name: 'Inversiones',
-    icon: 'IV',
-    color: '#0f766e',
-    allowedTypes: ['investment'],
-    active: true,
-  },
 ]
+
+export const getPaydayDate = (year: number, month: number, paydayDay: number) => {
+  const lastDay = new Date(year, month + 1, 0).getDate()
+  const payday = new Date(year, month, Math.min(paydayDay, lastDay))
+  while (payday.getDay() === 0 || payday.getDay() === 6) {
+    payday.setDate(payday.getDate() + 1)
+  }
+  return payday
+}
 
 export const getCycleId = (occurredOn: string, resetDay = 1) => {
   const date = new Date(`${occurredOn}T12:00:00`)
   const year = date.getFullYear()
   const month = date.getMonth()
-  const cycleDate =
-    date.getDate() >= resetDay ? new Date(year, month, 1) : new Date(year, month - 1, 1)
-  return `${cycleDate.getFullYear()}-${String(cycleDate.getMonth() + 1).padStart(2, '0')}`
+  const currentPayday = getPaydayDate(year, month, resetDay)
+  const scheduledCycle = date >= currentPayday ? new Date(year, month, 1) : new Date(year, month - 1, 1)
+  return `${scheduledCycle.getFullYear()}-${String(scheduledCycle.getMonth() + 1).padStart(2, '0')}`
 }

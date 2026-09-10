@@ -4,7 +4,13 @@
   width: min(680px, 100%);
   min-height: 100svh;
   margin: 0 auto;
-  padding: calc(env(safe-area-inset-top) + 20px) 16px calc(env(safe-area-inset-bottom) + 100px);
+  padding: calc(env(safe-area-inset-top) + 20px) 16px calc(env(safe-area-inset-bottom) + 132px);
+}
+
+.home-shell {
+  height: 100svh;
+  overflow: hidden;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 82px);
 }
 
 .topbar {
@@ -139,6 +145,39 @@ label,
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
+}
+
+.home-screen {
+  gap: 10px;
+}
+
+.home-shell .topbar {
+  margin-bottom: 12px;
+}
+
+.home-shell .payday-banner,
+.home-shell .metric,
+.home-shell .compact-panel {
+  padding: 12px;
+}
+
+.home-shell .metric strong {
+  margin: 5px 0;
+  font-size: 1.45rem;
+}
+
+.home-shell .compact-panel {
+  overflow: hidden;
+}
+
+.home-shell .transaction-list li {
+  padding: 9px 0;
+}
+
+.home-shell .metadata {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .entry-panel,
@@ -325,10 +364,6 @@ textarea {
   color: var(--positive);
 }
 
-.transaction-list strong.investment {
-  color: var(--accent);
-}
-
 .card-creator {
   display: grid;
   gap: 10px;
@@ -388,20 +423,17 @@ textarea {
 .bottom-nav {
   position: fixed;
   z-index: 2;
-  right: 16px;
-  bottom: max(12px, env(safe-area-inset-bottom));
-  left: 16px;
+  right: 0;
+  bottom: 0;
+  left: 0;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 3px;
-  width: min(648px, calc(100% - 32px));
-  padding: 5px;
-  margin: 0 auto;
-  border: 1px solid var(--line-strong);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  width: 100%;
+  padding: 6px 12px calc(env(safe-area-inset-bottom) + 6px);
+  border-top: 1px solid var(--line-strong);
+  background: var(--surface);
   box-shadow: var(--nav-shadow);
-  backdrop-filter: blur(16px);
 }
 
 .bottom-nav button {
@@ -417,6 +449,81 @@ textarea {
 .bottom-nav button.active {
   color: var(--text);
   background: var(--nav-active);
+}
+
+.calendar-button {
+  display: grid;
+  width: 42px;
+  min-height: 42px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0;
+  background: var(--field);
+}
+
+.calendar-button span {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 17px;
+  border: 2px solid var(--accent);
+  border-radius: 3px;
+}
+
+.calendar-button span::before,
+.calendar-button span::after {
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--accent);
+  content: '';
+}
+
+.calendar-button span::before {
+  left: 3px;
+}
+
+.calendar-button span::after {
+  right: 3px;
+}
+
+.monthly-calendar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+}
+
+.monthly-calendar article {
+  display: grid;
+  gap: 3px;
+  min-height: 82px;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--field);
+}
+
+.monthly-calendar strong {
+  color: var(--text);
+  font-size: 0.8rem;
+  text-transform: capitalize;
+}
+
+.monthly-calendar span {
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.calendar-income {
+  color: var(--positive);
+}
+
+.calendar-expense {
+  color: var(--danger);
 }
 
 .modal-layer {
@@ -584,9 +691,7 @@ textarea {
   }
 
   .bottom-nav {
-    right: 12px;
-    left: 12px;
-    width: calc(100% - 24px);
+    padding-inline: 12px;
   }
 
   .field-grid,
@@ -604,5 +709,13 @@ textarea {
     grid-column: 2;
     justify-self: start;
     margin-top: 2px;
+  }
+
+  .home-shell .topbar h1 {
+    font-size: 1.75rem;
+  }
+
+  .home-shell .metric {
+    padding: 10px;
   }
 }

@@ -1,4 +1,4 @@
-import { getCycleId, type PaymentMethod, type Transaction } from './finance'
+import { getCycleId, getPaydayDate, type PaymentMethod, type Transaction } from './finance'
 
 export const formatCurrency = (amountCents: number) =>
   new Intl.NumberFormat('es-ES', {
@@ -50,41 +50,35 @@ export const summarizeCurrentCycle = (transactions: Transaction[], resetDay = 1,
       if (transaction.type === 'income') {
         summary.incomeCents += transaction.amountCents
       }
-      if (transaction.type === 'investment') {
-        summary.investmentCents += transaction.amountCents
-      }
-      summary.netCents = summary.incomeCents - summary.expenseCents - summary.investmentCents
+      summary.netCents = summary.incomeCents - summary.expenseCents
       return summary
     },
     {
       expenseCents: 0,
       incomeCents: 0,
-      investmentCents: 0,
       netCents: 0,
     },
   )
 }
 
 export const getDaysUntilPayday = (paydayDay: number, today = new Date()) => {
-  const currentDay = today.getDate()
-  const targetMonth = currentDay <= paydayDay ? today.getMonth() : today.getMonth() + 1
-  const targetYear = today.getFullYear() + (targetMonth > 11 ? 1 : 0)
-  const normalizedMonth = targetMonth % 12
-  const lastDay = new Date(targetYear, normalizedMonth + 1, 0).getDate()
-  const nextPayday = new Date(targetYear, normalizedMonth, Math.min(paydayDay, lastDay))
   const currentDate = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  const currentPayday = getPaydayDate(today.getFullYear(), today.getMonth(), paydayDay)
+  const nextPayday =
+    currentDate <= currentPayday
+      ? currentPayday
+      : getPaydayDate(today.getFullYear(), today.getMonth() + 1, paydayDay)
   return Math.round((nextPayday.getTime() - currentDate.getTime()) / 86_400_000)
 }
 
 export const summarizeMonthlyHistory = (transactions: Transaction[]) => {
-  const summaries = new Map<string, { expenseCents: number; incomeCents: number; investmentCents: number }>()
+  const summaries = new Map<string, { expenseCents: number; incomeCents: number }>()
 
   for (const transaction of transactions) {
     const month = transaction.occurredOn.slice(0, 7)
-    const summary = summaries.get(month) ?? { expenseCents: 0, incomeCents: 0, investmentCents: 0 }
+    const summary = summaries.get(month) ?? { expenseCents: 0, incomeCents: 0 }
     if (transaction.type === 'expense') summary.expenseCents += transaction.amountCents
     if (transaction.type === 'income') summary.incomeCents += transaction.amountCents
-    if (transaction.type === 'investment') summary.investmentCents += transaction.amountCents
     summaries.set(month, summary)
   }
 

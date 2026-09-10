@@ -1,6 +1,6 @@
 # Simple Finance
 
-PWA privada para registrar gastos, ingresos e inversiones personales en español. La primera version se ejecuta localmente, guarda los datos en IndexedDB del dispositivo y esta preparada para evolucionar hacia Capacitor/iOS cuando exista entorno macOS y cuenta Apple Developer.
+PWA privada para registrar gastos e ingresos personales en español. La primera version se ejecuta localmente, guarda los datos en IndexedDB del dispositivo y esta preparada para evolucionar hacia Capacitor/iOS cuando exista entorno macOS y cuenta Apple Developer.
 
 ## Requisitos
 

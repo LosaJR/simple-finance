@@ -17,10 +17,10 @@ La interfaz de fase 0 usa navegacion local en el cliente con una barra inferior 
 
 - `PaymentMethod`: tarjeta, nombre, color, ultimos cuatro digitos opcional, activa y bandera unica de tarjeta principal. No se modelan cuentas ni efectivo.
 - `Category`: nombre, icono textual, color, tipos permitidos, limite opcional y activo.
-- `Transaction`: tipo, importe en centimos, comercio, fecha local, metodo, categoria, nota, estado y ciclo.
-- `AppSettings`: dia de cobro configurado localmente para el ciclo, la cuenta atras y la futura notificacion nativa.
+- `Transaction`: gasto o ingreso, importe en centimos, comercio, fecha local, metodo, categoria, nota, estado, ciclo y origen manual o nomina.
+- `AppSettings`: dia de cobro y cantidad de nomina configurados localmente para el ciclo, la cuenta atras y el registro diferido de nomina.
 
-Los importes se almacenan como enteros en centimos. Las fechas de movimientos usan formato `YYYY-MM-DD` y los calculos de ciclo se hacen con fecha local al mediodia para evitar desplazamientos por zona horaria. El resumen actual calcula el ciclo contra el dia de cobro vigente, mientras que el historial de meses se agrupa por mes natural para una lectura estable.
+Los importes se almacenan como enteros en centimos. Las fechas de movimientos usan formato `YYYY-MM-DD` y los calculos de ciclo se hacen con fecha local al mediodia para evitar desplazamientos por zona horaria. El resumen actual calcula el ciclo contra el dia de cobro vigente y desplaza un cobro de fin de semana al lunes. El calendario anual agrupa el historial por mes natural para una lectura estable.
 
 ## Privacidad
 

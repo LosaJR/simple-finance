@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getCycleId, normalizeMerchant, type Transaction } from './finance'
+import { getCycleId, getPaydayDate, normalizeMerchant, type Transaction } from './finance'
 import { createLocalId } from './storage'
 import {
   formatActivityDate,
@@ -21,21 +21,26 @@ describe('cycle ids', () => {
     expect(getCycleId('2026-09-09', 10)).toBe('2026-08')
     expect(getCycleId('2026-09-10', 10)).toBe('2026-09')
   })
+
+  it('moves a weekend payday to the next working day', () => {
+    const payday = getPaydayDate(2026, 4, 31)
+    expect([payday.getFullYear(), payday.getMonth(), payday.getDate()]).toEqual([2026, 5, 1])
+    expect(getCycleId('2026-05-31', 31)).toBe('2026-04')
+    expect(getCycleId('2026-06-01', 31)).toBe('2026-05')
+  })
 })
 
 describe('financial summary', () => {
-  it('keeps investments separate from expenses', () => {
+  it('calculates expenses and income', () => {
     const transactions: Transaction[] = [
       baseTransaction('expense', 3500),
       baseTransaction('income', 200000),
-      baseTransaction('investment', 50000),
     ]
 
     expect(summarizeCurrentCycle(transactions)).toEqual({
       expenseCents: 3500,
       incomeCents: 200000,
-      investmentCents: 50000,
-      netCents: 146500,
+      netCents: 196500,
     })
   })
 })
@@ -62,6 +67,7 @@ describe('payday and monthly history', () => {
     expect(getDaysUntilPayday(15, new Date('2026-09-10T12:00:00'))).toBe(5)
     expect(getDaysUntilPayday(15, new Date('2026-09-15T12:00:00'))).toBe(0)
     expect(getDaysUntilPayday(15, new Date('2026-09-16T12:00:00'))).toBe(29)
+    expect(getDaysUntilPayday(31, new Date('2026-05-31T12:00:00'))).toBe(1)
   })
 
   it('groups historical months with separate expense and income totals', () => {
@@ -72,8 +78,8 @@ describe('payday and monthly history', () => {
     ]
 
     expect(summarizeMonthlyHistory(transactions)).toEqual([
-      { month: '2026-09', expenseCents: 500, incomeCents: 0, investmentCents: 0 },
-      { month: '2026-08', expenseCents: 1500, incomeCents: 200000, investmentCents: 0 },
+      { month: '2026-09', expenseCents: 500, incomeCents: 0 },
+      { month: '2026-08', expenseCents: 1500, incomeCents: 200000 },
     ])
   })
 })

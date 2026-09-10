@@ -11,21 +11,20 @@ import {
   transactionDraftSchema,
 } from './lib/finance'
 import {
-  clearLocalData,
   createPaymentMethod,
   createTransaction,
   ensureSeedData,
+  ensureScheduledPayroll,
   getSettings,
   listCategories,
   listPaymentMethods,
   listTransactions,
-  savePaydayDay,
+  savePaydaySettings,
   setPrimaryPaymentMethod,
 } from './lib/storage'
 import {
   formatActivityDate,
   formatCurrency,
-  formatMonthYear,
   getDaysUntilPayday,
   parseEuroToCents,
   summarizeCurrentCycle,
@@ -47,6 +46,7 @@ const initialDraft: TransactionDraft = {
   categoryId: DEFAULT_CATEGORIES[0]?.id ?? '',
   note: '',
   status: 'posted',
+  source: 'manual',
 }
 
 type ActivityTab = 'all' | 'expense' | 'income'
@@ -69,6 +69,16 @@ const screens: { id: AppScreen; label: string; title: string }[] = [
 
 const quickSteps: QuickStep[] = ['type', 'amount', 'merchant', 'category']
 
+const formatCalendarMonth = (year: number, month: number) =>
+  new Intl.DateTimeFormat('es-ES', { month: 'short' })
+    .format(new Date(year, month, 1))
+    .replace('.', '')
+
+const formatAmountInput = (amountCents: number) =>
+  new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+    amountCents / 100,
+  )
+
 function App() {
   const [categories, setCategories] = useState<Category[]>([])
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
@@ -84,8 +94,10 @@ function App() {
   const [isAddingCard, setIsAddingCard] = useState(false)
   const [newCardName, setNewCardName] = useState('')
   const [paydayDay, setPaydayDay] = useState(1)
+  const [paydayAmount, setPaydayAmount] = useState('')
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [settingsPaydayDay, setSettingsPaydayDay] = useState(1)
+  const [settingsPaydayAmount, setSettingsPaydayAmount] = useState('')
   const [settingsFeedback, setSettingsFeedback] = useState('')
   const [isQuickEntryOpen, setIsQuickEntryOpen] = useState(false)
   const [quickStep, setQuickStep] = useState<QuickStep>('type')
@@ -94,9 +106,11 @@ function App() {
   const [quickMerchant, setQuickMerchant] = useState('')
   const [quickCategoryId, setQuickCategoryId] = useState('')
   const [quickFeedback, setQuickFeedback] = useState('')
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
   const refreshData = async () => {
     await ensureSeedData()
+    await ensureScheduledPayroll()
     const [nextCategories, nextMethods, nextTransactions, nextSettings] = await Promise.all([
       listCategories(),
       listPaymentMethods(),
@@ -108,6 +122,7 @@ function App() {
     setPaymentMethods(nextMethods)
     setTransactions(nextTransactions)
     setPaydayDay(nextSettings.paydayDay)
+    setPaydayAmount(nextSettings.paydayAmountCents ? formatAmountInput(nextSettings.paydayAmountCents) : '')
     setDraft((current) => ({
       ...current,
       categoryId: current.categoryId || nextCategories[0]?.id || '',
@@ -132,7 +147,19 @@ function App() {
     [paydayDay, transactions],
   )
   const daysUntilPayday = useMemo(() => getDaysUntilPayday(paydayDay), [paydayDay])
-  const monthlyHistory = useMemo(() => summarizeMonthlyHistory(transactions), [transactions])
+  const monthlyCalendar = useMemo(() => {
+    const year = new Date().getFullYear()
+    const summaries = new Map(summarizeMonthlyHistory(transactions).map((summary) => [summary.month, summary]))
+    return Array.from({ length: 12 }, (_, month) => {
+      const key = `${year}-${String(month + 1).padStart(2, '0')}`
+      const summary = summaries.get(key)
+      return {
+        label: formatCalendarMonth(year, month),
+        expenseCents: summary?.expenseCents ?? 0,
+        incomeCents: summary?.incomeCents ?? 0,
+      }
+    })
+  }, [transactions])
   const categoryMap = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
     [categories],
@@ -271,6 +298,7 @@ function App() {
 
   const openSettings = () => {
     setSettingsPaydayDay(paydayDay)
+    setSettingsPaydayAmount(paydayAmount)
     setSettingsFeedback('')
     setIsSettingsOpen(true)
   }
@@ -281,15 +309,14 @@ function App() {
       return
     }
 
-    await savePaydayDay(settingsPaydayDay)
+    const paydayAmountCents = parseEuroToCents(settingsPaydayAmount)
+    await savePaydaySettings(settingsPaydayDay, paydayAmountCents)
     setPaydayDay(settingsPaydayDay)
-    setSettingsFeedback('Día de nómina guardado.')
-  }
-
-  const handleResetDemoData = async () => {
-    await clearLocalData()
-    setFeedback('Datos locales reiniciados. No se ha enviado nada fuera del dispositivo.')
+    setPaydayAmount(settingsPaydayAmount)
     await refreshData()
+    setSettingsFeedback(
+      paydayAmountCents > 0 ? 'Nómina configurada.' : 'Día guardado. Añade una cantidad para automatizar la nómina.',
+    )
   }
 
   const renderTransactions = (items: Transaction[]) => {
@@ -330,7 +357,7 @@ function App() {
   }
 
   return (
-    <main className="shell">
+    <main className={`shell ${screen === 'home' ? 'home-shell' : ''}`}>
       <header className="topbar">
         <div>
           <p className="eyebrow">Simple Finance</p>
@@ -342,7 +369,7 @@ function App() {
       </header>
 
       {screen === 'home' ? (
-        <section className="screen-stack" aria-label="Resumen del ciclo actual">
+        <section className="screen-stack home-screen" aria-label="Resumen del ciclo actual">
           <article className="payday-banner">
             <span>Próxima nómina</span>
             <strong>{daysUntilPayday === 0 ? 'Cobras hoy' : `Faltan ${daysUntilPayday} días`}</strong>
@@ -357,11 +384,6 @@ function App() {
                 {formatCurrency(cycleSummary.incomeCents)} ingresos ·{' '}
                 {formatCurrency(cycleSummary.expenseCents)} gastos
               </small>
-            </article>
-            <article className="metric">
-              <span>Invertido</span>
-              <strong>{formatCurrency(cycleSummary.investmentCents)}</strong>
-              <small>No cuenta como gasto.</small>
             </article>
             <article className="metric">
               <span>Movimientos</span>
@@ -397,14 +419,14 @@ function App() {
           </div>
 
           <div className="segmented" aria-label="Tipo de movimiento">
-            {(['expense', 'income', 'investment'] as const).map((type) => (
+            {(['expense', 'income'] as const).map((type) => (
               <button
                 key={type}
                 className={draft.type === type ? 'active' : ''}
                 type="button"
                 onClick={() => setDraft((current) => ({ ...current, type }))}
               >
-                {type === 'expense' ? 'Gasto' : type === 'income' ? 'Ingreso' : 'Inversión'}
+                {type === 'expense' ? 'Gasto' : 'Ingreso'}
               </button>
             ))}
           </div>
@@ -493,10 +515,28 @@ function App() {
         <section className="activity-panel screen-stack" aria-label="Actividad">
           <div className="section-title">
             <h2>Todos los movimientos</h2>
-            <button className="text-button" type="button" onClick={handleResetDemoData}>
-              Reiniciar datos locales
+            <button
+              className="calendar-button"
+              type="button"
+              aria-label="Ver resumen mensual"
+              title="Ver resumen mensual"
+              onClick={() => setIsCalendarOpen((current) => !current)}
+            >
+              <span aria-hidden="true" />
             </button>
           </div>
+
+          {isCalendarOpen ? (
+            <section className="monthly-calendar" aria-label="Resumen de meses del año">
+              {monthlyCalendar.map((month) => (
+                <article key={month.label}>
+                  <strong>{month.label}</strong>
+                  <span className="calendar-income">+{formatCurrency(month.incomeCents)}</span>
+                  <span className="calendar-expense">-{formatCurrency(month.expenseCents)}</span>
+                </article>
+              ))}
+            </section>
+          ) : null}
 
           <label className="activity-method-filter">
             Tarjeta
@@ -743,28 +783,19 @@ function App() {
                   onChange={(event) => setSettingsPaydayDay(Number(event.target.value))}
                 />
               </label>
+              <label>
+                Cantidad cobrada
+                <input
+                  inputMode="decimal"
+                  placeholder="1.890,00"
+                  value={settingsPaydayAmount}
+                  onChange={(event) => setSettingsPaydayAmount(event.target.value)}
+                />
+              </label>
               <button className="primary-action" type="button" onClick={handleSaveSettings}>
-                Guardar día de nómina
+                Guardar nómina
               </button>
               {settingsFeedback ? <p className="status-message" role="status">{settingsFeedback}</p> : null}
-            </section>
-
-            <section className="settings-section" aria-labelledby="history-title">
-              <h3 id="history-title">Meses anteriores</h3>
-              {monthlyHistory.length === 0 ? (
-                <p className="muted-copy">Aún no hay meses con movimientos.</p>
-              ) : (
-                <ul className="monthly-history">
-                  {monthlyHistory.map((month) => (
-                    <li key={month.month}>
-                      <strong>{formatMonthYear(month.month)}</strong>
-                      <span>
-                        Gastos {formatCurrency(month.expenseCents)} · Ingresos {formatCurrency(month.incomeCents)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
             </section>
           </section>
         </div>

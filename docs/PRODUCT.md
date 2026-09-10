@@ -12,8 +12,7 @@ El propietario y un circulo cerrado de testers. No se recopilan datos, no hay ba
 
 - Idioma inicial: español.
 - Datos locales, privados y aislados por dispositivo/persona.
-- Tipos separados: gastos, ingresos e inversiones.
-- Las inversiones no cuentan como gasto y solo muestran importe invertido.
+- Tipos separados: gastos e ingresos.
 - Los metodos de pago son exclusivamente tarjetas. La tarjeta principal siempre aparece primero y se pueden anadir mas tarjetas.
 - La tarjeta principal se guarda como una preferencia unica y se aplica por defecto al registro rapido y al formulario completo.
 - El comercio o concepto es opcional para preservar el registro manual cuando no exista una fuente automatica.
@@ -21,7 +20,8 @@ El propietario y un circulo cerrado de testers. No se recopilan datos, no hay ba
 - La actividad puede filtrarse por todas las tarjetas o una tarjeta concreta.
 - La navegacion movil separa Resumen, Registrar, Actividad y Tarjetas en vistas propias; cada vista solo desplaza el contenido que necesita.
 - Resumen ofrece un registro rapido superpuesto con los pasos gasto o ingreso, importe, concepto y categoria; usa la tarjeta principal y el momento actual sin pedirlos.
-- Configuracion conserva el tema y el dia de cobro. Resumen muestra la cuenta atras para la proxima nomina y Configuracion muestra resumenes mensuales anteriores.
+- Configuracion conserva el tema, el dia de cobro y la cantidad de nomina. Resumen muestra la cuenta atras para la proxima nomina y Actividad ofrece un calendario anual resumido de ingresos y gastos.
+- Cuando la aplicacion se abre en la fecha de cobro efectiva o despues, registra una unica nomina como ingreso. Si el dia elegido cae en fin de semana, se desplaza al siguiente dia laborable.
 - Categorias ilimitadas; iniciales: Ocio, Supermercado, Gasolina, Hogar y Suscripciones.
 - Cada categoria puede tener limite opcional.
 - Ciclos con dia de reinicio configurable y cierre manual sin borrar historial.
@@ -36,5 +36,5 @@ El propietario y un circulo cerrado de testers. No se recopilan datos, no hay ba
 - La PWA no puede integrarse con App Intents ni recibir parametros desde Atajos. La futura app iOS si expondra un atajo para registrar un movimiento con importe, comercio y tarjeta cuando esos datos provengan de una fuente autorizada.
 - El disparador de transaccion de Wallet puede iniciar un atajo cuando se usa una tarjeta, pero no debe asumirse que entrega importe ni comercio; se validara en dispositivo antes de diseñar un flujo automatico sobre el.
 - La PWA no puede garantizar recordatorios con la app cerrada sin servicio adicional.
-- El dia de cobro se usa ya para el ciclo y la cuenta atras. La notificacion para confirmar la nomina requiere la futura capa nativa y una prueba en iPhone fisico.
+- El dia de cobro se usa ya para el ciclo, la cuenta atras y el registro local de nomina al abrir la aplicacion. Una notificacion fiable con la app cerrada requiere la futura capa nativa y una prueba en iPhone fisico.
 - Capacidades nativas deben probarse en iPhone fisico antes de declararse disponibles.

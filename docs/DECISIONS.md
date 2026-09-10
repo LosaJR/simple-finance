@@ -34,8 +34,12 @@ El modo claro usa papel marfil y un grano local de muy bajo contraste; el modo o
 
 ## 2026-09-10 - Registro rapido desde Resumen
 
-El flujo cotidiano abre una hoja superpuesta sin abandonar Resumen. Solo solicita gasto o ingreso, importe, concepto y categoria; la tarjeta principal y el momento de registro se asignan localmente. Las inversiones se mantienen en el formulario completo por ser una operacion menos frecuente.
+El flujo cotidiano abre una hoja superpuesta sin abandonar Resumen. Solo solicita gasto o ingreso, importe, concepto y categoria; la tarjeta principal y el momento de registro se asignan localmente. Las inversiones se eliminan del producto inicial para mantener el flujo diario centrado en gastos e ingresos.
 
 ## 2026-09-10 - Dia de nomina local
 
-El dia de cobro se guarda en IndexedDB y determina la cuenta atras y el ciclo actual. El historial inicial se presenta por mes natural para que siga siendo interpretable aunque cambie el dia configurado. La notificacion de confirmacion de nomina queda pendiente de la aplicacion iOS nativa.
+El dia de cobro y la cantidad se guardan en IndexedDB. Determinan la cuenta atras, el ciclo y una unica entrada automatica de nomina cuando la app se abre en la fecha efectiva o despues. Si cae en fin de semana, la fecha efectiva se desplaza al lunes. La notificacion de confirmacion queda pendiente de la aplicacion iOS nativa.
+
+## 2026-09-10 - Resumen fijo y calendario en Actividad
+
+Resumen se mantiene compacto y sin desplazamiento; la navegacion inferior es opaca y reserva espacio para que no se vea contenido debajo. El historial comparativo se traslada a un calendario anual desplegable desde Actividad, con ingresos y gastos por mes.

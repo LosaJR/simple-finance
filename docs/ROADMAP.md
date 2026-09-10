@@ -23,10 +23,10 @@ Issues previstos:
 
 - Dashboard responsive para iPhone.
 - Tarjeta principal configurable, tarjetas adicionales y CRUD seguro de tarjetas y categorias.
-- Registro manual completo de gastos, ingresos e inversiones.
+- Registro manual completo de gastos e ingresos.
 - Registro rapido diario de gasto o ingreso, con tarjeta principal y fecha/hora automaticas.
 - Actividad global, de gastos y de ingresos ordenada por fecha y hora.
-- Filtro de actividad por tarjeta, dia de cobro, cuenta atras de nomina e historial mensual resumido.
+- Filtro de actividad por tarjeta, dia de cobro, cuenta atras de nomina, registro diferido de nomina y calendario mensual resumido.
 
 ## Fase 2 - Limites y ciclos
 

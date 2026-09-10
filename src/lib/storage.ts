@@ -4,6 +4,7 @@ import {
   DEFAULT_PAYMENT_METHODS,
   DEFAULT_SETTINGS,
   getCycleId,
+  getPaydayDate,
   type AppSettings,
   type Category,
   type PaymentMethod,
@@ -78,6 +79,8 @@ export const ensureSeedData = async () => {
 
   if (!settings) {
     await db.settings.put(DEFAULT_SETTINGS)
+  } else if (settings.paydayAmountCents === undefined) {
+    await db.settings.update(DEFAULT_SETTINGS.id, { paydayAmountCents: 0 })
   }
 }
 
@@ -100,7 +103,9 @@ export const listPaymentMethods = async () => {
 export const listCategories = () => db.categories.filter((category) => category.active).toArray()
 
 export const listTransactions = async () => {
-  const transactions = await db.transactions.toArray()
+  const transactions = (await db.transactions.toArray()).filter(
+    (transaction) => (transaction as unknown as { type: string }).type !== 'investment',
+  )
   return transactions.sort(
     (first, second) =>
       second.occurredOn.localeCompare(first.occurredOn) || second.createdAt.localeCompare(first.createdAt),
@@ -147,9 +152,68 @@ export const setPrimaryPaymentMethod = async (paymentMethodId: string) => {
 
 export const getSettings = async () => (await db.settings.get(DEFAULT_SETTINGS.id)) ?? DEFAULT_SETTINGS
 
-export const savePaydayDay = async (paydayDay: number) => {
+export const savePaydaySettings = async (paydayDay: number, paydayAmountCents: number) => {
   const normalizedDay = Math.min(31, Math.max(1, Math.trunc(paydayDay)))
-  await db.settings.put({ id: DEFAULT_SETTINGS.id, paydayDay: normalizedDay })
+  await db.settings.put({
+    id: DEFAULT_SETTINGS.id,
+    paydayDay: normalizedDay,
+    paydayAmountCents: Math.max(0, Math.trunc(paydayAmountCents)),
+  })
+}
+
+const getMostRecentPayday = (today: Date, paydayDay: number) => {
+  const currentPayday = getPaydayDate(today.getFullYear(), today.getMonth(), paydayDay)
+  return today >= currentPayday
+    ? currentPayday
+    : getPaydayDate(today.getFullYear(), today.getMonth() - 1, paydayDay)
+}
+
+export const ensureScheduledPayroll = async (today = new Date()) => {
+  const settings = await getSettings()
+  if (settings.paydayAmountCents <= 0) {
+    return false
+  }
+
+  const payday = getMostRecentPayday(today, settings.paydayDay)
+  const occurredOn = `${payday.getFullYear()}-${String(payday.getMonth() + 1).padStart(2, '0')}-${String(
+    payday.getDate(),
+  ).padStart(2, '0')}`
+  const cycleId = getCycleId(occurredOn, settings.paydayDay)
+  const existingPayroll = await db.transactions
+    .filter(
+      (transaction) =>
+        transaction.cycleId === cycleId &&
+        (transaction as unknown as { source?: string }).source === 'payroll',
+    )
+    .first()
+
+  if (existingPayroll) {
+    return false
+  }
+
+  const [incomeCategory, cards] = await Promise.all([
+    db.categories.get('income'),
+    listPaymentMethods(),
+  ])
+  const primaryCard = cards.find((card) => card.isPrimary) ?? cards[0]
+  if (!incomeCategory || !primaryCard) {
+    return false
+  }
+
+  await createTransaction(
+    {
+      type: 'income',
+      amountCents: settings.paydayAmountCents,
+      merchant: 'Nómina',
+      occurredOn,
+      paymentMethodId: primaryCard.id,
+      categoryId: incomeCategory.id,
+      status: 'posted',
+      source: 'payroll',
+    },
+    settings.paydayDay,
+  )
+  return true
 }
 
 export const clearLocalData = async () => {

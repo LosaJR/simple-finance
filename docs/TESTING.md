@@ -16,7 +16,7 @@ Checklist inicial:
 - Abrir URL local o privada en Safari.
 - Añadir a pantalla de inicio.
 - Abrir en modo standalone.
-- Crear gasto, ingreso e inversion con datos ficticios.
+- Crear gasto e ingreso con datos ficticios.
 - Confirmar que la actividad aparece tras cerrar y reabrir.
 - Activar tema oscuro y revisar que no hay texto cortado.
 
