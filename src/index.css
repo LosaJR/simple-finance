@@ -1,22 +1,22 @@
 :root {
-  --paper: #f7efdf;
-  --bg: #dfd2bc;
-  --surface: #f8f0e2;
-  --field: #efe2cf;
-  --text: #35322c;
-  --muted: #756d61;
-  --ink: #38362d;
-  --summary-bg: #5f715b;
-  --summary-text: #f8f4e9;
-  --accent: #546f59;
-  --positive: #3f7658;
-  --danger: #a9504d;
-  --line: #d4c3aa;
-  --line-strong: #bca98d;
-  --shadow: 0 14px 32px rgba(91, 72, 48, 0.12);
-  --button-shadow: 0 6px 14px rgba(91, 72, 48, 0.14);
-  --nav-shadow: 0 12px 28px rgba(80, 61, 39, 0.2);
-  --nav-active: #e7d8bf;
+  --paper: #f9f7f2;
+  --bg: #e7e3d9;
+  --surface: #f8f7f3;
+  --field: #efede7;
+  --text: #242823;
+  --muted: #6f746c;
+  --ink: #1f241f;
+  --summary-bg: #516b5a;
+  --summary-text: #f7f8f2;
+  --accent: #466a55;
+  --positive: #357356;
+  --danger: #ad5953;
+  --line: #d8d7cf;
+  --line-strong: #c3c5ba;
+  --shadow: 0 10px 24px rgba(42, 47, 40, 0.09);
+  --button-shadow: 0 4px 12px rgba(42, 47, 40, 0.11);
+  --nav-shadow: 0 -8px 26px rgba(42, 47, 40, 0.12);
+  --nav-active: #e2e9dd;
   color: var(--text);
   background: var(--bg);
   color-scheme: light;
@@ -30,24 +30,24 @@
 }
 
 :root[data-theme='dark'] {
-  --paper: #eee5d7;
-  --bg: #2a2e28;
-  --surface: #353a32;
-  --field: #292f28;
-  --text: #eee5d7;
-  --muted: #b9b09f;
-  --ink: #f0e8da;
-  --summary-bg: #65755d;
-  --summary-text: #fbf7ef;
-  --accent: #b9c88e;
-  --positive: #91c596;
-  --danger: #ee9a91;
-  --line: #4d5548;
-  --line-strong: #6c765e;
-  --shadow: 0 14px 32px rgba(12, 14, 11, 0.3);
-  --button-shadow: 0 6px 14px rgba(12, 14, 11, 0.32);
-  --nav-shadow: 0 12px 28px rgba(9, 11, 8, 0.38);
-  --nav-active: #4b5544;
+  --paper: #e9ebe3;
+  --bg: #20241f;
+  --surface: #2c312b;
+  --field: #242a24;
+  --text: #edf0e7;
+  --muted: #b8beb2;
+  --ink: #f2f4ed;
+  --summary-bg: #5d7965;
+  --summary-text: #f4f7ef;
+  --accent: #a9c7a4;
+  --positive: #95cd9d;
+  --danger: #f0a098;
+  --line: #434b42;
+  --line-strong: #5c6859;
+  --shadow: 0 10px 24px rgba(5, 8, 5, 0.25);
+  --button-shadow: 0 4px 12px rgba(5, 8, 5, 0.3);
+  --nav-shadow: 0 -8px 26px rgba(5, 8, 5, 0.35);
+  --nav-active: #3c4e3d;
   color-scheme: dark;
 }
 
@@ -70,11 +70,11 @@ body::before {
   content: '';
   background-image: url('/paper-grain.webp');
   background-size: 560px 560px;
-  opacity: 0.18;
+  opacity: 0.055;
 }
 
 :root[data-theme='dark'] body::before {
-  opacity: 0.045;
+  opacity: 0.025;
 }
 
 button,

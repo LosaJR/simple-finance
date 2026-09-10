@@ -1,5 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { CalendarDays, Pencil, Plus, Trash2 } from 'lucide-react'
+import {
+  CalendarDays,
+  CirclePlus,
+  CreditCard,
+  LayoutDashboard,
+  ListFilter,
+  Pencil,
+  Plus,
+  ReceiptText,
+  Settings2,
+  Tags,
+  Trash2,
+  WalletCards,
+} from 'lucide-react'
 import './App.css'
 import {
   DEFAULT_CATEGORIES,
@@ -63,11 +76,11 @@ const activityTabs: { id: ActivityTab; label: string }[] = [
   { id: 'income', label: 'Ingresos' },
 ]
 
-const screens: { id: AppScreen; label: string; title: string }[] = [
-  { id: 'home', label: 'Resumen', title: 'Control personal' },
-  { id: 'entry', label: 'Registrar', title: 'Nuevo movimiento' },
-  { id: 'activity', label: 'Actividad', title: 'Actividad' },
-  { id: 'cards', label: 'Configuración', title: 'Configuración' },
+const screens: { id: AppScreen; label: string; title: string; icon: typeof LayoutDashboard }[] = [
+  { id: 'home', label: 'Resumen', title: 'Control personal', icon: LayoutDashboard },
+  { id: 'entry', label: 'Registrar', title: 'Nuevo movimiento', icon: CirclePlus },
+  { id: 'activity', label: 'Actividad', title: 'Actividad', icon: ListFilter },
+  { id: 'cards', label: 'Configuración', title: 'Configuración', icon: Settings2 },
 ]
 
 const quickSteps: QuickStep[] = ['type', 'amount', 'merchant', 'category']
@@ -533,44 +546,54 @@ function App() {
           <h1>{currentScreen.title}</h1>
         </div>
         <button className="icon-button" type="button" aria-label="Configuración" onClick={openSettings}>
-          Ajustes
+          <Settings2 size={19} aria-hidden="true" />
         </button>
       </header>
 
       {screen === 'home' ? (
         <section className="screen-stack home-screen" aria-label="Resumen del ciclo actual">
           <article className="payday-banner">
-            <span>Próxima nómina</span>
+            <span className="summary-symbol"><CalendarDays size={19} aria-hidden="true" /></span>
+            <div className="payday-copy">
+              <span>Próxima nómina</span>
+              <small>Día de cobro: {paydayDay}</small>
+            </div>
             <strong>{daysUntilPayday === 0 ? 'Cobras hoy' : `Faltan ${daysUntilPayday} días`}</strong>
-            <small>Día de cobro: {paydayDay}</small>
           </article>
 
           <section className="dashboard">
             <article className="metric primary">
-              <span>Ciclo actual</span>
-              <strong>{formatCurrency(cycleSummary.netCents)}</strong>
-              <small>
-                {formatCurrency(cycleSummary.incomeCents)} ingresos ·{' '}
-                {formatCurrency(cycleSummary.expenseCents)} gastos
-              </small>
+              <span className="summary-symbol"><WalletCards size={20} aria-hidden="true" /></span>
+              <div className="metric-copy">
+                <span>Ciclo actual</span>
+                <strong>{formatCurrency(cycleSummary.netCents)}</strong>
+                <small>
+                  {formatCurrency(cycleSummary.incomeCents)} ingresos ·{' '}
+                  {formatCurrency(cycleSummary.expenseCents)} gastos
+                </small>
+              </div>
             </article>
             <article className="metric">
-              <span>Movimientos</span>
-              <strong>{transactions.length}</strong>
-              <small>En este dispositivo.</small>
+              <span className="metric-icon"><ReceiptText size={18} aria-hidden="true" /></span>
+              <div className="metric-copy">
+                <span>Movimientos</span>
+                <strong>{transactions.length}</strong>
+                <small>En este dispositivo.</small>
+              </div>
             </article>
           </section>
 
           <div className="home-actions">
             <button className="primary-action" type="button" onClick={openQuickEntry}>
-              Registrar movimiento
+              <CirclePlus size={19} aria-hidden="true" />
+              <span>Registrar movimiento</span>
             </button>
           </div>
           {homeFeedback ? <p className="status-message" role="status">{homeFeedback}</p> : null}
 
           <section className="compact-panel" aria-label="Últimos movimientos">
             <div className="section-title">
-              <h2>Últimos movimientos</h2>
+              <h2><ReceiptText size={17} aria-hidden="true" />Últimos movimientos</h2>
               <button className="text-button" type="button" onClick={() => navigateTo('activity')}>
                 Ver todos
               </button>
@@ -673,7 +696,7 @@ function App() {
       {screen === 'activity' ? (
         <section className="activity-panel screen-stack" aria-label="Actividad">
           <div className="section-title">
-            <h2>Todos los movimientos</h2>
+            <h2><ListFilter size={17} aria-hidden="true" />Todos los movimientos</h2>
             <button
               className="calendar-button"
               type="button"
@@ -710,7 +733,7 @@ function App() {
           ) : null}
 
           <label className="activity-method-filter">
-            Tarjeta
+            <span className="field-title"><CreditCard size={16} aria-hidden="true" />Tarjeta</span>
             <select value={activityPaymentMethodId} onChange={(event) => setActivityPaymentMethodId(event.target.value)}>
               <option value="all">Todas las tarjetas</option>
               {paymentMethods.map((method) => (
@@ -744,7 +767,7 @@ function App() {
         <section className="cards-panel screen-stack" aria-label="Configuración personal">
           <div className="section-title">
             <div>
-              <h2>Configuración personal</h2>
+              <h2><Settings2 size={17} aria-hidden="true" />Configuración personal</h2>
               <p>Personaliza las bases de tus movimientos.</p>
             </div>
           </div>
@@ -752,7 +775,7 @@ function App() {
           <section className="configuration-item" aria-label="Tarjetas">
             <div className="configuration-select-row">
               <label>
-                Tarjetas
+                <span className="field-title"><CreditCard size={16} aria-hidden="true" />Tarjetas</span>
                 <select value={selectedCard?.id ?? ''} onChange={(event) => setSelectedCardId(event.target.value)}>
                   {paymentMethods.map((method) => (
                     <option key={method.id} value={method.id}>
@@ -799,7 +822,7 @@ function App() {
           <section className="configuration-item" aria-label="Categorías">
             <div className="configuration-select-row">
               <label>
-                Categorías
+                <span className="field-title"><Tags size={16} aria-hidden="true" />Categorías</span>
                 <select value={selectedCategory?.id ?? ''} onChange={(event) => setSelectedCategoryId(event.target.value)}>
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
@@ -840,15 +863,21 @@ function App() {
 
       <nav className="bottom-nav" aria-label="Navegación principal">
         {screens.map((item) => (
-          <button
-            key={item.id}
-            className={screen === item.id ? 'active' : ''}
-            type="button"
-            aria-current={screen === item.id ? 'page' : undefined}
-            onClick={() => navigateTo(item.id)}
-          >
-            {item.label}
-          </button>
+          (() => {
+            const Icon = item.icon
+            return (
+              <button
+                key={item.id}
+                className={screen === item.id ? 'active' : ''}
+                type="button"
+                aria-current={screen === item.id ? 'page' : undefined}
+                onClick={() => navigateTo(item.id)}
+              >
+                <Icon size={18} aria-hidden="true" />
+                <span>{item.label}</span>
+              </button>
+            )
+          })()
         ))}
       </nav>
 

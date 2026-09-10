@@ -12,7 +12,7 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
-Base local creada en la rama `feature/fase-0-base` con una experiencia funcional en IndexedDB. La correccion de prueba iPhone elimina la dependencia de `crypto.randomUUID` en HTTP local. La interfaz tiene Resumen fijo, Registrar compacto, Actividad y Configuracion, registro rapido por pasos, tarjeta principal persistente, categorias configurables, filtro por tarjeta, calendario anual por ciclos de nomina etiquetados por su cobro de cierre, edicion y eliminacion por deslizamiento, configuracion de tema y nomina, cuenta atras y registro diferido de nomina en dia laborable. Tarjetas y categorias se eligen desde selectores directos con botones `+` para añadirlas. Repositorio privado creado en GitHub como `LosaJR/simple-finance`.
+Base local creada en la rama `feature/fase-0-base` con una experiencia funcional en IndexedDB. La correccion de prueba iPhone elimina la dependencia de `crypto.randomUUID` en HTTP local. La interfaz tiene Resumen fijo, Registrar compacto, Actividad y Configuracion, registro rapido por pasos, tarjeta principal persistente, categorias configurables, filtro por tarjeta, calendario anual por ciclos de nomina etiquetados por su cobro de cierre, edicion y eliminacion por deslizamiento, configuracion de tema y nomina, cuenta atras y registro diferido de nomina en dia laborable. Tarjetas y categorias se eligen desde selectores directos con botones `+` para añadirlas. La capa visual usa grupos suaves, controles sobrios e iconos funcionales para una navegacion de estilo iOS sin perder densidad financiera. Repositorio privado creado en GitHub como `LosaJR/simple-finance`.
 
 ## Siguiente tarea
 

@@ -4,7 +4,7 @@
   width: min(680px, 100%);
   min-height: 100svh;
   margin: 0 auto;
-  padding: calc(env(safe-area-inset-top) + 20px) 16px calc(env(safe-area-inset-bottom) + 132px);
+  padding: calc(env(safe-area-inset-top) + 22px) 16px calc(env(safe-area-inset-bottom) + 124px);
 }
 
 .home-shell {
@@ -24,15 +24,15 @@
   grid-template-columns: 1fr auto;
   gap: 12px;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .eyebrow {
   margin: 0 0 4px;
   color: var(--muted);
-  font-size: 0.76rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -43,8 +43,8 @@
 
 .topbar h1 {
   color: var(--ink);
-  font-size: 2rem;
-  line-height: 1.1;
+  font-size: 1.85rem;
+  line-height: 1.08;
 }
 
 .screen-stack {
@@ -65,13 +65,16 @@
 }
 
 .icon-button {
-  min-width: 68px;
+  display: grid;
+  width: 42px;
   min-height: 42px;
+  place-items: center;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 8px 12px;
-  color: var(--text);
-  background: var(--surface);
+  padding: 0;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  box-shadow: 0 2px 8px rgba(42, 47, 40, 0.05);
 }
 
 .dashboard {
@@ -86,22 +89,27 @@
 .cards-panel,
 .compact-panel,
 .payday-banner {
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
   border-radius: 8px;
   background: var(--surface);
   box-shadow: var(--shadow);
 }
 
 .metric {
-  padding: 16px;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 14px;
 }
 
 .payday-banner {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 4px 14px;
-  padding: 14px 16px;
-  background: color-mix(in srgb, var(--surface) 88%, var(--nav-active));
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--surface) 92%, var(--nav-active));
 }
 
 .payday-banner span,
@@ -114,13 +122,34 @@
   font-size: 1.15rem;
 }
 
+.payday-copy {
+  display: grid;
+  gap: 2px;
+}
+
 .payday-banner small {
-  grid-column: 1 / -1;
   font-size: 0.8rem;
+}
+
+.summary-symbol,
+.metric-icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--nav-active) 76%, var(--surface));
+}
+
+.metric.primary .summary-symbol {
+  color: var(--summary-text);
+  background: rgba(255, 255, 255, 0.13);
 }
 
 .metric.primary {
   grid-column: 1 / -1;
+  grid-template-columns: 40px minmax(0, 1fr);
   background: var(--summary-bg);
 }
 
@@ -143,7 +172,7 @@ label,
   display: block;
   margin: 7px 0;
   color: var(--ink);
-  font-size: 1.7rem;
+  font-size: 1.55rem;
   line-height: 1;
 }
 
@@ -164,7 +193,7 @@ label,
 .home-shell .payday-banner,
 .home-shell .metric,
 .home-shell .compact-panel {
-  padding: 12px;
+  padding: 12px 14px;
 }
 
 .entry-shell .topbar {
@@ -219,6 +248,9 @@ label,
 }
 
 .section-title h2 {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
   color: var(--ink);
   font-size: 1.08rem;
 }
@@ -243,8 +275,8 @@ label,
 .activity-tabs {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-  padding: 4px;
+  gap: 3px;
+  padding: 3px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--field);
@@ -252,8 +284,8 @@ label,
 
 .segmented button,
 .activity-tabs button {
-  min-height: 40px;
-  border-radius: 6px;
+  min-height: 38px;
+  border-radius: 7px;
   color: var(--muted);
   background: transparent;
   font-weight: 700;
@@ -301,6 +333,10 @@ textarea {
 .primary-action,
 .secondary-action {
   min-height: 48px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
   border-radius: 8px;
   padding: 0 14px;
   font-weight: 800;
@@ -311,6 +347,7 @@ textarea {
 .primary-action {
   color: var(--paper);
   background: var(--accent);
+  box-shadow: var(--button-shadow);
 }
 
 .secondary-action {
@@ -497,20 +534,25 @@ textarea {
   left: 0;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 3px;
+  gap: 2px;
   width: 100%;
-  padding: 6px 12px calc(env(safe-area-inset-bottom) + 6px);
-  border-top: 1px solid var(--line-strong);
-  background: var(--surface);
+  padding: 7px 12px calc(env(safe-area-inset-bottom) + 7px);
+  border-top: 1px solid color-mix(in srgb, var(--line-strong) 72%, transparent);
+  background: color-mix(in srgb, var(--surface) 91%, transparent);
   box-shadow: var(--nav-shadow);
+  backdrop-filter: blur(18px);
 }
 
 .bottom-nav button {
-  min-height: 48px;
-  border-radius: 6px;
+  display: grid;
+  min-height: 50px;
+  place-items: center;
+  align-content: center;
+  gap: 3px;
+  border-radius: 8px;
   color: var(--muted);
   background: transparent;
-  font-size: 0.76rem;
+  font-size: 0.68rem;
   font-weight: 800;
   touch-action: manipulation;
 }
@@ -518,6 +560,10 @@ textarea {
 .bottom-nav button.active {
   color: var(--text);
   background: var(--nav-active);
+}
+
+.bottom-nav button svg {
+  stroke-width: 2.25;
 }
 
 .calendar-button {
@@ -540,7 +586,7 @@ textarea {
 .monthly-calendar button {
   display: grid;
   gap: 3px;
-  min-height: 82px;
+  min-height: 78px;
   padding: 9px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -590,7 +636,7 @@ textarea {
   display: grid;
   gap: 10px;
   padding: 14px;
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
   border-radius: 8px;
   background: var(--surface);
 }
@@ -606,15 +652,26 @@ textarea {
   min-width: 0;
 }
 
+.field-title {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  color: var(--ink);
+}
+
+.field-title svg {
+  color: var(--accent);
+}
+
 .add-icon-button {
   display: grid;
   width: 42px;
   height: 42px;
   place-items: center;
-  border: 1px solid var(--line-strong);
+  border: 1px solid color-mix(in srgb, var(--line-strong) 84%, transparent);
   border-radius: 8px;
   color: var(--accent);
-  background: var(--field);
+  background: color-mix(in srgb, var(--field) 88%, var(--surface));
   cursor: pointer;
 }
 
@@ -625,8 +682,8 @@ textarea {
   display: grid;
   align-items: end;
   padding: 16px;
-  background: rgba(33, 30, 24, 0.38);
-  backdrop-filter: blur(3px);
+  background: rgba(30, 35, 30, 0.28);
+  backdrop-filter: blur(8px);
 }
 
 .quick-sheet,
@@ -638,7 +695,7 @@ textarea {
   padding: 20px;
   margin: 0 auto;
   overflow-y: auto;
-  border: 1px solid var(--line-strong);
+  border: 1px solid color-mix(in srgb, var(--line-strong) 86%, transparent);
   border-radius: 8px;
   background: var(--surface);
   box-shadow: var(--nav-shadow);
@@ -713,7 +770,7 @@ textarea {
 
 .quick-categories button {
   min-height: 50px;
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
   border-radius: 8px;
   color: var(--text);
   background: var(--field);

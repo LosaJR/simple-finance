@@ -52,6 +52,10 @@ Los ciclos se delimitan entre cobros efectivos, no por el limite natural del cal
 
 Tarjetas y categorias no usan una segunda capa de secciones plegables. Cada una se muestra como selector directo en Configuracion y ofrece un boton `+` lateral para abrir el alta correspondiente.
 
+## 2026-09-10 - Interfaz financiera suave
+
+La interfaz movil conserva una paleta neutra con acento verde, pero reduce bordes pesados y textura para priorizar lectura. Los iconos se reservan para orientacion, navegacion y acciones; las superficies se agrupan por tarea y la barra inferior mantiene icono y etiqueta para una navegacion inmediata.
+
 ## 2026-09-10 - Correccion de movimientos desde Resumen
 
 Los ultimos movimientos se pueden deslizar hacia la izquierda para descubrir acciones persistentes de editar y eliminar. Editar reaprovecha el formulario compacto sin nota; eliminar una nomina automatica evita que vuelva a crearse durante ese mismo ciclo.
