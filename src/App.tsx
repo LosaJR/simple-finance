@@ -3,11 +3,11 @@ import './App.css'
 import {
   DEFAULT_CATEGORIES,
   DEFAULT_PAYMENT_METHODS,
+  normalizeMerchant,
   type Category,
   type PaymentMethod,
   type Transaction,
   type TransactionDraft,
-  normalizeMerchant,
   transactionDraftSchema,
 } from './lib/finance'
 import {
@@ -20,8 +20,8 @@ import {
   listTransactions,
 } from './lib/storage'
 import {
-  formatCurrency,
   formatActivityDate,
+  formatCurrency,
   parseEuroToCents,
   summarizeCurrentCycle,
 } from './lib/summary'
@@ -40,11 +40,19 @@ const initialDraft: TransactionDraft = {
 }
 
 type ActivityTab = 'all' | 'expense' | 'income'
+type AppScreen = 'home' | 'entry' | 'activity' | 'cards'
 
 const activityTabs: { id: ActivityTab; label: string }[] = [
   { id: 'all', label: 'Global' },
   { id: 'expense', label: 'Gastos' },
   { id: 'income', label: 'Ingresos' },
+]
+
+const screens: { id: AppScreen; label: string; title: string }[] = [
+  { id: 'home', label: 'Resumen', title: 'Control personal' },
+  { id: 'entry', label: 'Registrar', title: 'Nuevo movimiento' },
+  { id: 'activity', label: 'Actividad', title: 'Actividad' },
+  { id: 'cards', label: 'Tarjetas', title: 'Tarjetas' },
 ]
 
 function App() {
@@ -56,6 +64,7 @@ function App() {
   const [feedback, setFeedback] = useState('Datos guardados solo en este dispositivo.')
   const [isDark, setIsDark] = useState(false)
   const [activityTab, setActivityTab] = useState<ActivityTab>('all')
+  const [screen, setScreen] = useState<AppScreen>('home')
   const [isAddingCard, setIsAddingCard] = useState(false)
   const [newCardName, setNewCardName] = useState('')
 
@@ -89,12 +98,10 @@ function App() {
     () => new Map(categories.map((category) => [category.id, category])),
     [categories],
   )
-
   const methodMap = useMemo(
     () => new Map(paymentMethods.map((method) => [method.id, method])),
     [paymentMethods],
   )
-
   const visibleTransactions = useMemo(
     () =>
       activityTab === 'all'
@@ -102,6 +109,12 @@ function App() {
         : transactions.filter((transaction) => transaction.type === activityTab),
     [activityTab, transactions],
   )
+  const currentScreen = screens.find((item) => item.id === screen) ?? screens[0]
+
+  const navigateTo = (nextScreen: AppScreen) => {
+    setScreen(nextScreen)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -160,12 +173,49 @@ function App() {
     await refreshData()
   }
 
+  const renderTransactions = (items: Transaction[]) => {
+    if (items.length === 0) {
+      return (
+        <div className="empty-state">
+          <strong>Sin movimientos todavia.</strong>
+          <button className="text-button" type="button" onClick={() => navigateTo('entry')}>
+            Registrar el primero
+          </button>
+        </div>
+      )
+    }
+
+    return (
+      <ul className="transaction-list">
+        {items.map((transaction) => {
+          const category = categoryMap.get(transaction.categoryId)
+          const method = methodMap.get(transaction.paymentMethodId)
+          return (
+            <li key={transaction.id}>
+              <div>
+                <span className="merchant">{transaction.merchant}</span>
+                <span className="metadata">
+                  {category?.name ?? 'Sin categoria'} · {method?.name ?? 'Sin tarjeta'} ·{' '}
+                  {formatActivityDate(transaction.occurredOn, transaction.createdAt)}
+                </span>
+              </div>
+              <strong className={transaction.type}>
+                {transaction.type === 'expense' ? '-' : '+'}
+                {formatCurrency(transaction.amountCents)}
+              </strong>
+            </li>
+          )
+        })}
+      </ul>
+    )
+  }
+
   return (
     <main className="shell">
       <header className="topbar">
         <div>
           <p className="eyebrow">Simple Finance</p>
-          <h1>Control personal</h1>
+          <h1>{currentScreen.title}</h1>
         </div>
         <button
           className="icon-button"
@@ -178,31 +228,54 @@ function App() {
         </button>
       </header>
 
-      <section className="dashboard" aria-label="Resumen del ciclo actual">
-        <article className="metric primary">
-          <span>Ciclo actual</span>
-          <strong>{formatCurrency(cycleSummary.netCents)}</strong>
-          <small>
-            {formatCurrency(cycleSummary.incomeCents)} ingresos ·{' '}
-            {formatCurrency(cycleSummary.expenseCents)} gastos
-          </small>
-        </article>
-        <article className="metric">
-          <span>Invertido</span>
-          <strong>{formatCurrency(cycleSummary.investmentCents)}</strong>
-          <small>No cuenta como gasto.</small>
-        </article>
-        <article className="metric">
-          <span>Movimientos</span>
-          <strong>{transactions.length}</strong>
-          <small>Persistidos en IndexedDB.</small>
-        </article>
-      </section>
+      {screen === 'home' ? (
+        <section className="screen-stack" aria-label="Resumen del ciclo actual">
+          <section className="dashboard">
+            <article className="metric primary">
+              <span>Ciclo actual</span>
+              <strong>{formatCurrency(cycleSummary.netCents)}</strong>
+              <small>
+                {formatCurrency(cycleSummary.incomeCents)} ingresos ·{' '}
+                {formatCurrency(cycleSummary.expenseCents)} gastos
+              </small>
+            </article>
+            <article className="metric">
+              <span>Invertido</span>
+              <strong>{formatCurrency(cycleSummary.investmentCents)}</strong>
+              <small>No cuenta como gasto.</small>
+            </article>
+            <article className="metric">
+              <span>Movimientos</span>
+              <strong>{transactions.length}</strong>
+              <small>En este dispositivo.</small>
+            </article>
+          </section>
 
-      <section className="workspace">
-        <form className="entry-panel" onSubmit={handleSubmit}>
+          <div className="home-actions">
+            <button className="primary-action" type="button" onClick={() => navigateTo('entry')}>
+              Registrar movimiento
+            </button>
+            <button className="secondary-action" type="button" onClick={() => navigateTo('activity')}>
+              Ver actividad
+            </button>
+          </div>
+
+          <section className="compact-panel" aria-label="Ultimos movimientos">
+            <div className="section-title">
+              <h2>Ultimos movimientos</h2>
+              <button className="text-button" type="button" onClick={() => navigateTo('activity')}>
+                Ver todos
+              </button>
+            </div>
+            {renderTransactions(transactions.slice(0, 3))}
+          </section>
+        </section>
+      ) : null}
+
+      {screen === 'entry' ? (
+        <form className="entry-panel screen-stack" onSubmit={handleSubmit}>
           <div className="section-title">
-            <h2>Nuevo movimiento</h2>
+            <h2>Datos del movimiento</h2>
             <p>{feedback}</p>
           </div>
 
@@ -256,8 +329,8 @@ function App() {
               <select
                 value={draft.paymentMethodId}
                 onChange={(event) => {
-                  if (event.target.value === 'add-card') {
-                    setIsAddingCard(true)
+                  if (event.target.value === 'manage-cards') {
+                    navigateTo('cards')
                     return
                   }
                   setDraft((current) => ({ ...current, paymentMethodId: event.target.value }))
@@ -268,27 +341,10 @@ function App() {
                     {method.name}
                   </option>
                 ))}
-                <option value="add-card">Añadir tarjeta...</option>
+                <option value="manage-cards">Añadir o gestionar tarjetas...</option>
               </select>
             </label>
           </div>
-
-          {isAddingCard ? (
-            <div className="card-creator">
-              <label>
-                Nombre de la tarjeta
-                <input
-                  autoFocus
-                  placeholder="Tarjeta de viajes"
-                  value={newCardName}
-                  onChange={(event) => setNewCardName(event.target.value)}
-                />
-              </label>
-              <button className="secondary-action" type="button" onClick={handleAddCard}>
-                Añadir tarjeta
-              </button>
-            </div>
-          ) : null}
 
           <label>
             Categoria
@@ -320,10 +376,12 @@ function App() {
             Guardar movimiento
           </button>
         </form>
+      ) : null}
 
-        <section className="activity-panel" aria-label="Actividad reciente">
+      {screen === 'activity' ? (
+        <section className="activity-panel screen-stack" aria-label="Actividad">
           <div className="section-title">
-            <h2>Actividad</h2>
+            <h2>Todos los movimientos</h2>
             <button className="text-button" type="button" onClick={handleResetDemoData}>
               Reiniciar datos locales
             </button>
@@ -344,37 +402,70 @@ function App() {
             ))}
           </div>
 
-          {visibleTransactions.length === 0 ? (
-            <div className="empty-state">
-              <strong>Sin movimientos todavia.</strong>
-              <span>Registra el primero para ver el resumen por categoria y metodo.</span>
-            </div>
-          ) : (
-            <ul className="transaction-list">
-              {visibleTransactions.map((transaction) => {
-                const category = categoryMap.get(transaction.categoryId)
-                const method = methodMap.get(transaction.paymentMethodId)
-                return (
-                  <li key={transaction.id}>
-                    <div>
-                      <span className="merchant">{transaction.merchant}</span>
-                      <span className="metadata">
-                        {category?.name ?? 'Sin categoria'} · {method?.name ?? 'Sin metodo'} ·{' '}
-                        {formatActivityDate(transaction.occurredOn, transaction.createdAt)}
-                      </span>
-                    </div>
-                    <strong className={transaction.type}>
-                      {transaction.type === 'expense' ? '-' : '+'}
-                      {formatCurrency(transaction.amountCents)}
-                    </strong>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
+          {renderTransactions(visibleTransactions)}
         </section>
-      </section>
+      ) : null}
 
+      {screen === 'cards' ? (
+        <section className="cards-panel screen-stack" aria-label="Tarjetas">
+          <div className="section-title">
+            <div>
+              <h2>Tus tarjetas</h2>
+              <p>La principal siempre aparece primero.</p>
+            </div>
+            <button
+              className="text-button"
+              type="button"
+              onClick={() => setIsAddingCard((current) => !current)}
+            >
+              Añadir tarjeta
+            </button>
+          </div>
+
+          {isAddingCard ? (
+            <div className="card-creator">
+              <label>
+                Nombre de la tarjeta
+                <input
+                  autoFocus
+                  placeholder="Tarjeta de viajes"
+                  value={newCardName}
+                  onChange={(event) => setNewCardName(event.target.value)}
+                />
+              </label>
+              <button className="primary-action" type="button" onClick={handleAddCard}>
+                Guardar tarjeta
+              </button>
+            </div>
+          ) : null}
+
+          <ul className="card-list">
+            {paymentMethods.map((method) => (
+              <li key={method.id}>
+                <span className="card-swatch" style={{ backgroundColor: method.color }} aria-hidden="true" />
+                <div>
+                  <strong>{method.name}</strong>
+                  <small>{method.id === 'card-main' ? 'Tarjeta principal' : 'Tarjeta activa'}</small>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      <nav className="bottom-nav" aria-label="Navegacion principal">
+        {screens.map((item) => (
+          <button
+            key={item.id}
+            className={screen === item.id ? 'active' : ''}
+            type="button"
+            aria-current={screen === item.id ? 'page' : undefined}
+            onClick={() => navigateTo(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </nav>
     </main>
   )
 }

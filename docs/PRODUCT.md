@@ -17,6 +17,7 @@ El propietario y un circulo cerrado de testers. No se recopilan datos, no hay ba
 - Los metodos de pago son exclusivamente tarjetas. La tarjeta principal siempre aparece primero y se pueden anadir mas tarjetas.
 - El comercio o concepto es opcional para preservar el registro manual cuando no exista una fuente automatica.
 - La actividad se consulta por fecha y hora en las pestañas Global, Gastos e Ingresos.
+- La navegacion movil separa Resumen, Registrar, Actividad y Tarjetas en vistas propias; cada vista solo desplaza el contenido que necesita.
 - Categorias ilimitadas; iniciales: Ocio, Supermercado, Gasolina, Hogar y Suscripciones.
 - Cada categoria puede tener limite opcional.
 - Ciclos con dia de reinicio configurable y cierre manual sin borrar historial.

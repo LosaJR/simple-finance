@@ -23,3 +23,11 @@ El producto inicial representa solo tarjetas: una tarjeta principal y tarjetas a
 ## 2026-09-10 - Captura automatica mediante Atajos nativos
 
 El registro manual conserva un comercio opcional como respaldo. La futura app iOS expondra un App Intent para que Atajos pueda registrar un movimiento con parametros. El disparador de Wallet puede iniciar una automatizacion al usar una tarjeta, pero no se asumira que aporta importe o comercio hasta probarlo en iPhone.
+
+## 2026-09-10 - Navegacion movil antes de ampliar funciones
+
+Se separan los flujos base en Resumen, Registrar, Actividad y Tarjetas con una barra inferior fija. Esta estructura se valida desde iPhone antes de ampliar la fase funcional para no trasladar una pagina de desplazamiento continuo a la futura app nativa.
+
+## 2026-09-10 - Material calido y sobrio
+
+El modo claro usa papel marfil y un grano local de muy bajo contraste; el modo oscuro usa tonos tinta y verde apagado, con la misma textura apenas perceptible. La imagen se sirve comprimida como WebP para que forme parte de la PWA sin superar el limite de precache.

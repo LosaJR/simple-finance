@@ -1,29 +1,26 @@
 .shell {
-  width: min(1180px, 100%);
+  position: relative;
+  z-index: 1;
+  width: min(680px, 100%);
   min-height: 100svh;
   margin: 0 auto;
-  padding: calc(env(safe-area-inset-top) + 22px) 18px calc(env(safe-area-inset-bottom) + 24px);
-}
-
-.topbar,
-.dashboard,
-.workspace {
-  display: grid;
-  gap: 14px;
+  padding: calc(env(safe-area-inset-top) + 20px) 16px calc(env(safe-area-inset-bottom) + 100px);
 }
 
 .topbar {
+  display: grid;
   grid-template-columns: 1fr auto;
+  gap: 12px;
   align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .eyebrow {
   margin: 0 0 4px;
   color: var(--muted);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -33,37 +30,49 @@
 }
 
 .topbar h1 {
-  font-size: clamp(2rem, 5vw, 3.2rem);
-  line-height: 1;
+  color: var(--ink);
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.screen-stack {
+  display: grid;
+  gap: 14px;
 }
 
 .icon-button,
 .text-button,
 .segmented button,
-.primary-action {
+.primary-action,
+.secondary-action,
+.bottom-nav button,
+.activity-tabs button {
   border: 0;
   cursor: pointer;
   font: inherit;
 }
 
 .icon-button {
-  min-width: 72px;
+  min-width: 68px;
+  min-height: 42px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 10px 12px;
+  padding: 8px 12px;
   color: var(--text);
   background: var(--surface);
 }
 
 .dashboard {
-  grid-template-columns: 1.3fr 1fr 1fr;
-  margin-bottom: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 .metric,
 .entry-panel,
 .activity-panel,
-.method-strip article {
+.cards-panel,
+.compact-panel {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
@@ -71,29 +80,21 @@
 }
 
 .metric {
-  padding: 18px;
+  padding: 16px;
+}
+
+.metric.primary {
+  grid-column: 1 / -1;
+  background: var(--summary-bg);
 }
 
 .metric span,
 .metric small,
 .metadata,
-.method-strip small,
 .section-title p,
-label {
+label,
+.card-list small {
   color: var(--muted);
-}
-
-.metric strong {
-  display: block;
-  margin: 8px 0;
-  color: var(--text);
-  font-size: clamp(1.7rem, 4vw, 2.7rem);
-  line-height: 1;
-}
-
-.metric.primary {
-  background: var(--summary-bg);
-  color: var(--summary-text);
 }
 
 .metric.primary span,
@@ -102,48 +103,67 @@ label {
   color: var(--summary-text);
 }
 
-.workspace {
-  grid-template-columns: minmax(320px, 0.92fr) minmax(0, 1.18fr);
-  align-items: start;
+.metric strong {
+  display: block;
+  margin: 7px 0;
+  color: var(--ink);
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.home-actions {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 10px;
 }
 
 .entry-panel,
-.activity-panel {
+.activity-panel,
+.cards-panel,
+.compact-panel {
   padding: 18px;
 }
 
 .section-title {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: start;
   justify-content: space-between;
-  margin-bottom: 16px;
+}
+
+.section-title h2 {
+  color: var(--ink);
+  font-size: 1.08rem;
 }
 
 .section-title p {
   margin: 4px 0 0;
-  font-size: 0.9rem;
+  font-size: 0.86rem;
 }
 
-.segmented {
+.segmented,
+.activity-tabs {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+  gap: 4px;
   padding: 4px;
-  margin-bottom: 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--field);
 }
 
-.segmented button {
-  min-height: 42px;
+.segmented button,
+.activity-tabs button {
+  min-height: 40px;
   border-radius: 6px;
   color: var(--muted);
   background: transparent;
+  font-weight: 700;
+  touch-action: manipulation;
 }
 
-.segmented button.active {
+.segmented button.active,
+.activity-tabs button.active {
   color: var(--text);
   background: var(--surface);
   box-shadow: var(--button-shadow);
@@ -152,9 +172,9 @@ label {
 label {
   display: grid;
   gap: 7px;
-  margin-bottom: 12px;
+  margin: 0;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 input,
@@ -180,15 +200,25 @@ textarea {
   gap: 10px;
 }
 
-.primary-action {
-  width: 100%;
+.primary-action,
+.secondary-action {
   min-height: 48px;
   border-radius: 8px;
-  color: var(--paper);
-  background: var(--accent);
+  padding: 0 14px;
   font-weight: 800;
   touch-action: manipulation;
   -webkit-appearance: none;
+}
+
+.primary-action {
+  color: var(--paper);
+  background: var(--accent);
+}
+
+.secondary-action {
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  background: var(--surface);
 }
 
 .text-button {
@@ -198,62 +228,10 @@ textarea {
   font-weight: 800;
 }
 
-.activity-tabs {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  padding: 4px;
-  margin: 0 0 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--field);
-}
-
-.activity-tabs button {
-  min-height: 40px;
-  border: 0;
-  border-radius: 6px;
-  color: var(--muted);
-  background: transparent;
-  font: inherit;
-  font-weight: 700;
-  touch-action: manipulation;
-}
-
-.activity-tabs button.active {
-  color: var(--text);
-  background: var(--surface);
-  box-shadow: var(--button-shadow);
-}
-
-.card-creator {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: end;
-  margin: -2px 0 12px;
-}
-
-.card-creator label {
-  margin: 0;
-}
-
-.secondary-action {
-  min-height: 48px;
-  border: 1px solid var(--line-strong);
-  border-radius: 8px;
-  padding: 0 14px;
-  color: var(--text);
-  background: var(--surface);
-  font: inherit;
-  font-weight: 800;
-  touch-action: manipulation;
-}
-
 .empty-state {
   display: grid;
-  gap: 6px;
-  min-height: 220px;
+  gap: 8px;
+  min-height: 180px;
   place-content: center;
   border: 1px dashed var(--line-strong);
   border-radius: 8px;
@@ -261,13 +239,16 @@ textarea {
   text-align: center;
 }
 
-.empty-state strong {
+.empty-state strong,
+.merchant,
+.card-list strong {
   color: var(--text);
 }
 
-.transaction-list {
+.transaction-list,
+.card-list {
   display: grid;
-  gap: 8px;
+  gap: 0;
   padding: 0;
   margin: 0;
   list-style: none;
@@ -278,7 +259,7 @@ textarea {
   grid-template-columns: 1fr auto;
   gap: 12px;
   align-items: center;
-  padding: 13px 0;
+  padding: 14px 0;
   border-bottom: 1px solid var(--line);
 }
 
@@ -289,13 +270,12 @@ textarea {
 .merchant {
   display: block;
   margin-bottom: 4px;
-  color: var(--text);
   font-weight: 800;
 }
 
 .metadata {
   display: block;
-  font-size: 0.84rem;
+  font-size: 0.8rem;
 }
 
 .transaction-list strong {
@@ -314,26 +294,92 @@ textarea {
   color: var(--accent);
 }
 
-@media (max-width: 820px) {
+.card-creator {
+  display: grid;
+  gap: 10px;
+}
+
+.card-list {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.card-list li {
+  display: grid;
+  grid-template-columns: 6px 1fr;
+  gap: 12px;
+  align-items: center;
+  min-height: 74px;
+  padding-right: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.card-list li:last-child {
+  border-bottom: 0;
+}
+
+.card-swatch {
+  align-self: stretch;
+}
+
+.card-list strong,
+.card-list small {
+  display: block;
+}
+
+.card-list small {
+  margin-top: 3px;
+  font-size: 0.82rem;
+}
+
+.bottom-nav {
+  position: fixed;
+  z-index: 2;
+  right: 16px;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  left: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  width: min(648px, calc(100% - 32px));
+  padding: 5px;
+  margin: 0 auto;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: var(--nav-shadow);
+  backdrop-filter: blur(16px);
+}
+
+.bottom-nav button {
+  min-height: 48px;
+  border-radius: 6px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 0.76rem;
+  font-weight: 800;
+  touch-action: manipulation;
+}
+
+.bottom-nav button.active {
+  color: var(--text);
+  background: var(--nav-active);
+}
+
+@media (max-width: 420px) {
   .shell {
     padding-inline: 12px;
   }
 
-  .dashboard,
-  .workspace {
-    grid-template-columns: 1fr;
+  .bottom-nav {
+    right: 12px;
+    left: 12px;
+    width: calc(100% - 24px);
   }
 
-  .field-grid {
+  .field-grid,
+  .home-actions {
     grid-template-columns: 1fr;
-    gap: 0;
-  }
-
-  .card-creator {
-    grid-template-columns: 1fr;
-  }
-
-  .section-title {
-    display: grid;
   }
 }

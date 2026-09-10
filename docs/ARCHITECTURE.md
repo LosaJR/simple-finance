@@ -9,6 +9,10 @@
 - Zod para validar entradas e importaciones futuras.
 - Vitest para logica financiera y Playwright para flujos principales.
 
+## Interfaz movil
+
+La interfaz de fase 0 usa navegacion local en el cliente con una barra inferior fija. Las vistas Resumen, Registrar, Actividad y Tarjetas comparten el estado de IndexedDB, pero no se apilan en una pagina unica. La superficie usa una textura local comprimida para no penalizar la precache de la PWA.
+
 ## Modelo local inicial
 
 - `PaymentMethod`: tarjeta, nombre, color, ultimos cuatro digitos opcional y activa. No se modelan cuentas ni efectivo.
