@@ -153,6 +153,10 @@
   background: var(--summary-bg);
 }
 
+.metric-copy {
+  min-width: 0;
+}
+
 .metric span,
 .metric small,
 .metadata,
@@ -174,6 +178,42 @@ label,
   color: var(--ink);
   font-size: 1.55rem;
   line-height: 1;
+}
+
+.balance-breakdown {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.72rem;
+}
+
+.balance-breakdown span {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  min-width: 0;
+}
+
+.balance-breakdown b {
+  color: var(--summary-text);
+  font-size: 0.76rem;
+}
+
+.balance-breakdown i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.balance-breakdown .income-detail {
+  color: #d3e8d1;
+}
+
+.balance-breakdown .expense-detail {
+  color: #f4c5bf;
 }
 
 .home-actions {
@@ -330,6 +370,10 @@ textarea {
   gap: 10px;
 }
 
+.entry-panel .field-grid {
+  padding-top: 2px;
+}
+
 .primary-action,
 .secondary-action {
   min-height: 48px;
@@ -389,12 +433,8 @@ textarea {
   list-style: none;
 }
 
-.transaction-list li {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
-  align-items: center;
-  padding: 14px 0;
+.transaction-list li:not(.swipe-row) {
+  padding: 0;
   border-bottom: 1px solid var(--line);
 }
 
@@ -405,18 +445,39 @@ textarea {
   padding: 0;
 }
 
+.transaction-content {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 64px;
+  padding: 11px 0;
+}
+
 .swipe-content {
   position: relative;
   z-index: 1;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
-  align-items: center;
-  min-height: 64px;
-  padding: 9px 0;
   background: var(--surface);
   touch-action: pan-y;
   transition: transform 160ms ease-out;
+}
+
+.transaction-marker {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 8px;
+}
+
+.transaction-marker.expense {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, var(--field));
+}
+
+.transaction-marker.income {
+  color: var(--positive);
+  background: color-mix(in srgb, var(--positive) 12%, var(--field));
 }
 
 .swipe-actions {
@@ -449,7 +510,7 @@ textarea {
 
 .merchant {
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
   font-weight: 800;
 }
 

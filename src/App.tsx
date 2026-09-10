@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
+  ArrowDownRight,
+  ArrowUpRight,
+  Banknote,
   CalendarDays,
   CirclePlus,
   CreditCard,
@@ -9,6 +12,7 @@ import {
   Plus,
   ReceiptText,
   Settings2,
+  Store,
   Tags,
   Trash2,
   WalletCards,
@@ -519,17 +523,26 @@ function App() {
                 onPointerUp={swipeable ? () => handleSwipeEnd(transaction.id) : undefined}
                 onPointerCancel={swipeable ? () => handleSwipeEnd(transaction.id) : undefined}
               >
-                <div>
-                <span className="merchant">{transaction.merchant}</span>
-                <span className="metadata">
-                  {category?.name ?? 'Sin categoría'} · {method?.name ?? 'Sin tarjeta'} ·{' '}
-                  {formatActivityDate(transaction.occurredOn, transaction.createdAt)}
-                </span>
-              </div>
-              <strong className={transaction.type}>
-                {transaction.type === 'expense' ? '-' : '+'}
-                {formatCurrency(transaction.amountCents)}
-              </strong>
+                <div className="transaction-content">
+                  <span className={`transaction-marker ${transaction.type}`}>
+                    {transaction.type === 'expense' ? (
+                      <ArrowDownRight size={17} aria-hidden="true" />
+                    ) : (
+                      <ArrowUpRight size={17} aria-hidden="true" />
+                    )}
+                  </span>
+                  <div>
+                    <span className="merchant">{transaction.merchant}</span>
+                    <span className="metadata">
+                      {category?.name ?? 'Sin categoría'} · {method?.name ?? 'Sin tarjeta'} ·{' '}
+                      {formatActivityDate(transaction.occurredOn, transaction.createdAt)}
+                    </span>
+                  </div>
+                  <strong className={transaction.type}>
+                    {transaction.type === 'expense' ? '-' : '+'}
+                    {formatCurrency(transaction.amountCents)}
+                  </strong>
+                </div>
               </div>
             </li>
           )
@@ -567,10 +580,14 @@ function App() {
               <div className="metric-copy">
                 <span>Ciclo actual</span>
                 <strong>{formatCurrency(cycleSummary.netCents)}</strong>
-                <small>
-                  {formatCurrency(cycleSummary.incomeCents)} ingresos ·{' '}
-                  {formatCurrency(cycleSummary.expenseCents)} gastos
-                </small>
+                <div className="balance-breakdown">
+                  <span className="income-detail">
+                    <i aria-hidden="true" />Ingresos <b>{formatCurrency(cycleSummary.incomeCents)}</b>
+                  </span>
+                  <span className="expense-detail">
+                    <i aria-hidden="true" />Gastos <b>{formatCurrency(cycleSummary.expenseCents)}</b>
+                  </span>
+                </div>
               </div>
             </article>
             <article className="metric">
@@ -606,7 +623,7 @@ function App() {
       {screen === 'entry' ? (
         <form className="entry-panel screen-stack" onSubmit={handleSubmit}>
           <div className="section-title">
-            <h2>Datos del movimiento</h2>
+            <h2><CirclePlus size={17} aria-hidden="true" />Datos del movimiento</h2>
             <p>{feedback}</p>
           </div>
 
@@ -624,7 +641,7 @@ function App() {
           </div>
 
           <label>
-            Importe
+            <span className="field-title"><Banknote size={16} aria-hidden="true" />Importe</span>
             <input
               inputMode="decimal"
               placeholder="34,90"
@@ -634,7 +651,7 @@ function App() {
           </label>
 
           <label>
-            Comercio o concepto (opcional)
+            <span className="field-title"><Store size={16} aria-hidden="true" />Comercio o concepto (opcional)</span>
             <input
               placeholder="Añádelo si no se ha detectado"
               value={draft.merchant}
@@ -644,7 +661,7 @@ function App() {
 
           <div className="field-grid">
             <label>
-              Fecha
+              <span className="field-title"><CalendarDays size={16} aria-hidden="true" />Fecha</span>
               <input
                 type="date"
                 value={draft.occurredOn}
@@ -652,7 +669,7 @@ function App() {
               />
             </label>
             <label>
-              Tarjeta utilizada
+              <span className="field-title"><CreditCard size={16} aria-hidden="true" />Tarjeta utilizada</span>
               <select
                 value={draft.paymentMethodId}
                 onChange={(event) => {
@@ -674,7 +691,7 @@ function App() {
           </div>
 
           <label>
-            Categoría
+            <span className="field-title"><Tags size={16} aria-hidden="true" />Categoría</span>
             <select
               value={draft.categoryId}
               onChange={(event) => setDraft((current) => ({ ...current, categoryId: event.target.value }))}

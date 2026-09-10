@@ -54,7 +54,7 @@ Tarjetas y categorias no usan una segunda capa de secciones plegables. Cada una 
 
 ## 2026-09-10 - Interfaz financiera suave
 
-La interfaz movil conserva una paleta neutra con acento verde, pero reduce bordes pesados y textura para priorizar lectura. Los iconos se reservan para orientacion, navegacion y acciones; las superficies se agrupan por tarea y la barra inferior mantiene icono y etiqueta para una navegacion inmediata.
+La interfaz movil conserva una paleta neutra con acento verde, pero reduce bordes pesados y textura para priorizar lectura. Los iconos se reservan para orientacion, navegacion y acciones; las superficies se agrupan por tarea y la barra inferior mantiene icono y etiqueta para una navegacion inmediata. El balance separa ingresos y gastos dentro de la misma superficie, los movimientos usan un marcador por tipo y los campos se identifican con iconos de dominio.
 
 ## 2026-09-10 - Correccion de movimientos desde Resumen
 
