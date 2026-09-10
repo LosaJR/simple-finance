@@ -7,10 +7,12 @@ import {
   type PaymentMethod,
   type Transaction,
   type TransactionDraft,
+  normalizeMerchant,
   transactionDraftSchema,
 } from './lib/finance'
 import {
   clearLocalData,
+  createPaymentMethod,
   createTransaction,
   ensureSeedData,
   listCategories,
@@ -19,9 +21,8 @@ import {
 } from './lib/storage'
 import {
   formatCurrency,
-  formatLocalDate,
+  formatActivityDate,
   parseEuroToCents,
-  summarizeByMethod,
   summarizeCurrentCycle,
 } from './lib/summary'
 
@@ -38,6 +39,14 @@ const initialDraft: TransactionDraft = {
   status: 'posted',
 }
 
+type ActivityTab = 'all' | 'expense' | 'income'
+
+const activityTabs: { id: ActivityTab; label: string }[] = [
+  { id: 'all', label: 'Global' },
+  { id: 'expense', label: 'Gastos' },
+  { id: 'income', label: 'Ingresos' },
+]
+
 function App() {
   const [categories, setCategories] = useState<Category[]>([])
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
@@ -46,6 +55,9 @@ function App() {
   const [amount, setAmount] = useState('')
   const [feedback, setFeedback] = useState('Datos guardados solo en este dispositivo.')
   const [isDark, setIsDark] = useState(false)
+  const [activityTab, setActivityTab] = useState<ActivityTab>('all')
+  const [isAddingCard, setIsAddingCard] = useState(false)
+  const [newCardName, setNewCardName] = useState('')
 
   const refreshData = async () => {
     await ensureSeedData()
@@ -73,11 +85,6 @@ function App() {
   }, [isDark])
 
   const cycleSummary = useMemo(() => summarizeCurrentCycle(transactions), [transactions])
-  const methodSummary = useMemo(
-    () => summarizeByMethod(transactions, paymentMethods),
-    [paymentMethods, transactions],
-  )
-
   const categoryMap = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
     [categories],
@@ -88,7 +95,13 @@ function App() {
     [paymentMethods],
   )
 
-  const visibleTransactions = transactions.slice(0, 6)
+  const visibleTransactions = useMemo(
+    () =>
+      activityTab === 'all'
+        ? transactions
+        : transactions.filter((transaction) => transaction.type === activityTab),
+    [activityTab, transactions],
+  )
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -96,12 +109,12 @@ function App() {
     const parsed = transactionDraftSchema.safeParse({
       ...draft,
       amountCents,
-      merchant: draft.merchant.trim(),
+      merchant: normalizeMerchant(draft.merchant),
       note: draft.note?.trim() || undefined,
     })
 
     if (!parsed.success) {
-      setFeedback('Revisa el importe, comercio, categoria y metodo antes de guardar.')
+      setFeedback('Revisa el importe, la categoria y la tarjeta antes de guardar.')
       return
     }
 
@@ -115,6 +128,21 @@ function App() {
       paymentMethodId: current.paymentMethodId,
       occurredOn: todayInputValue(),
     }))
+    await refreshData()
+  }
+
+  const handleAddCard = async () => {
+    const cardName = newCardName.trim()
+    if (cardName.length < 2) {
+      setFeedback('Escribe un nombre para la tarjeta.')
+      return
+    }
+
+    const card = await createPaymentMethod(cardName)
+    setDraft((current) => ({ ...current, paymentMethodId: card.id }))
+    setNewCardName('')
+    setIsAddingCard(false)
+    setFeedback('Tarjeta añadida.')
     await refreshData()
   }
 
@@ -194,9 +222,9 @@ function App() {
           </label>
 
           <label>
-            Comercio o concepto
+            Comercio o concepto (opcional)
             <input
-              placeholder="Supermercado"
+              placeholder="Añádelo si no se ha detectado"
               value={draft.merchant}
               onChange={(event) =>
                 setDraft((current) => ({ ...current, merchant: event.target.value }))
@@ -216,21 +244,43 @@ function App() {
               />
             </label>
             <label>
-              Metodo
+              Tarjeta utilizada
               <select
                 value={draft.paymentMethodId}
-                onChange={(event) =>
+                onChange={(event) => {
+                  if (event.target.value === 'add-card') {
+                    setIsAddingCard(true)
+                    return
+                  }
                   setDraft((current) => ({ ...current, paymentMethodId: event.target.value }))
-                }
+                }}
               >
                 {paymentMethods.map((method) => (
                   <option key={method.id} value={method.id}>
                     {method.name}
                   </option>
                 ))}
+                <option value="add-card">Añadir tarjeta...</option>
               </select>
             </label>
           </div>
+
+          {isAddingCard ? (
+            <div className="card-creator">
+              <label>
+                Nombre de la tarjeta
+                <input
+                  autoFocus
+                  placeholder="Tarjeta de viajes"
+                  value={newCardName}
+                  onChange={(event) => setNewCardName(event.target.value)}
+                />
+              </label>
+              <button className="secondary-action" type="button" onClick={handleAddCard}>
+                Añadir tarjeta
+              </button>
+            </div>
+          ) : null}
 
           <label>
             Categoria
@@ -271,6 +321,21 @@ function App() {
             </button>
           </div>
 
+          <div className="activity-tabs" role="tablist" aria-label="Filtro de actividad">
+            {activityTabs.map((tab) => (
+              <button
+                key={tab.id}
+                className={activityTab === tab.id ? 'active' : ''}
+                type="button"
+                role="tab"
+                aria-selected={activityTab === tab.id}
+                onClick={() => setActivityTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
           {visibleTransactions.length === 0 ? (
             <div className="empty-state">
               <strong>Sin movimientos todavia.</strong>
@@ -287,7 +352,7 @@ function App() {
                       <span className="merchant">{transaction.merchant}</span>
                       <span className="metadata">
                         {category?.name ?? 'Sin categoria'} · {method?.name ?? 'Sin metodo'} ·{' '}
-                        {formatLocalDate(transaction.occurredOn)}
+                        {formatActivityDate(transaction.occurredOn, transaction.createdAt)}
                       </span>
                     </div>
                     <strong className={transaction.type}>
@@ -302,18 +367,6 @@ function App() {
         </section>
       </section>
 
-      <section className="method-strip" aria-label="Resumen por metodo de pago">
-        {methodSummary.map((item) => (
-          <article key={item.method.id}>
-            <span style={{ backgroundColor: item.method.color }} aria-hidden="true" />
-            <div>
-              <strong>{item.method.name}</strong>
-              <small>{item.method.type}</small>
-            </div>
-            <b>{formatCurrency(item.totalCents)}</b>
-          </article>
-        ))}
-      </section>
     </main>
   )
 }

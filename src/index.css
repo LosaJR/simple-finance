@@ -6,6 +6,8 @@
   --text: #17201a;
   --muted: #667368;
   --ink: #18241d;
+  --summary-bg: #18241d;
+  --summary-text: #f8fbf8;
   --accent: #256b53;
   --positive: #16724d;
   --danger: #b04444;
@@ -33,6 +35,8 @@
   --text: #eef2ed;
   --muted: #9caa9f;
   --ink: #edf3ea;
+  --summary-bg: #12382a;
+  --summary-text: #eef9f2;
   --accent: #76c7a2;
   --positive: #7dd3a9;
   --danger: #ff9c91;

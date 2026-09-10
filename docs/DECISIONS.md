@@ -15,3 +15,11 @@ Dexie cubre IndexedDB con una API mantenible y Zod permite validar formularios e
 ## 2026-09-10 - Tema profesional de herramienta
 
 La interfaz prioriza densidad, claridad y lectura rapida sobre una landing page o elementos decorativos.
+
+## 2026-09-10 - Tarjetas como unico metodo de pago
+
+El producto inicial representa solo tarjetas: una tarjeta principal y tarjetas adicionales. No se incorporan cuentas ni efectivo a este flujo.
+
+## 2026-09-10 - Captura automatica sin lectura de notificaciones ajenas
+
+El registro manual conserva un comercio opcional como respaldo. La PWA no puede leer notificaciones de iOS y una app iOS no puede inspeccionar de forma generica notificaciones de otras apps; una futura automatizacion se evaluara solo mediante una fuente autorizada y comprobable.

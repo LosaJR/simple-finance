@@ -27,13 +27,23 @@ class SimpleFinanceDatabase extends Dexie {
 export const db = new SimpleFinanceDatabase()
 
 export const ensureSeedData = async () => {
-  const [methodCount, categoryCount] = await Promise.all([
-    db.paymentMethods.count(),
-    db.categories.count(),
-  ])
+  const [methodCount, categoryCount] = await Promise.all([db.paymentMethods.count(), db.categories.count()])
 
   if (methodCount === 0) {
     await db.paymentMethods.bulkPut(DEFAULT_PAYMENT_METHODS)
+  } else {
+    const legacyMethodIds = await db.paymentMethods
+      .filter((method) => (method as unknown as { type?: string }).type !== 'card')
+      .primaryKeys()
+
+    if (legacyMethodIds.length > 0) {
+      await db.paymentMethods.bulkDelete(legacyMethodIds)
+    }
+
+    const hasMainCard = await db.paymentMethods.get('card-main')
+    if (!hasMainCard) {
+      await db.paymentMethods.add(DEFAULT_PAYMENT_METHODS[0])
+    }
   }
 
   if (categoryCount === 0) {
@@ -41,12 +51,43 @@ export const ensureSeedData = async () => {
   }
 }
 
-export const listPaymentMethods = () =>
-  db.paymentMethods.filter((method) => method.active).toArray()
+export const listPaymentMethods = async () => {
+  const methods = await db.paymentMethods
+    .filter((method) => method.active && method.type === 'card')
+    .toArray()
+
+  return methods.sort((first, second) => {
+    if (first.id === 'card-main') {
+      return -1
+    }
+    if (second.id === 'card-main') {
+      return 1
+    }
+    return first.name.localeCompare(second.name, 'es')
+  })
+}
 
 export const listCategories = () => db.categories.filter((category) => category.active).toArray()
 
-export const listTransactions = () => db.transactions.orderBy('occurredOn').reverse().toArray()
+export const listTransactions = async () => {
+  const transactions = await db.transactions.toArray()
+  return transactions.sort(
+    (first, second) =>
+      second.occurredOn.localeCompare(first.occurredOn) || second.createdAt.localeCompare(first.createdAt),
+  )
+}
+
+export const createPaymentMethod = async (name: string) => {
+  const paymentMethod: PaymentMethod = {
+    id: crypto.randomUUID(),
+    name,
+    type: 'card',
+    color: '#315f8f',
+    active: true,
+  }
+  await db.paymentMethods.add(paymentMethod)
+  return paymentMethod
+}
 
 export const createTransaction = async (draft: TransactionDraft) => {
   const timestamp = new Date().toISOString()

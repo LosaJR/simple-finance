@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { getCycleId, type Transaction } from './finance'
-import { parseEuroToCents, summarizeCurrentCycle } from './summary'
+import { getCycleId, normalizeMerchant, type Transaction } from './finance'
+import { formatActivityDate, parseEuroToCents, summarizeCurrentCycle } from './summary'
 
 describe('money parsing', () => {
   it('stores euros as integer cents', () => {
@@ -30,6 +30,18 @@ describe('financial summary', () => {
       investmentCents: 50000,
       netCents: 146500,
     })
+  })
+})
+
+describe('manual merchant fallback', () => {
+  it('keeps manual entry available when no merchant was detected', () => {
+    expect(normalizeMerchant('   ')).toBe('Movimiento manual')
+  })
+})
+
+describe('activity dates', () => {
+  it('combines the movement date with its recorded time', () => {
+    expect(formatActivityDate('2026-09-10', '2026-09-10T14:30:00.000Z')).toContain('10 sept')
   })
 })
 

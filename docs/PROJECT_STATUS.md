@@ -10,11 +10,11 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
-Base local creada en la rama `feature/fase-0-base` con primera pantalla funcional para registrar movimientos en IndexedDB. Repositorio privado creado en GitHub como `LosaJR/simple-finance`.
+Base local creada en la rama `feature/fase-0-base` con primera pantalla funcional para registrar movimientos en IndexedDB. La primera correccion de prueba iPhone elimina cuentas y efectivo, incorpora tarjetas, comercio manual opcional y filtros de actividad. Repositorio privado creado en GitHub como `LosaJR/simple-finance`.
 
 ## Siguiente tarea
 
-Revisar/mergear PR #12. Despues abordar Fase 1 con CRUD completo de metodos y categorias.
+Revisar desde iPhone fisico los cambios de interfaz del PR #12. Despues abordar Fase 1 con CRUD completo de tarjetas y categorias.
 
 ## Verificaciones
 

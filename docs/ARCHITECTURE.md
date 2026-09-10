@@ -11,7 +11,7 @@
 
 ## Modelo local inicial
 
-- `PaymentMethod`: nombre, tipo, color, ultimos cuatro digitos opcional y activo.
+- `PaymentMethod`: tarjeta, nombre, color, ultimos cuatro digitos opcional y activa. No se modelan cuentas ni efectivo.
 - `Category`: nombre, icono textual, color, tipos permitidos, limite opcional y activo.
 - `Transaction`: tipo, importe en centimos, comercio, fecha local, metodo, categoria, nota, estado y ciclo.
 
@@ -23,4 +23,4 @@ No hay backend, analitica ni SDKs externos. Los datos quedan en IndexedDB del na
 
 ## Extension futura
 
-Capacitor debe envolver la PWA sin romper la capa de dominio. App Intents, Atajos, notificaciones locales, Face ID/PIN, widgets y Apple Watch viven en la fase nativa y requieren macOS, cuenta Apple Developer y pruebas en dispositivo fisico.
+Capacitor debe envolver la PWA sin romper la capa de dominio. App Intents, Atajos, notificaciones locales, Face ID/PIN, widgets y Apple Watch viven en la fase nativa y requieren macOS, cuenta Apple Developer y pruebas en dispositivo fisico. La lectura generica de notificaciones de bancos u otras apps no es una capacidad disponible de iOS.

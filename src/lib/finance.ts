@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const transactionTypes = ['expense', 'income', 'investment'] as const
 export type TransactionType = (typeof transactionTypes)[number]
 
-export type PaymentMethodType = 'card' | 'bank' | 'cash' | 'investment'
+export type PaymentMethodType = 'card'
 
 export interface PaymentMethod {
   id: string
@@ -42,7 +42,7 @@ export interface Transaction {
 export const transactionDraftSchema = z.object({
   type: z.enum(transactionTypes),
   amountCents: z.number().int().positive(),
-  merchant: z.string().trim().min(2).max(80),
+  merchant: z.string().trim().max(80),
   occurredOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   paymentMethodId: z.string().min(1),
   categoryId: z.string().min(1),
@@ -52,26 +52,14 @@ export const transactionDraftSchema = z.object({
 
 export type TransactionDraft = z.infer<typeof transactionDraftSchema>
 
+export const normalizeMerchant = (merchant: string) => merchant.trim() || 'Movimiento manual'
+
 export const DEFAULT_PAYMENT_METHODS: PaymentMethod[] = [
   {
     id: 'card-main',
     name: 'Tarjeta principal',
     type: 'card',
     color: '#256b53',
-    active: true,
-  },
-  {
-    id: 'bank-main',
-    name: 'Cuenta corriente',
-    type: 'bank',
-    color: '#315f8f',
-    active: true,
-  },
-  {
-    id: 'cash',
-    name: 'Efectivo',
-    type: 'cash',
-    color: '#8a6f2b',
     active: true,
   },
 ]

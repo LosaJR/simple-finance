@@ -12,6 +12,15 @@ export const formatLocalDate = (isoDate: string) =>
     month: 'short',
   }).format(new Date(`${isoDate}T12:00:00`))
 
+export const formatActivityDate = (occurredOn: string, createdAt: string) => {
+  const time = new Intl.DateTimeFormat('es-ES', {
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(createdAt))
+
+  return `${formatLocalDate(occurredOn)} · ${time}`
+}
+
 export const parseEuroToCents = (value: string) => {
   const normalized = value.trim().replace(/\./g, '').replace(',', '.')
   if (!normalized) {

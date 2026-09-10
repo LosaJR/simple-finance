@@ -18,9 +18,9 @@ Issues previstos:
 ## Fase 1 - Fundamentos financieros
 
 - Dashboard responsive para iPhone.
-- Metodos de pago, categorias y CRUD seguro.
+- Tarjeta principal, tarjetas adicionales y CRUD seguro de tarjetas y categorias.
 - Registro manual completo de gastos, ingresos e inversiones.
-- Vista global y por metodo de pago.
+- Actividad global, de gastos y de ingresos ordenada por fecha y hora.
 
 ## Fase 2 - Limites y ciclos
 
