@@ -26,7 +26,7 @@ El registro manual conserva un comercio opcional como respaldo. La futura app iO
 
 ## 2026-09-10 - Navegacion movil antes de ampliar funciones
 
-Se separan los flujos base en Resumen, Registrar, Actividad y Tarjetas con una barra inferior fija. Esta estructura se valida desde iPhone antes de ampliar la fase funcional para no trasladar una pagina de desplazamiento continuo a la futura app nativa.
+Se separan los flujos base en Resumen, Registrar, Actividad y Configuracion con una barra inferior fija. Esta estructura se valida desde iPhone antes de ampliar la fase funcional para no trasladar una pagina de desplazamiento continuo a la futura app nativa.
 
 ## 2026-09-10 - Material calido y sobrio
 
@@ -42,4 +42,12 @@ El dia de cobro y la cantidad se guardan en IndexedDB. Determinan la cuenta atra
 
 ## 2026-09-10 - Resumen fijo y calendario en Actividad
 
-Resumen se mantiene compacto y sin desplazamiento; la navegacion inferior es opaca y reserva espacio para que no se vea contenido debajo. El historial comparativo se traslada a un calendario anual desplegable desde Actividad, con ingresos y gastos por mes.
+Resumen se mantiene compacto y sin desplazamiento; la navegacion inferior es opaca y reserva espacio para que no se vea contenido debajo. El historial comparativo se traslada a un calendario anual desplegable desde Actividad, con ingresos y gastos por ciclo de nomina.
+
+## 2026-09-10 - Ciclos entre fechas efectivas de cobro
+
+Los ciclos se delimitan entre cobros efectivos, no por el limite natural del calendario. Si el dia configurado cae en fin de semana, se desplaza al lunes y ese retraso amplía el ciclo anterior. El calendario mantiene una casilla por mes de cobro programado para comparar, pero al pulsarla filtra el extracto del ciclo real.
+
+## 2026-09-10 - Correccion de movimientos desde Resumen
+
+Los ultimos movimientos se pueden deslizar hacia la izquierda para descubrir acciones persistentes de editar y eliminar. Editar reaprovecha el formulario compacto sin nota; eliminar una nomina automatica evita que vuelva a crearse durante ese mismo ciclo.

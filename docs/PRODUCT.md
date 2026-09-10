@@ -18,11 +18,15 @@ El propietario y un circulo cerrado de testers. No se recopilan datos, no hay ba
 - El comercio o concepto es opcional para preservar el registro manual cuando no exista una fuente automatica.
 - La actividad se consulta por fecha y hora en las pestañas Global, Gastos e Ingresos.
 - La actividad puede filtrarse por todas las tarjetas o una tarjeta concreta.
-- La navegacion movil separa Resumen, Registrar, Actividad y Tarjetas en vistas propias; cada vista solo desplaza el contenido que necesita.
+- La navegacion movil separa Resumen, Registrar, Actividad y Configuracion en vistas propias; cada vista solo desplaza el contenido que necesita.
 - Resumen ofrece un registro rapido superpuesto con los pasos gasto o ingreso, importe, concepto y categoria; usa la tarjeta principal y el momento actual sin pedirlos.
-- Configuracion conserva el tema, el dia de cobro y la cantidad de nomina. Resumen muestra la cuenta atras para la proxima nomina y Actividad ofrece un calendario anual resumido de ingresos y gastos.
+- Resumen mantiene los ultimos movimientos compactos y permite deslizarlos a la izquierda para editar o eliminar el movimiento.
+- Registrar no pide notas; solo solicita los datos necesarios para crear el movimiento en una pantalla compacta.
+- Configuracion conserva el tema, el dia de cobro y la cantidad de nomina, y concentra las tarjetas y categorias en secciones desplegables.
+- Resumen muestra la cuenta atras para la proxima nomina y Actividad ofrece un calendario anual resumido de ingresos y gastos por ciclo de nomina; al elegir un ciclo muestra su extracto.
 - Cuando la aplicacion se abre en la fecha de cobro efectiva o despues, registra una unica nomina como ingreso. Si el dia elegido cae en fin de semana, se desplaza al siguiente dia laborable.
-- Categorias ilimitadas; iniciales: Ocio, Supermercado, Gasolina, Hogar y Suscripciones.
+- Cada ciclo comienza en la fecha efectiva de cobro y termina al comenzar el siguiente. La nomina que abre el ciclo se asigna a ese ciclo, aunque la fecha efectiva caiga al principio del mes siguiente.
+- Categorias ilimitadas; las creadas por la persona sirven tanto para gastos como para ingresos. Iniciales: Ocio, Supermercado, Gasolina, Hogar y Suscripciones.
 - Cada categoria puede tener limite opcional.
 - Ciclos con dia de reinicio configurable y cierre manual sin borrar historial.
 - Vista agregada y por metodo de pago.

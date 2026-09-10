@@ -37,7 +37,7 @@ pnpm e2e
 
 ## Estado actual
 
-Fase 0 en curso: base React + Vite, TypeScript estricto, PWA instalable, persistencia local con Dexie, validacion con Zod, pruebas unitarias, Playwright y CI.
+Fase 0 en curso: base React + Vite, TypeScript estricto, PWA instalable, persistencia local con Dexie, validacion con Zod, pruebas unitarias, Playwright y CI. La experiencia movil ya incluye registro, edicion y eliminacion de movimientos, ciclos entre nominas y configuracion local de tarjetas y categorias.
 
 ## Limites actuales
 

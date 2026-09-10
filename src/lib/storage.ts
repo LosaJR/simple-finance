@@ -64,7 +64,18 @@ export const ensureSeedData = async () => {
     }
   }
 
-  if (categoryCount === 0) {
+  if (categoryCount > 0) {
+    const legacyCategoryIds = await db.categories
+      .filter((category) =>
+        (category as unknown as { allowedTypes?: string[] }).allowedTypes?.includes('investment') ?? false,
+      )
+      .primaryKeys()
+    if (legacyCategoryIds.length > 0) {
+      await db.categories.bulkDelete(legacyCategoryIds)
+    }
+  }
+
+  if ((await db.categories.count()) === 0) {
     await db.categories.bulkPut(DEFAULT_CATEGORIES)
   }
 
@@ -79,8 +90,11 @@ export const ensureSeedData = async () => {
 
   if (!settings) {
     await db.settings.put(DEFAULT_SETTINGS)
-  } else if (settings.paydayAmountCents === undefined) {
-    await db.settings.update(DEFAULT_SETTINGS.id, { paydayAmountCents: 0 })
+  } else if (settings.paydayAmountCents === undefined || settings.suppressedPayrollCycleIds === undefined) {
+    await db.settings.update(DEFAULT_SETTINGS.id, {
+      paydayAmountCents: settings.paydayAmountCents ?? 0,
+      suppressedPayrollCycleIds: settings.suppressedPayrollCycleIds ?? [],
+    })
   }
 }
 
@@ -125,6 +139,19 @@ export const createPaymentMethod = async (name: string) => {
   return paymentMethod
 }
 
+export const createCategory = async (name: string) => {
+  const category: Category = {
+    id: createLocalId(),
+    name,
+    icon: 'CA',
+    color: '#546f59',
+    allowedTypes: ['expense', 'income'],
+    active: true,
+  }
+  await db.categories.add(category)
+  return category
+}
+
 export const createTransaction = async (draft: TransactionDraft, resetDay = 1) => {
   const timestamp = new Date().toISOString()
   const transaction: Transaction = {
@@ -136,6 +163,37 @@ export const createTransaction = async (draft: TransactionDraft, resetDay = 1) =
   }
   await db.transactions.add(transaction)
   return transaction
+}
+
+export const updateTransaction = async (id: string, draft: TransactionDraft, resetDay = 1) => {
+  const existing = await db.transactions.get(id)
+  if (!existing) {
+    throw new Error('Movimiento no encontrado.')
+  }
+
+  const updatedAt = new Date().toISOString()
+  await db.transactions.update(id, {
+    ...draft,
+    source: existing.source ?? draft.source,
+    cycleId: getCycleId(draft.occurredOn, resetDay),
+    updatedAt,
+  })
+}
+
+export const deleteTransaction = async (id: string) => {
+  const transaction = await db.transactions.get(id)
+  if (!transaction) {
+    return
+  }
+
+  await db.transaction('rw', db.transactions, db.settings, async () => {
+    await db.transactions.delete(id)
+    if (transaction.source === 'payroll') {
+      const settings = await getSettings()
+      const suppressedPayrollCycleIds = [...new Set([...settings.suppressedPayrollCycleIds, transaction.cycleId])]
+      await db.settings.put({ ...settings, suppressedPayrollCycleIds })
+    }
+  })
 }
 
 export const setPrimaryPaymentMethod = async (paymentMethodId: string) => {
@@ -158,6 +216,7 @@ export const savePaydaySettings = async (paydayDay: number, paydayAmountCents: n
     id: DEFAULT_SETTINGS.id,
     paydayDay: normalizedDay,
     paydayAmountCents: Math.max(0, Math.trunc(paydayAmountCents)),
+    suppressedPayrollCycleIds: (await getSettings()).suppressedPayrollCycleIds,
   })
 }
 
@@ -179,6 +238,9 @@ export const ensureScheduledPayroll = async (today = new Date()) => {
     payday.getDate(),
   ).padStart(2, '0')}`
   const cycleId = getCycleId(occurredOn, settings.paydayDay)
+  if (settings.suppressedPayrollCycleIds.includes(cycleId)) {
+    return false
+  }
   const existingPayroll = await db.transactions
     .filter(
       (transaction) =>

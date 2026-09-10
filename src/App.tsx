@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { CalendarDays, Pencil, Trash2 } from 'lucide-react'
 import './App.css'
 import {
   DEFAULT_CATEGORIES,
   DEFAULT_PAYMENT_METHODS,
+  getCycleId,
   normalizeMerchant,
   type Category,
   type PaymentMethod,
@@ -12,7 +14,9 @@ import {
 } from './lib/finance'
 import {
   createPaymentMethod,
+  createCategory,
   createTransaction,
+  deleteTransaction,
   ensureSeedData,
   ensureScheduledPayroll,
   getSettings,
@@ -21,6 +25,7 @@ import {
   listTransactions,
   savePaydaySettings,
   setPrimaryPaymentMethod,
+  updateTransaction,
 } from './lib/storage'
 import {
   formatActivityDate,
@@ -28,7 +33,6 @@ import {
   getDaysUntilPayday,
   parseEuroToCents,
   summarizeCurrentCycle,
-  summarizeMonthlyHistory,
 } from './lib/summary'
 
 const todayInputValue = () => {
@@ -44,7 +48,6 @@ const initialDraft: TransactionDraft = {
   occurredOn: todayInputValue(),
   paymentMethodId: DEFAULT_PAYMENT_METHODS[0]?.id ?? '',
   categoryId: DEFAULT_CATEGORIES[0]?.id ?? '',
-  note: '',
   status: 'posted',
   source: 'manual',
 }
@@ -64,20 +67,20 @@ const screens: { id: AppScreen; label: string; title: string }[] = [
   { id: 'home', label: 'Resumen', title: 'Control personal' },
   { id: 'entry', label: 'Registrar', title: 'Nuevo movimiento' },
   { id: 'activity', label: 'Actividad', title: 'Actividad' },
-  { id: 'cards', label: 'Tarjetas', title: 'Tarjetas' },
+  { id: 'cards', label: 'Configuración', title: 'Configuración' },
 ]
 
 const quickSteps: QuickStep[] = ['type', 'amount', 'merchant', 'category']
-
-const formatCalendarMonth = (year: number, month: number) =>
-  new Intl.DateTimeFormat('es-ES', { month: 'short' })
-    .format(new Date(year, month, 1))
-    .replace('.', '')
 
 const formatAmountInput = (amountCents: number) =>
   new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
     amountCents / 100,
   )
+
+const formatCycleLabel = (cycleId: string) =>
+  new Intl.DateTimeFormat('es-ES', { month: 'short' })
+    .format(new Date(`${cycleId}-01T12:00:00`))
+    .replace('.', '')
 
 function App() {
   const [categories, setCategories] = useState<Category[]>([])
@@ -90,9 +93,14 @@ function App() {
   const [isDark, setIsDark] = useState(false)
   const [activityTab, setActivityTab] = useState<ActivityTab>('all')
   const [activityPaymentMethodId, setActivityPaymentMethodId] = useState('all')
+  const [activityCycleId, setActivityCycleId] = useState<string | null>(null)
   const [screen, setScreen] = useState<AppScreen>('home')
   const [isAddingCard, setIsAddingCard] = useState(false)
   const [newCardName, setNewCardName] = useState('')
+  const [selectedCardId, setSelectedCardId] = useState('')
+  const [isAddingCategory, setIsAddingCategory] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [selectedCategoryId, setSelectedCategoryId] = useState('')
   const [paydayDay, setPaydayDay] = useState(1)
   const [paydayAmount, setPaydayAmount] = useState('')
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -107,6 +115,13 @@ function App() {
   const [quickCategoryId, setQuickCategoryId] = useState('')
   const [quickFeedback, setQuickFeedback] = useState('')
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+  const [editDraft, setEditDraft] = useState<TransactionDraft | null>(null)
+  const [editAmount, setEditAmount] = useState('')
+  const [editFeedback, setEditFeedback] = useState('')
+  const [openTransactionId, setOpenTransactionId] = useState<string | null>(null)
+  const [swipeOffsets, setSwipeOffsets] = useState<Record<string, number>>({})
+  const swipeStart = useRef<{ id: string; x: number } | null>(null)
 
   const refreshData = async () => {
     await ensureSeedData()
@@ -128,6 +143,8 @@ function App() {
       categoryId: current.categoryId || nextCategories[0]?.id || '',
       paymentMethodId: current.paymentMethodId || primary?.id || '',
     }))
+    setSelectedCardId((current) => current || primary?.id || '')
+    setSelectedCategoryId((current) => current || nextCategories[0]?.id || '')
   }
 
   useEffect(() => {
@@ -142,6 +159,14 @@ function App() {
     () => paymentMethods.find((method) => method.isPrimary) ?? paymentMethods[0],
     [paymentMethods],
   )
+  const selectedCard = useMemo(
+    () => paymentMethods.find((method) => method.id === selectedCardId) ?? primaryCard,
+    [paymentMethods, primaryCard, selectedCardId],
+  )
+  const selectedCategory = useMemo(
+    () => categories.find((category) => category.id === selectedCategoryId) ?? categories[0],
+    [categories, selectedCategoryId],
+  )
   const cycleSummary = useMemo(
     () => summarizeCurrentCycle(transactions, paydayDay),
     [paydayDay, transactions],
@@ -149,17 +174,25 @@ function App() {
   const daysUntilPayday = useMemo(() => getDaysUntilPayday(paydayDay), [paydayDay])
   const monthlyCalendar = useMemo(() => {
     const year = new Date().getFullYear()
-    const summaries = new Map(summarizeMonthlyHistory(transactions).map((summary) => [summary.month, summary]))
+    const summaries = new Map<string, { expenseCents: number; incomeCents: number }>()
+    for (const transaction of transactions) {
+      const cycleId = getCycleId(transaction.occurredOn, paydayDay)
+      const summary = summaries.get(cycleId) ?? { expenseCents: 0, incomeCents: 0 }
+      if (transaction.type === 'expense') summary.expenseCents += transaction.amountCents
+      if (transaction.type === 'income') summary.incomeCents += transaction.amountCents
+      summaries.set(cycleId, summary)
+    }
     return Array.from({ length: 12 }, (_, month) => {
       const key = `${year}-${String(month + 1).padStart(2, '0')}`
       const summary = summaries.get(key)
       return {
-        label: formatCalendarMonth(year, month),
+        cycleId: key,
+        label: formatCycleLabel(key),
         expenseCents: summary?.expenseCents ?? 0,
         incomeCents: summary?.incomeCents ?? 0,
       }
     })
-  }, [transactions])
+  }, [paydayDay, transactions])
   const categoryMap = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
     [categories],
@@ -173,9 +206,10 @@ function App() {
       transactions.filter(
         (transaction) =>
           (activityTab === 'all' || transaction.type === activityTab) &&
-          (activityPaymentMethodId === 'all' || transaction.paymentMethodId === activityPaymentMethodId),
+          (activityPaymentMethodId === 'all' || transaction.paymentMethodId === activityPaymentMethodId) &&
+          (activityCycleId === null || getCycleId(transaction.occurredOn, paydayDay) === activityCycleId),
       ),
-    [activityPaymentMethodId, activityTab, transactions],
+    [activityCycleId, activityPaymentMethodId, activityTab, paydayDay, transactions],
   )
   const quickCategories = useMemo(
     () => categories.filter((category) => category.allowedTypes.includes(quickType)),
@@ -242,7 +276,6 @@ function App() {
       ...draft,
       amountCents: parseEuroToCents(amount),
       merchant: normalizeMerchant(draft.merchant),
-      note: draft.note?.trim() || undefined,
     })
 
     if (!parsed.success) {
@@ -275,13 +308,33 @@ function App() {
     }
 
     try {
-      await createPaymentMethod(cardName)
+      const card = await createPaymentMethod(cardName)
+      setSelectedCardId(card.id)
       setNewCardName('')
       setIsAddingCard(false)
       setFeedback('Tarjeta añadida.')
       await refreshData()
     } catch {
       setFeedback('No se ha podido añadir la tarjeta. Inténtalo de nuevo.')
+    }
+  }
+
+  const handleAddCategory = async () => {
+    const categoryName = newCategoryName.trim()
+    if (categoryName.length < 2) {
+      setFeedback('Escribe un nombre para la categoría.')
+      return
+    }
+
+    try {
+      const category = await createCategory(categoryName)
+      setSelectedCategoryId(category.id)
+      setNewCategoryName('')
+      setIsAddingCategory(false)
+      setFeedback('Categoría añadida.')
+      await refreshData()
+    } catch {
+      setFeedback('No se ha podido añadir la categoría.')
     }
   }
 
@@ -319,7 +372,86 @@ function App() {
     )
   }
 
-  const renderTransactions = (items: Transaction[]) => {
+  const openTransactionEditor = (transaction: Transaction) => {
+    setOpenTransactionId(null)
+    setSwipeOffsets({})
+    setEditingTransaction(transaction)
+    setEditAmount(formatAmountInput(transaction.amountCents))
+    setEditDraft({
+      type: transaction.type,
+      amountCents: transaction.amountCents,
+      merchant: transaction.merchant === 'Movimiento manual' ? '' : transaction.merchant,
+      occurredOn: transaction.occurredOn,
+      paymentMethodId: transaction.paymentMethodId,
+      categoryId: transaction.categoryId,
+      status: transaction.status,
+      source: transaction.source ?? 'manual',
+    })
+    setEditFeedback('')
+  }
+
+  const handleSaveEditedTransaction = async () => {
+    if (!editingTransaction || !editDraft) {
+      return
+    }
+
+    const parsed = transactionDraftSchema.safeParse({
+      ...editDraft,
+      amountCents: parseEuroToCents(editAmount),
+      merchant: normalizeMerchant(editDraft.merchant),
+    })
+    if (!parsed.success) {
+      setEditFeedback('Revisa el importe y la categoría.')
+      return
+    }
+
+    try {
+      await updateTransaction(editingTransaction.id, parsed.data, paydayDay)
+      setEditingTransaction(null)
+      setEditDraft(null)
+      setFeedback('Movimiento actualizado.')
+      await refreshData()
+    } catch {
+      setEditFeedback('No se ha podido actualizar el movimiento.')
+    }
+  }
+
+  const handleDeleteTransaction = async (transaction: Transaction) => {
+    if (!window.confirm(`¿Eliminar ${transaction.merchant}?`)) {
+      return
+    }
+
+    try {
+      await deleteTransaction(transaction.id)
+      setOpenTransactionId(null)
+      setSwipeOffsets({})
+      setHomeFeedback('Movimiento eliminado.')
+      await refreshData()
+    } catch {
+      setHomeFeedback('No se ha podido eliminar el movimiento.')
+    }
+  }
+
+  const handleSwipeStart = (transactionId: string, clientX: number) => {
+    swipeStart.current = { id: transactionId, x: clientX }
+  }
+
+  const handleSwipeMove = (transactionId: string, clientX: number) => {
+    if (swipeStart.current?.id !== transactionId) {
+      return
+    }
+    const offset = Math.max(-128, Math.min(0, clientX - swipeStart.current.x))
+    setSwipeOffsets({ [transactionId]: offset })
+  }
+
+  const handleSwipeEnd = (transactionId: string) => {
+    const offset = swipeOffsets[transactionId] ?? 0
+    setOpenTransactionId(offset <= -64 ? transactionId : null)
+    setSwipeOffsets({})
+    swipeStart.current = null
+  }
+
+  const renderTransactions = (items: Transaction[], swipeable = false) => {
     if (items.length === 0) {
       return (
         <div className="empty-state">
@@ -337,8 +469,44 @@ function App() {
           const category = categoryMap.get(transaction.categoryId)
           const method = methodMap.get(transaction.paymentMethodId)
           return (
-            <li key={transaction.id}>
-              <div>
+            <li key={transaction.id} className={swipeable ? 'swipe-row' : undefined}>
+              {swipeable ? (
+                <div className="swipe-actions" aria-hidden={openTransactionId !== transaction.id}>
+                  <button
+                    className="swipe-action edit"
+                    type="button"
+                    tabIndex={openTransactionId === transaction.id ? 0 : -1}
+                    aria-label={`Editar ${transaction.merchant}`}
+                    title="Editar movimiento"
+                    onClick={() => openTransactionEditor(transaction)}
+                  >
+                    <Pencil size={18} aria-hidden="true" />
+                  </button>
+                  <button
+                    className="swipe-action delete"
+                    type="button"
+                    tabIndex={openTransactionId === transaction.id ? 0 : -1}
+                    aria-label={`Eliminar ${transaction.merchant}`}
+                    title="Eliminar movimiento"
+                    onClick={() => void handleDeleteTransaction(transaction)}
+                  >
+                    <Trash2 size={18} aria-hidden="true" />
+                  </button>
+                </div>
+              ) : null}
+              <div
+                className={swipeable ? 'swipe-content' : undefined}
+                style={
+                  swipeable
+                    ? { transform: `translateX(${swipeOffsets[transaction.id] ?? (openTransactionId === transaction.id ? -128 : 0)}px)` }
+                    : undefined
+                }
+                onPointerDown={swipeable ? (event) => handleSwipeStart(transaction.id, event.clientX) : undefined}
+                onPointerMove={swipeable ? (event) => handleSwipeMove(transaction.id, event.clientX) : undefined}
+                onPointerUp={swipeable ? () => handleSwipeEnd(transaction.id) : undefined}
+                onPointerCancel={swipeable ? () => handleSwipeEnd(transaction.id) : undefined}
+              >
+                <div>
                 <span className="merchant">{transaction.merchant}</span>
                 <span className="metadata">
                   {category?.name ?? 'Sin categoría'} · {method?.name ?? 'Sin tarjeta'} ·{' '}
@@ -349,6 +517,7 @@ function App() {
                 {transaction.type === 'expense' ? '-' : '+'}
                 {formatCurrency(transaction.amountCents)}
               </strong>
+              </div>
             </li>
           )
         })}
@@ -357,7 +526,7 @@ function App() {
   }
 
   return (
-    <main className={`shell ${screen === 'home' ? 'home-shell' : ''}`}>
+    <main className={`shell ${screen === 'home' ? 'home-shell' : screen === 'entry' ? 'entry-shell' : ''}`}>
       <header className="topbar">
         <div>
           <p className="eyebrow">Simple Finance</p>
@@ -406,7 +575,7 @@ function App() {
                 Ver todos
               </button>
             </div>
-            {renderTransactions(transactions.slice(0, 3))}
+            {renderTransactions(transactions.slice(0, 2), true)}
           </section>
         </section>
       ) : null}
@@ -495,16 +664,6 @@ function App() {
             </select>
           </label>
 
-          <label>
-            Nota
-            <textarea
-              rows={3}
-              placeholder="Opcional"
-              value={draft.note ?? ''}
-              onChange={(event) => setDraft((current) => ({ ...current, note: event.target.value }))}
-            />
-          </label>
-
           <button className="primary-action" type="submit">
             Guardar movimiento
           </button>
@@ -522,20 +681,32 @@ function App() {
               title="Ver resumen mensual"
               onClick={() => setIsCalendarOpen((current) => !current)}
             >
-              <span aria-hidden="true" />
+              <CalendarDays size={19} aria-hidden="true" />
             </button>
           </div>
 
           {isCalendarOpen ? (
-            <section className="monthly-calendar" aria-label="Resumen de meses del año">
+            <section className="monthly-calendar" aria-label="Resumen de ciclos del año">
               {monthlyCalendar.map((month) => (
-                <article key={month.label}>
+                <button
+                  key={month.cycleId}
+                  className={activityCycleId === month.cycleId ? 'active' : ''}
+                  type="button"
+                  aria-pressed={activityCycleId === month.cycleId}
+                  onClick={() => setActivityCycleId((current) => (current === month.cycleId ? null : month.cycleId))}
+                >
                   <strong>{month.label}</strong>
                   <span className="calendar-income">+{formatCurrency(month.incomeCents)}</span>
                   <span className="calendar-expense">-{formatCurrency(month.expenseCents)}</span>
-                </article>
+                </button>
               ))}
             </section>
+          ) : null}
+
+          {activityCycleId ? (
+            <button className="cycle-filter" type="button" onClick={() => setActivityCycleId(null)}>
+              Extracto de {formatCycleLabel(activityCycleId)} · Mostrar todo
+            </button>
           ) : null}
 
           <label className="activity-method-filter">
@@ -570,56 +741,100 @@ function App() {
       ) : null}
 
       {screen === 'cards' ? (
-        <section className="cards-panel screen-stack" aria-label="Tarjetas">
+        <section className="cards-panel screen-stack" aria-label="Configuración personal">
           <div className="section-title">
             <div>
-              <h2>Tus tarjetas</h2>
-              <p>La tarjeta principal se usa por defecto.</p>
+              <h2>Configuración personal</h2>
+              <p>Personaliza las bases de tus movimientos.</p>
             </div>
-            <button className="text-button" type="button" onClick={() => setIsAddingCard((current) => !current)}>
-              Añadir tarjeta
-            </button>
           </div>
 
-          {isAddingCard ? (
-            <div className="card-creator">
+          <details className="settings-disclosure">
+            <summary>
+              <span>Tarjetas</span>
+              <small>{selectedCard?.name ?? 'Sin tarjetas'}</small>
+            </summary>
+            <div className="disclosure-content">
               <label>
-                Nombre de la tarjeta
-                <input
-                  autoFocus
-                  placeholder="Tarjeta de viajes"
-                  value={newCardName}
-                  onChange={(event) => setNewCardName(event.target.value)}
-                />
+                Tarjeta utilizada por defecto
+                <select value={selectedCard?.id ?? ''} onChange={(event) => setSelectedCardId(event.target.value)}>
+                  {paymentMethods.map((method) => (
+                    <option key={method.id} value={method.id}>
+                      {method.name}{method.isPrimary ? ' · Principal' : ''}
+                    </option>
+                  ))}
+                </select>
               </label>
-              <button className="primary-action" type="button" onClick={handleAddCard}>
-                Guardar tarjeta
+              {selectedCard && !selectedCard.isPrimary ? (
+                <button
+                  className="secondary-action"
+                  type="button"
+                  onClick={() => handleSetPrimaryCard(selectedCard.id)}
+                >
+                  Usar como principal
+                </button>
+              ) : (
+                <span className="primary-tag">Tarjeta principal</span>
+              )}
+              <button className="text-button" type="button" onClick={() => setIsAddingCard((current) => !current)}>
+                Añadir tarjeta
               </button>
-            </div>
-          ) : null}
-
-          <ul className="card-list">
-            {paymentMethods.map((method) => (
-              <li key={method.id}>
-                <span className="card-swatch" style={{ backgroundColor: method.color }} aria-hidden="true" />
-                <div>
-                  <strong>{method.name}</strong>
-                  <small>{method.isPrimary ? 'Tarjeta principal' : 'Tarjeta activa'}</small>
-                </div>
-                {method.isPrimary ? (
-                  <span className="primary-tag">Principal</span>
-                ) : (
-                  <button
-                    className="secondary-action compact-action"
-                    type="button"
-                    onClick={() => handleSetPrimaryCard(method.id)}
-                  >
-                    Usar como principal
+              {isAddingCard ? (
+                <div className="card-creator">
+                  <label>
+                    Nombre de la tarjeta
+                    <input
+                      autoFocus
+                      placeholder="Tarjeta de viajes"
+                      value={newCardName}
+                      onChange={(event) => setNewCardName(event.target.value)}
+                    />
+                  </label>
+                  <button className="primary-action" type="button" onClick={handleAddCard}>
+                    Guardar tarjeta
                   </button>
-                )}
-              </li>
-            ))}
-          </ul>
+                </div>
+              ) : null}
+            </div>
+          </details>
+
+          <details className="settings-disclosure">
+            <summary>
+              <span>Categorías</span>
+              <small>{selectedCategory?.name ?? 'Sin categorías'}</small>
+            </summary>
+            <div className="disclosure-content">
+              <label>
+                Categoría
+                <select value={selectedCategory?.id ?? ''} onChange={(event) => setSelectedCategoryId(event.target.value)}>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button className="text-button" type="button" onClick={() => setIsAddingCategory((current) => !current)}>
+                Añadir categoría
+              </button>
+              {isAddingCategory ? (
+                <div className="card-creator">
+                  <label>
+                    Nombre de la categoría
+                    <input
+                      autoFocus
+                      placeholder="Mascotas"
+                      value={newCategoryName}
+                      onChange={(event) => setNewCategoryName(event.target.value)}
+                    />
+                  </label>
+                  <button className="primary-action" type="button" onClick={handleAddCategory}>
+                    Guardar categoría
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          </details>
         </section>
       ) : null}
 
@@ -741,6 +956,120 @@ function App() {
                 )}
               </div>
             ) : null}
+          </section>
+        </div>
+      ) : null}
+
+      {editingTransaction && editDraft ? (
+        <div className="modal-layer" role="dialog" aria-modal="true" aria-labelledby="edit-transaction-title">
+          <section className="settings-sheet edit-sheet">
+            <div className="sheet-heading">
+              <div>
+                <p className="eyebrow">Movimiento</p>
+                <h2 id="edit-transaction-title">Editar movimiento</h2>
+              </div>
+              <button
+                className="close-button"
+                type="button"
+                aria-label="Cerrar edición"
+                onClick={() => setEditingTransaction(null)}
+              >
+                Cerrar
+              </button>
+            </div>
+
+            <div className="segmented edit-type" aria-label="Tipo de movimiento">
+              {(['expense', 'income'] as const).map((type) => (
+                <button
+                  key={type}
+                  className={editDraft.type === type ? 'active' : ''}
+                  type="button"
+                  onClick={() =>
+                    setEditDraft((current) =>
+                      current
+                        ? {
+                            ...current,
+                            type,
+                            categoryId:
+                              categories.find((category) => category.allowedTypes.includes(type))?.id ?? current.categoryId,
+                          }
+                        : current,
+                    )
+                  }
+                >
+                  {type === 'expense' ? 'Gasto' : 'Ingreso'}
+                </button>
+              ))}
+            </div>
+
+            <label>
+              Importe
+              <input
+                autoFocus
+                inputMode="decimal"
+                value={editAmount}
+                onChange={(event) => setEditAmount(event.target.value)}
+              />
+            </label>
+
+            <label>
+              Comercio o concepto
+              <input
+                value={editDraft.merchant}
+                onChange={(event) => setEditDraft((current) => (current ? { ...current, merchant: event.target.value } : current))}
+              />
+            </label>
+
+            <div className="field-grid">
+              <label>
+                Fecha
+                <input
+                  type="date"
+                  value={editDraft.occurredOn}
+                  onChange={(event) =>
+                    setEditDraft((current) => (current ? { ...current, occurredOn: event.target.value } : current))
+                  }
+                />
+              </label>
+              <label>
+                Tarjeta
+                <select
+                  value={editDraft.paymentMethodId}
+                  onChange={(event) =>
+                    setEditDraft((current) => (current ? { ...current, paymentMethodId: event.target.value } : current))
+                  }
+                >
+                  {paymentMethods.map((method) => (
+                    <option key={method.id} value={method.id}>
+                      {method.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <label>
+              Categoría
+              <select
+                value={editDraft.categoryId}
+                onChange={(event) =>
+                  setEditDraft((current) => (current ? { ...current, categoryId: event.target.value } : current))
+                }
+              >
+                {categories
+                  .filter((category) => category.allowedTypes.includes(editDraft.type))
+                  .map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+              </select>
+            </label>
+
+            {editFeedback ? <p className="status-message error" role="alert">{editFeedback}</p> : null}
+            <button className="primary-action" type="button" onClick={() => void handleSaveEditedTransaction()}>
+              Guardar cambios
+            </button>
           </section>
         </div>
       ) : null}

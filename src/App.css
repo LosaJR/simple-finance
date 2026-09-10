@@ -13,6 +13,12 @@
   padding-bottom: calc(env(safe-area-inset-bottom) + 82px);
 }
 
+.entry-shell {
+  height: 100svh;
+  overflow: hidden;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 82px);
+}
+
 .topbar {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -159,6 +165,24 @@ label,
 .home-shell .metric,
 .home-shell .compact-panel {
   padding: 12px;
+}
+
+.entry-shell .topbar {
+  margin-bottom: 12px;
+}
+
+.entry-shell .entry-panel {
+  gap: 10px;
+  padding: 14px;
+}
+
+.entry-shell .entry-panel label {
+  gap: 5px;
+}
+
+.entry-shell input,
+.entry-shell select {
+  padding: 10px;
 }
 
 .home-shell .metric strong {
@@ -337,6 +361,51 @@ textarea {
   border-bottom: 1px solid var(--line);
 }
 
+.transaction-list li.swipe-row {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  padding: 0;
+}
+
+.swipe-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  min-height: 64px;
+  padding: 9px 0;
+  background: var(--surface);
+  touch-action: pan-y;
+  transition: transform 160ms ease-out;
+}
+
+.swipe-actions {
+  position: absolute;
+  inset: 0 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 64px);
+  width: 128px;
+  background: var(--field);
+}
+
+.swipe-action {
+  display: grid;
+  place-items: center;
+  border: 0;
+  color: var(--paper);
+}
+
+.swipe-action.edit {
+  background: var(--accent);
+}
+
+.swipe-action.delete {
+  background: var(--danger);
+}
+
 .transaction-list li:last-child {
   border-bottom: 0;
 }
@@ -462,48 +531,28 @@ textarea {
   background: var(--field);
 }
 
-.calendar-button span {
-  position: relative;
-  display: block;
-  width: 18px;
-  height: 17px;
-  border: 2px solid var(--accent);
-  border-radius: 3px;
-}
-
-.calendar-button span::before,
-.calendar-button span::after {
-  position: absolute;
-  top: -4px;
-  width: 2px;
-  height: 6px;
-  border-radius: 2px;
-  background: var(--accent);
-  content: '';
-}
-
-.calendar-button span::before {
-  left: 3px;
-}
-
-.calendar-button span::after {
-  right: 3px;
-}
-
 .monthly-calendar {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 7px;
 }
 
-.monthly-calendar article {
+.monthly-calendar button {
   display: grid;
   gap: 3px;
   min-height: 82px;
   padding: 9px;
   border: 1px solid var(--line);
   border-radius: 8px;
+  color: var(--text);
   background: var(--field);
+  font: inherit;
+  text-align: left;
+}
+
+.monthly-calendar button.active {
+  border-color: var(--accent);
+  background: var(--nav-active);
 }
 
 .monthly-calendar strong {
@@ -524,6 +573,57 @@ textarea {
 
 .calendar-expense {
   color: var(--danger);
+}
+
+.cycle-filter {
+  justify-self: start;
+  border: 0;
+  padding: 0;
+  color: var(--accent);
+  background: transparent;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.settings-disclosure {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--field);
+}
+
+.settings-disclosure summary {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  min-height: 58px;
+  padding: 0 14px;
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.settings-disclosure summary::marker {
+  content: '';
+}
+
+.settings-disclosure summary small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.disclosure-content {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
 }
 
 .modal-layer {
@@ -717,5 +817,13 @@ textarea {
 
   .home-shell .metric {
     padding: 10px;
+  }
+
+  .entry-shell .topbar h1 {
+    font-size: 1.75rem;
+  }
+
+  .bottom-nav button {
+    font-size: 0.7rem;
   }
 }

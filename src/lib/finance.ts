@@ -19,6 +19,7 @@ export interface AppSettings {
   id: 'app-settings'
   paydayDay: number
   paydayAmountCents: number
+  suppressedPayrollCycleIds: string[]
 }
 
 export interface Category {
@@ -39,7 +40,6 @@ export interface Transaction {
   occurredOn: string
   paymentMethodId: string
   categoryId: string
-  note?: string
   status: 'posted' | 'pending'
   source?: 'manual' | 'payroll'
   cycleId: string
@@ -54,7 +54,6 @@ export const transactionDraftSchema = z.object({
   occurredOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   paymentMethodId: z.string().min(1),
   categoryId: z.string().min(1),
-  note: z.string().max(240).optional(),
   status: z.enum(['posted', 'pending']).default('posted'),
   source: z.enum(['manual', 'payroll']).default('manual'),
 })
@@ -78,6 +77,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   id: 'app-settings',
   paydayDay: 1,
   paydayAmountCents: 0,
+  suppressedPayrollCycleIds: [],
 }
 
 export const DEFAULT_CATEGORIES: Category[] = [

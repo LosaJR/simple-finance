@@ -17,7 +17,9 @@ Checklist inicial:
 - Añadir a pantalla de inicio.
 - Abrir en modo standalone.
 - Crear gasto e ingreso con datos ficticios.
+- Deslizar un movimiento de Resumen a la izquierda, editarlo y eliminar un movimiento de prueba.
 - Confirmar que la actividad aparece tras cerrar y reabrir.
+- Abrir el calendario de Actividad y comprobar que al elegir un ciclo se muestra su extracto.
 - Activar tema oscuro y revisar que no hay texto cortado.
 
 No capturar ni adjuntar datos financieros reales en incidencias.
