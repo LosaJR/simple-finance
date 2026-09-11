@@ -18,7 +18,7 @@ La rama también incorpora una carga opcional de datos ficticios, identificados 
 
 ## Siguiente tarea
 
-Revisar en iPhone fisico la rama experimental: primer inicio, registro rapido con regla, aviso de duplicado, pendientes, recurrentes, filtros, exportacion/restauracion y contraste reforzado. Despues decidir cuales de estas mejoras se integran en `main` y preparar la comparativa de ciclos.
+Autorizar la integración limitada de Cloudflare Pages con el repositorio y desplegar `feature/flujo-financiero-diario` para verificar desde Safari con datos móviles. Después, revisar en iPhone físico la rama experimental: primer inicio, registro rápido con regla, aviso de duplicado, pendientes, recurrentes, filtros, exportación/restauración y contraste reforzado.
 
 ## Verificaciones
 

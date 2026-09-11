@@ -59,8 +59,9 @@ Estado: iniciada.
 
 ## Fase 6 - Despliegue privado
 
-- Evaluar hosting estatico compatible con repositorio privado.
-- Preparar despliegue sin publicar codigo ni datos.
+- Hosting elegido: Cloudflare Pages con integración GitHub; la guía de configuración está en `docs/DEPLOYMENT.md`.
+- Pendiente: autorizar la cuenta de Cloudflare, crear el proyecto y verificar la URL HTTPS desde iPhone con datos móviles.
+- El repositorio permanece privado y no se despliegan datos; la URL pública de prueba expone únicamente los recursos estáticos de la PWA. El acceso restringido requiere una fase posterior con dominio propio y Cloudflare Access.
 
 ## Fase 7 - Puente iOS nativo futuro
 
