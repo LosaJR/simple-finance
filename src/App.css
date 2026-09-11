@@ -1460,6 +1460,28 @@ textarea {
   font-weight: 700;
 }
 
+.demo-data-control {
+  display: grid;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.demo-data-control > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.demo-data-control strong {
+  color: var(--text);
+  font-size: 0.86rem;
+}
+
+.demo-data-control small {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
 .contrast-toggle {
   padding-top: 7px;
 }

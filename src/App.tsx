@@ -48,6 +48,7 @@ import {
 import {
   archiveCategory,
   archivePaymentMethod,
+  createDemoDataset,
   createMerchantRule,
   createPaymentMethod,
   createCategory,
@@ -66,6 +67,7 @@ import {
   listPlannedPayments,
   listTransactions,
   recordPlannedPayment,
+  removeDemoDataset,
   restoreLocalBackup,
   savePreferences,
   savePaydaySettings,
@@ -206,6 +208,7 @@ function App() {
   const [plannedFrequency, setPlannedFrequency] = useState<PlannedPayment['frequency']>('monthly')
   const [plannedDueOn, setPlannedDueOn] = useState(todayInputValue())
   const [planFeedback, setPlanFeedback] = useState('')
+  const [demoFeedback, setDemoFeedback] = useState('')
   const importInputRef = useRef<HTMLInputElement>(null)
   const [swipeOffsets, setSwipeOffsets] = useState<Record<string, number>>({})
   const swipeStart = useRef<{ id: string; x: number } | null>(null)
@@ -704,6 +707,27 @@ const downloadFile = (name: string, contents: string, type: string) => {
     } catch {
       setFeedback('La copia no tiene un formato válido o no se ha podido restaurar.')
     }
+  }
+
+  const handleLoadDemoData = async () => {
+    try {
+      const result = await createDemoDataset()
+      setDemoFeedback(
+        result.alreadyExists
+          ? 'Los datos de demostración ya están cargados en este dispositivo.'
+          : `${result.createdCount} movimientos ficticios cargados desde enero.`,
+      )
+      await refreshData()
+    } catch (error) {
+      setDemoFeedback(error instanceof Error ? error.message : 'No se han podido cargar los datos de demostración.')
+    }
+  }
+
+  const handleRemoveDemoData = async () => {
+    if (!window.confirm('¿Quitar todos los movimientos marcados como Demostración? Los demás datos no se modificarán.')) return
+    const count = await removeDemoDataset()
+    setDemoFeedback(count ? `${count} movimientos de demostración eliminados.` : 'No había datos de demostración que quitar.')
+    await refreshData()
   }
 
   const handleSaveCategoryLimit = async () => {
@@ -1477,6 +1501,11 @@ const downloadFile = (name: string, contents: string, type: string) => {
             <div className="section-title"><div><h2><Download size={17} aria-hidden="true" />Datos locales</h2><p>Exporta una copia privada o restáurala en este dispositivo.</p></div></div>
             <div className="backup-actions"><button className="secondary-action" type="button" onClick={() => void handleExportCsv()}><Download size={16} aria-hidden="true" />CSV</button><button className="secondary-action" type="button" onClick={() => void handleExportJson()}><Download size={16} aria-hidden="true" />Copia JSON</button><button className="secondary-action" type="button" onClick={() => importInputRef.current?.click()}><Upload size={16} aria-hidden="true" />Restaurar</button></div>
             <input ref={importInputRef} className="visually-hidden" type="file" accept="application/json" onChange={(event) => void handleRestoreBackup(event.target.files?.[0])} />
+            <div className="demo-data-control">
+              <div><strong>Datos de demostración</strong><small>Movimientos ficticios desde enero para probar gráficos, ciclos y filtros.</small></div>
+              <div className="inline-actions"><button className="secondary-action compact-action" type="button" onClick={() => void handleLoadDemoData()}>Cargar datos</button><button className="danger-action compact-action" type="button" onClick={() => void handleRemoveDemoData()}>Quitar datos</button></div>
+            </div>
+            {demoFeedback ? <p className="status-message" role="status">{demoFeedback}</p> : null}
           </section>
         </section>
       ) : null}

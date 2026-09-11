@@ -282,6 +282,103 @@ export const createTransaction = async (draft: TransactionDraft, resetDay = 1) =
   return transaction
 }
 
+const demoPrefix = 'Demostración · '
+
+const demoExpenseDetails = (category: Category, month: number) => {
+  const name = category.name.toLocaleLowerCase('es-ES')
+  if (name.includes('super') || name.includes('comida')) return { merchant: 'Mercado Central', amountCents: 6240 + (month % 4) * 875 }
+  if (name.includes('gasolina') || name.includes('combustible')) return { merchant: 'Estación Norte', amountCents: 4890 + (month % 3) * 620 }
+  if (name.includes('hogar') || name.includes('casa')) return { merchant: 'Suministros hogar', amountCents: 7190 + (month % 2) * 1260 }
+  if (name.includes('suscrip')) return { merchant: 'Suscripción digital', amountCents: 1299 + (month % 2) * 300 }
+  if (name.includes('ocio') || name.includes('tiempo')) return { merchant: 'Plan de fin de semana', amountCents: 2850 + (month % 4) * 740 }
+  return { merchant: `Compra de ${category.name}`, amountCents: 3200 + (month % 5) * 610 }
+}
+
+export const createDemoDataset = async (today = new Date()) => {
+  const existingDemoCount = await db.transactions.filter((transaction) => transaction.merchant.startsWith(demoPrefix)).count()
+  if (existingDemoCount > 0) return { createdCount: 0, alreadyExists: true }
+
+  const [categories, methods, settings] = await Promise.all([listCategories(), listPaymentMethods(), getSettings()])
+  const primaryCard = methods.find((method) => method.isPrimary) ?? methods[0]
+  if (!primaryCard) throw new Error('Configura una tarjeta antes de cargar datos de demostración.')
+
+  const expenseCategories = categories.filter((category) => category.allowedTypes.includes('expense'))
+  const incomeCategories = categories.filter((category) => category.allowedTypes.includes('income'))
+  const year = today.getFullYear()
+  const lastMonth = today.getMonth()
+  const demoTransactions: Transaction[] = []
+  const usedExpenseCategories = new Set<string>()
+
+  const addTransaction = (
+    type: Transaction['type'],
+    category: Category,
+    amountCents: number,
+    merchant: string,
+    occurredOn: string,
+    hour: number,
+  ) => {
+    const createdAt = `${occurredOn}T${String(hour).padStart(2, '0')}:15:00.000Z`
+    demoTransactions.push({
+      id: createLocalId(),
+      type,
+      amountCents,
+      merchant: `${demoPrefix}${merchant}`,
+      occurredOn,
+      paymentMethodId: primaryCard.id,
+      categoryId: category.id,
+      status: 'posted',
+      source: 'manual',
+      cycleId: getCycleId(occurredOn, settings.paydayDay),
+      createdAt,
+      updatedAt: createdAt,
+    })
+  }
+
+  for (let month = 0; month <= lastMonth; month += 1) {
+    const lastDay = new Date(year, month + 1, 0).getDate()
+    const monthIndex = String(month + 1).padStart(2, '0')
+    const canUseDay = (day: number) => month < lastMonth || day <= today.getDate()
+    const incomeCategory = incomeCategories.length ? incomeCategories[month % incomeCategories.length] : undefined
+    const payday = getPaydayDate(year, month, settings.paydayDay)
+    if (incomeCategory && payday.getMonth() === month && canUseDay(payday.getDate())) {
+      const occurredOn = `${year}-${monthIndex}-${String(payday.getDate()).padStart(2, '0')}`
+      addTransaction('income', incomeCategory, 189000 + (month % 3) * 2500, 'Nómina de prueba', occurredOn, 9)
+    }
+
+    const categoryStart = expenseCategories.length ? (month * 3) % expenseCategories.length : 0
+    const monthCategories = Array.from({ length: Math.min(3, expenseCategories.length) }, (_, index) =>
+      expenseCategories[(categoryStart + index) % expenseCategories.length],
+    )
+    monthCategories.forEach((category, index) => {
+      const day = Math.min(5 + index * 3, lastDay)
+      if (!canUseDay(day)) return
+      const occurredOn = `${year}-${monthIndex}-${String(day).padStart(2, '0')}`
+      const detail = demoExpenseDetails(category, month)
+      addTransaction('expense', category, detail.amountCents, detail.merchant, occurredOn, 12 + index * 2)
+      usedExpenseCategories.add(category.id)
+    })
+  }
+
+  for (const [index, category] of expenseCategories.entries()) {
+    if (usedExpenseCategories.has(category.id)) continue
+    const month = Math.min(index, lastMonth)
+    const day = month === lastMonth ? Math.min(today.getDate(), 5) : 5
+    if (day < 1) continue
+    const occurredOn = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    const detail = demoExpenseDetails(category, month)
+    addTransaction('expense', category, detail.amountCents, detail.merchant, occurredOn, 16)
+  }
+
+  await db.transactions.bulkAdd(demoTransactions)
+  return { createdCount: demoTransactions.length, alreadyExists: false }
+}
+
+export const removeDemoDataset = async () => {
+  const ids = await db.transactions.filter((transaction) => transaction.merchant.startsWith(demoPrefix)).primaryKeys()
+  await db.transactions.bulkDelete(ids)
+  return ids.length
+}
+
 export const updateTransaction = async (id: string, draft: TransactionDraft, resetDay = 1) => {
   const existing = await db.transactions.get(id)
   if (!existing) {

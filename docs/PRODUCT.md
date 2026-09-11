@@ -37,6 +37,7 @@ El propietario y un circulo cerrado de testers. No se recopilan datos, no hay ba
 - Deteccion local de duplicados antes de guardar un movimiento manual, con confirmacion explicita.
 - Resumen con disponible estimado: ingresos del ciclo menos gastos registrados y pagos recurrentes previstos que siguen pendientes de confirmar.
 - Tema persistente y modo de contraste reforzado, sin depender exclusivamente del color para explicar limites o estados.
+- Configuración ofrece un conjunto opcional de datos ficticios, marcado como `Demostración`, desde enero hasta la fecha actual. Sirve solo para probar la interfaz y puede retirarse sin borrar los demás movimientos locales.
 
 ## Limites que deben comunicarse
 

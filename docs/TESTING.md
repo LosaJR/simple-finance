@@ -33,5 +33,6 @@ Checklist inicial:
 - Buscar actividad por comercio, filtrar por categoría y activar `Solo pendientes`; limpiar filtros al terminar.
 - Exportar un CSV y una copia JSON de datos ficticios; probar restauración solo en un perfil de prueba, pues reemplaza los datos locales.
 - Activar `Contraste reforzado` desde Configuración y comprobar que límites, pendientes y acciones conservan texto explicativo.
+- Desde `Datos locales`, cargar datos de demostración y comprobar que hay actividad entre enero y la fecha actual, con importes y comercios claramente marcados como `Demostración`; después usar `Quitar datos` y confirmar que solo se eliminan esos movimientos.
 
 No capturar ni adjuntar datos financieros reales en incidencias.
