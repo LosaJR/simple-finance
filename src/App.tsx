@@ -124,7 +124,7 @@ function App() {
   const [amount, setAmount] = useState('')
   const [feedback, setFeedback] = useState('Datos guardados solo en este dispositivo.')
   const [homeFeedback, setHomeFeedback] = useState('')
-  const [isDark, setIsDark] = useState(false)
+  const [isDark, setIsDark] = useState(true)
   const [activityTab, setActivityTab] = useState<ActivityTab>('all')
   const [activityPaymentMethodId, setActivityPaymentMethodId] = useState('all')
   const [activityCycleId, setActivityCycleId] = useState<string | null>(null)
@@ -778,7 +778,14 @@ function App() {
                         aria-expanded={summaryCategoryId === entry.category.id}
                         onClick={() => setSummaryCategoryId((current) => current === entry.category.id ? null : entry.category.id)}
                       >
-                        <span className="category-icon" style={{ color: entry.category.color, background: `${entry.category.color}1f` }}>
+                        <span
+                          className="category-icon"
+                          style={{
+                            color: entry.category.color,
+                            background: `${entry.category.color}2e`,
+                            borderColor: `${entry.category.color}4a`,
+                          }}
+                        >
                           <Icon size={18} aria-hidden="true" />
                         </span>
                         <div className="category-spending-copy">
