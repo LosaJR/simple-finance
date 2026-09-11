@@ -20,7 +20,7 @@ Revisar desde iPhone fisico el gráfico circular, el selector de mes/año, el de
 
 ## Verificaciones
 
-- `pnpm run validate`: correcto con Resumen fijo, edicion y eliminacion, nomina en dia laborable y calendario por ciclos.
+- `pnpm run validate`: correcto con Resumen por ciclo, detalle por categoría, edicion y eliminacion, nomina en dia laborable y calendario por ciclos.
 - GitHub Actions `validate` en PR #12: correcto.
 - Serena `project health-check`: correcto con salida UTF-8.
 - Registro de movimiento, nomina en dia laborable, tarjeta principal, filtro por tarjeta, calendario por ciclos y configuracion con selectores directos: verificados contra un origen HTTP de red local a tamano iPhone; queda pendiente la confirmacion en iPhone fisico.
