@@ -21,7 +21,6 @@ import {
   ShoppingBasket,
   Tags,
   Trash2,
-  X,
 } from 'lucide-react'
 import './App.css'
 import {
@@ -801,21 +800,6 @@ function App() {
                       </button>
                       {summaryCategoryId === entry.category.id ? (
                         <section className="category-expenses category-expenses-inline" aria-label={`Gastos de ${entry.category.name}`}>
-                          <div className="section-title">
-                            <div>
-                              <h3>Gastos en {entry.category.name}</h3>
-                              <p>{formatCycleLabel(selectedSummaryCycleId)} · {selectedSummaryCategoryTransactions.length} movimientos</p>
-                            </div>
-                            <button
-                              className="icon-button compact-icon-button"
-                              type="button"
-                              aria-label={`Cerrar gastos de ${entry.category.name}`}
-                              title="Cerrar"
-                              onClick={() => setSummaryCategoryId(null)}
-                            >
-                              <X size={17} aria-hidden="true" />
-                            </button>
-                          </div>
                           {renderTransactions(selectedSummaryCategoryTransactions)}
                         </section>
                       ) : null}

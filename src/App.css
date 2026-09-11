@@ -497,17 +497,6 @@ label,
   animation: disclosure-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.category-expenses h3 {
-  margin: 0;
-  color: var(--ink);
-  font-size: 0.98rem;
-}
-
-.compact-icon-button {
-  width: 34px;
-  min-height: 34px;
-}
-
 .entry-panel,
 .activity-panel,
 .cards-panel,
