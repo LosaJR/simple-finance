@@ -4,7 +4,7 @@ Fecha: 2026-09-11
 
 ## Estado actual
 
-Fase 0 lista para revision en PR #12: https://github.com/LosaJR/simple-finance/pull/12
+Fase 0 lista para revision en PR #12: https://github.com/LosaJR/simple-finance/pull/12. Las mejoras de flujo diario estan disponibles para comparacion en la rama `feature/flujo-financiero-diario` (commit `8ae5641`) y todavia no modifican la rama base.
 
 Seguimiento visible de fases y porcentajes: https://github.com/LosaJR/simple-finance/issues/13
 
