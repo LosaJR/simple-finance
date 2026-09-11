@@ -1,6 +1,6 @@
 # Estado del proyecto
 
-Fecha: 2026-09-10
+Fecha: 2026-09-11
 
 ## Estado actual
 
@@ -12,11 +12,11 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
-Base local creada en la rama `feature/fase-0-base` con una experiencia funcional en IndexedDB. La correccion de prueba iPhone elimina la dependencia de `crypto.randomUUID` en HTTP local. La interfaz tiene Resumen desplazable con gráfico circular de gastos, calendario anual y consumo por categoría, Registrar compacto, Actividad y Configuracion, registro rapido por pasos, tarjeta principal persistente, categorías con límite mensual configurable, filtro por tarjeta, calendario anual por ciclos de nomina etiquetados por su cobro de cierre, edicion y eliminacion por deslizamiento, configuracion de tema y nomina, cuenta atras y registro diferido de nomina en dia laborable. Tarjetas y categorias se eligen desde selectores directos con botones `+` para añadirlas. La capa visual usa grupos suaves, controles sobrios, desglose de balance, marcadores de ingreso/gasto e iconos de dominio para una navegacion de estilo iOS sin perder densidad financiera. Repositorio privado creado en GitHub como `LosaJR/simple-finance`.
+Base local creada en la rama `feature/fase-0-base` con una experiencia funcional en IndexedDB. La correccion de prueba iPhone elimina la dependencia de `crypto.randomUUID` en HTTP local. La interfaz tiene Resumen desplazable con gráfico circular de gastos, calendario anual que actualiza su propio contenido y detalle por categoría, Registrar compacto, Actividad y Configuracion, registro rapido por pasos, tarjeta principal persistente, categorías con límite mensual individual configurable, filtro por tarjeta, calendario anual por ciclos de nomina etiquetados por su cobro de cierre, edicion y eliminacion por deslizamiento, configuracion de tema y nomina, cuenta atras y registro diferido de nomina en dia laborable. Tarjetas y categorias se eligen desde selectores directos con botones `+` para añadirlas. La capa visual se acota a un lienzo de iPhone para la revision en Codex, con grupos suaves, controles sobrios, desglose de balance, marcadores de ingreso/gasto e iconos de dominio. Repositorio privado creado en GitHub como `LosaJR/simple-finance`.
 
 ## Siguiente tarea
 
-Revisar desde iPhone fisico el gráfico circular, el selector de mes/año, los límites por categoría, el deslizamiento de movimientos y la barra inferior opaca. Despues completar el CRUD seguro de tarjetas y categorías y los avisos nativos de límites.
+Revisar desde iPhone fisico el gráfico circular, el selector de mes/año, el detalle por categoría, los límites individuales por categoría, el deslizamiento de movimientos y la barra inferior opaca. Despues completar el CRUD seguro de tarjetas y categorías y los avisos nativos de límites.
 
 ## Verificaciones
 

@@ -20,6 +20,7 @@ import {
   ShoppingBasket,
   Tags,
   Trash2,
+  X,
 } from 'lucide-react'
 import './App.css'
 import {
@@ -152,6 +153,8 @@ function App() {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const [isSummaryCalendarOpen, setIsSummaryCalendarOpen] = useState(false)
   const [summaryCalendarYear, setSummaryCalendarYear] = useState(() => new Date().getFullYear())
+  const [summaryCycleId, setSummaryCycleId] = useState<string | null>(null)
+  const [summaryCategoryId, setSummaryCategoryId] = useState<string | null>(null)
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   const [editDraft, setEditDraft] = useState<TransactionDraft | null>(null)
   const [editAmount, setEditAmount] = useState('')
@@ -209,10 +212,11 @@ function App() {
     [categories],
   )
   const currentCycleId = useMemo(() => getCycleId(todayInputValue(), paydayDay), [paydayDay])
+  const selectedSummaryCycleId = summaryCycleId ?? currentCycleId
   const cycleExpenseCategories = useMemo(() => {
     const amounts = new Map<string, number>()
     for (const transaction of transactions) {
-      if (transaction.type !== 'expense' || getCycleId(transaction.occurredOn, paydayDay) !== currentCycleId) {
+      if (transaction.type !== 'expense' || getCycleId(transaction.occurredOn, paydayDay) !== selectedSummaryCycleId) {
         continue
       }
       amounts.set(transaction.categoryId, (amounts.get(transaction.categoryId) ?? 0) + transaction.amountCents)
@@ -229,7 +233,21 @@ function App() {
       .sort((first, second) => second.amountCents - first.amountCents)
 
     return { entries, totalCents }
-  }, [categoryMap, currentCycleId, paydayDay, transactions])
+  }, [categoryMap, paydayDay, selectedSummaryCycleId, transactions])
+  const selectedSummaryCategory = useMemo(
+    () => cycleExpenseCategories.entries.find((entry) => entry.category.id === summaryCategoryId)?.category,
+    [cycleExpenseCategories.entries, summaryCategoryId],
+  )
+  const selectedSummaryCategoryTransactions = useMemo(
+    () =>
+      transactions.filter(
+        (transaction) =>
+          transaction.type === 'expense' &&
+          transaction.categoryId === summaryCategoryId &&
+          getCycleId(transaction.occurredOn, paydayDay) === selectedSummaryCycleId,
+      ),
+    [paydayDay, selectedSummaryCycleId, summaryCategoryId, transactions],
+  )
   const expenseChartBackground = useMemo(() => {
     if (cycleExpenseCategories.entries.length === 0) {
       return 'conic-gradient(var(--field) 0 100%)'
@@ -451,12 +469,10 @@ function App() {
     }
   }
 
-  const openActivityForCycle = (cycleId: string) => {
-    setActivityCycleId(cycleId)
-    setActivityTab('expense')
-    setIsCalendarOpen(false)
+  const selectSummaryCycle = (cycleId: string) => {
+    setSummaryCycleId(cycleId)
+    setSummaryCategoryId(null)
     setIsSummaryCalendarOpen(false)
-    navigateTo('activity')
   }
 
   const handleSetPrimaryCard = async (paymentMethodId: string) => {
@@ -686,7 +702,7 @@ function App() {
             <div className="section-title">
               <div>
                 <h2><PieChart size={17} aria-hidden="true" />Gastos del ciclo</h2>
-                <p>{formatCycleLabel(currentCycleId)} · {formatCurrency(cycleExpenseCategories.totalCents)}</p>
+                <p>{formatCycleLabel(selectedSummaryCycleId)} · {formatCurrency(cycleExpenseCategories.totalCents)}</p>
               </div>
               <button
                 className="calendar-button"
@@ -714,7 +730,13 @@ function App() {
                 </label>
                 <div className="summary-month-grid">
                   {summaryCalendarMonths.map((month) => (
-                    <button key={month.cycleId} type="button" onClick={() => openActivityForCycle(month.cycleId)}>
+                    <button
+                      key={month.cycleId}
+                      className={month.cycleId === selectedSummaryCycleId ? 'active' : ''}
+                      type="button"
+                      aria-pressed={month.cycleId === selectedSummaryCycleId}
+                      onClick={() => selectSummaryCycle(month.cycleId)}
+                    >
                       {month.label}
                     </button>
                   ))}
@@ -741,7 +763,7 @@ function App() {
             <div className="section-title">
               <div>
                 <h2><Tags size={17} aria-hidden="true" />Categorías</h2>
-                <p>Uso del límite mensual en este ciclo.</p>
+                <p>Límite individual de cada categoría en este ciclo.</p>
               </div>
             </div>
             {cycleExpenseCategories.entries.length === 0 ? (
@@ -755,24 +777,51 @@ function App() {
                     : 0
                   return (
                     <li key={entry.category.id}>
-                      <span className="category-icon" style={{ color: entry.category.color, background: `${entry.category.color}1f` }}>
-                        <Icon size={18} aria-hidden="true" />
-                      </span>
-                      <div className="category-spending-copy">
-                        <div>
-                          <strong>{entry.category.name}</strong>
-                          <span>{entry.percentage}% de los gastos</span>
+                      <button
+                        className="category-spending-row"
+                        type="button"
+                        aria-expanded={summaryCategoryId === entry.category.id}
+                        onClick={() => setSummaryCategoryId((current) => current === entry.category.id ? null : entry.category.id)}
+                      >
+                        <span className="category-icon" style={{ color: entry.category.color, background: `${entry.category.color}1f` }}>
+                          <Icon size={18} aria-hidden="true" />
+                        </span>
+                        <div className="category-spending-copy">
+                          <div>
+                            <strong>{entry.category.name}</strong>
+                            <span>{entry.percentage}% de los gastos</span>
+                          </div>
+                          <b>{formatCurrency(entry.amountCents)}{entry.category.limitCents ? ` / ${formatCurrency(entry.category.limitCents)}` : ''}</b>
+                          {entry.category.limitCents ? (
+                            <span className="limit-track"><i style={{ width: `${limitRatio}%`, background: entry.category.color }} /></span>
+                          ) : null}
                         </div>
-                        <b>{formatCurrency(entry.amountCents)}{entry.category.limitCents ? ` / ${formatCurrency(entry.category.limitCents)}` : ''}</b>
-                        {entry.category.limitCents ? (
-                          <span className="limit-track"><i style={{ width: `${limitRatio}%`, background: entry.category.color }} /></span>
-                        ) : null}
-                      </div>
+                      </button>
                     </li>
                   )
                 })}
               </ul>
             )}
+            {selectedSummaryCategory ? (
+              <section className="category-expenses" aria-label={`Gastos de ${selectedSummaryCategory.name}`}>
+                <div className="section-title">
+                  <div>
+                    <h3>Gastos en {selectedSummaryCategory.name}</h3>
+                    <p>{formatCycleLabel(selectedSummaryCycleId)} · {selectedSummaryCategoryTransactions.length} movimientos</p>
+                  </div>
+                  <button
+                    className="icon-button compact-icon-button"
+                    type="button"
+                    aria-label="Cerrar gastos de categoría"
+                    title="Cerrar"
+                    onClick={() => setSummaryCategoryId(null)}
+                  >
+                    <X size={17} aria-hidden="true" />
+                  </button>
+                </div>
+                {renderTransactions(selectedSummaryCategoryTransactions)}
+              </section>
+            ) : null}
           </section>
         </section>
       ) : null}
@@ -1017,10 +1066,10 @@ function App() {
             </div>
             <div className="category-limit-control">
               <label>
-                <span className="field-title"><PieChart size={16} aria-hidden="true" />Límite mensual</span>
+                <span className="field-title"><PieChart size={16} aria-hidden="true" />Límite mensual de {selectedCategory?.name ?? 'esta categoría'}</span>
                 <input
                   inputMode="decimal"
-                  placeholder="Sin límite"
+                  placeholder="Ej. 250,00 €"
                   value={categoryLimitInput}
                   onChange={(event) => setCategoryLimitInput(event.target.value)}
                 />
@@ -1029,6 +1078,7 @@ function App() {
                 Guardar límite
               </button>
             </div>
+            <p className="limit-help">Este importe solo se aplica a {selectedCategory?.name ?? 'la categoría seleccionada'}.</p>
             {categoryLimitFeedback ? <p className="status-message" role="status">{categoryLimitFeedback}</p> : null}
             {isAddingCategory ? (
               <div className="card-creator">
