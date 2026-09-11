@@ -58,7 +58,7 @@ La interfaz movil conserva una paleta neutra con acento verde, pero reduce borde
 
 ## 2026-09-11 - Identidad visual Simple Finance
 
-El logo y la ilustración de fondo proporcionados para Simple Finance se usan como activos locales de la PWA. La cabecera muestra solo el símbolo compacto del logo para conservar densidad, mientras que el fondo se presenta con una capa clara en modo día y con su contraste completo en modo noche. Las superficies mantienen opacidad y contraste suficientes para que cifras, campos y acciones no compitan con la ilustración.
+El logo y la ilustración de fondo proporcionados para Simple Finance se usan como activos locales de la PWA. La cabecera muestra solo el símbolo compacto del logo para conservar densidad, mientras que el fondo se presenta con una capa clara en modo día y con su contraste completo en modo noche. Las superficies principales, campos y navegación usan capas de cristal translúcidas con desenfoque para integrar la ilustración en la interfaz; los controles de entrada conservan una capa más definida para que cifras y acciones no compitan con ella.
 
 ## 2026-09-10 - Resumen centrado en gasto por categoría
 

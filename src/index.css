@@ -18,6 +18,10 @@
   --nav-shadow: 0 -8px 26px rgba(13, 57, 67, 0.16);
   --nav-active: #d9eee5;
   --background-wash: rgb(239 247 243 / 82%);
+  --surface-glass: rgb(248 253 250 / 74%);
+  --surface-tint: rgb(221 242 232 / 62%);
+  --field-glass: rgb(233 245 239 / 78%);
+  --highlight-glass: rgb(225 245 235 / 82%);
   color: var(--text);
   background: var(--bg);
   color-scheme: light;
@@ -50,6 +54,10 @@
   --nav-shadow: 0 -8px 26px rgba(0, 13, 20, 0.48);
   --nav-active: #174957;
   --background-wash: rgb(3 28 39 / 28%);
+  --surface-glass: rgb(8 47 60 / 74%);
+  --surface-tint: rgb(18 83 88 / 62%);
+  --field-glass: rgb(5 38 49 / 80%);
+  --highlight-glass: rgb(15 75 80 / 82%);
   color-scheme: dark;
 }
 
