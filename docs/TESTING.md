@@ -22,7 +22,7 @@ Checklist inicial:
 - Abrir el calendario de Actividad y comprobar que al elegir septiembre se muestra el periodo entre el cobro anterior y el siguiente, incluso cuando el siguiente cobro es el día 1 de octubre.
 - Abrir Configuracion, elegir una tarjeta y una categoria directamente, y comprobar que los botones `+` abren su alta.
 - En Resumen, abrir el selector de año y mes, elegir septiembre y comprobar que el gráfico y las categorías se actualizan sin abrir Actividad.
-- Pulsar una categoría de Resumen y comprobar que solo se despliegan sus gastos del ciclo seleccionado.
+- Pulsar una categoría de Resumen y comprobar que solo se despliegan sus gastos del ciclo seleccionado justo debajo de esa categoría, con apertura suave y cierre al pulsarla de nuevo.
 - Configurar un límite mensual de prueba en una categoría y comprobar que solo cambia el importe, porcentaje y barra de consumo de esa categoría en Resumen.
 - Activar tema oscuro y revisar que no hay texto cortado.
 

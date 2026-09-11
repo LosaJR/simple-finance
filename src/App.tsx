@@ -4,6 +4,7 @@ import {
   ArrowUpRight,
   Banknote,
   CalendarDays,
+  ChevronDown,
   CirclePlus,
   CreditCard,
   Fuel,
@@ -234,10 +235,6 @@ function App() {
 
     return { entries, totalCents }
   }, [categoryMap, paydayDay, selectedSummaryCycleId, transactions])
-  const selectedSummaryCategory = useMemo(
-    () => cycleExpenseCategories.entries.find((entry) => entry.category.id === summaryCategoryId)?.category,
-    [cycleExpenseCategories.entries, summaryCategoryId],
-  )
   const selectedSummaryCategoryTransactions = useMemo(
     () =>
       transactions.filter(
@@ -796,32 +793,37 @@ function App() {
                             <span className="limit-track"><i style={{ width: `${limitRatio}%`, background: entry.category.color }} /></span>
                           ) : null}
                         </div>
+                        <ChevronDown
+                          className={summaryCategoryId === entry.category.id ? 'category-caret is-open' : 'category-caret'}
+                          size={18}
+                          aria-hidden="true"
+                        />
                       </button>
+                      {summaryCategoryId === entry.category.id ? (
+                        <section className="category-expenses category-expenses-inline" aria-label={`Gastos de ${entry.category.name}`}>
+                          <div className="section-title">
+                            <div>
+                              <h3>Gastos en {entry.category.name}</h3>
+                              <p>{formatCycleLabel(selectedSummaryCycleId)} · {selectedSummaryCategoryTransactions.length} movimientos</p>
+                            </div>
+                            <button
+                              className="icon-button compact-icon-button"
+                              type="button"
+                              aria-label={`Cerrar gastos de ${entry.category.name}`}
+                              title="Cerrar"
+                              onClick={() => setSummaryCategoryId(null)}
+                            >
+                              <X size={17} aria-hidden="true" />
+                            </button>
+                          </div>
+                          {renderTransactions(selectedSummaryCategoryTransactions)}
+                        </section>
+                      ) : null}
                     </li>
                   )
                 })}
               </ul>
             )}
-            {selectedSummaryCategory ? (
-              <section className="category-expenses" aria-label={`Gastos de ${selectedSummaryCategory.name}`}>
-                <div className="section-title">
-                  <div>
-                    <h3>Gastos en {selectedSummaryCategory.name}</h3>
-                    <p>{formatCycleLabel(selectedSummaryCycleId)} · {selectedSummaryCategoryTransactions.length} movimientos</p>
-                  </div>
-                  <button
-                    className="icon-button compact-icon-button"
-                    type="button"
-                    aria-label="Cerrar gastos de categoría"
-                    title="Cerrar"
-                    onClick={() => setSummaryCategoryId(null)}
-                  >
-                    <X size={17} aria-hidden="true" />
-                  </button>
-                </div>
-                {renderTransactions(selectedSummaryCategoryTransactions)}
-              </section>
-            ) : null}
           </section>
         </section>
       ) : null}
