@@ -15,6 +15,15 @@ Cloudflare Pages con integración GitHub.
 
 Para la prueba actual, configurar como rama de producción `feature/flujo-financiero-diario`. De ese modo la URL remota muestra la versión experimental y la rama base no cambia. Cuando la revisión esté aprobada, se cambiará la producción a `main` o se fusionará la rama.
 
+## Despliegue activo
+
+- URL de prueba: `https://simple-finance-379.pages.dev`
+- Proyecto de Cloudflare Pages: `simple-finance`
+- Rama de producción actual: `feature/flujo-financiero-diario`
+- Fecha de primera publicación: 2026-09-12
+
+Cloudflare reconstruye y publica automáticamente esta URL tras cada `push` a la rama configurada.
+
 ## Configuracion inicial
 
 La persona propietaria debe crear o abrir una cuenta de Cloudflare y autorizar la aplicación `Cloudflare Workers and Pages` en GitHub limitada solo a este repositorio. No guardar tokens de Cloudflare ni credenciales en el repositorio.
@@ -32,7 +41,7 @@ Build command: corepack enable && pnpm install --frozen-lockfile && pnpm run bui
 Build output directory: dist
 ```
 
-6. Desplegar y abrir la URL `https://simple-finance-preview.pages.dev` que entregue Cloudflare.
+6. Desplegar y abrir la URL `https://simple-finance-379.pages.dev` que entregue Cloudflare.
 7. En el iPhone, abrir esa URL en Safari y elegir `Compartir` > `Añadir a pantalla de inicio`.
 
 ## Datos y privacidad

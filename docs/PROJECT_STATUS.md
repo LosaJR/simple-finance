@@ -1,6 +1,6 @@
 # Estado del proyecto
 
-Fecha: 2026-09-11
+Fecha: 2026-09-12
 
 ## Estado actual
 
@@ -18,7 +18,7 @@ La rama también incorpora una carga opcional de datos ficticios, identificados 
 
 ## Siguiente tarea
 
-Autorizar la integración limitada de Cloudflare Pages con el repositorio y desplegar `feature/flujo-financiero-diario` para verificar desde Safari con datos móviles. Después, revisar en iPhone físico la rama experimental: primer inicio, registro rápido con regla, aviso de duplicado, pendientes, recurrentes, filtros, exportación/restauración y contraste reforzado.
+Revisar desde Safari en iPhone, con datos móviles, la rama experimental publicada en `https://simple-finance-379.pages.dev`: primer inicio, carga de demostración, registro rápido con regla, aviso de duplicado, pendientes, recurrentes, filtros, exportación/restauración y contraste reforzado.
 
 ## Verificaciones
 
@@ -27,8 +27,9 @@ Autorizar la integración limitada de Cloudflare Pages con el repositorio y desp
 - Serena `project health-check`: correcto con salida UTF-8.
 - Registro de movimiento, nomina en dia laborable, tarjeta principal, filtro por tarjeta, calendario por ciclos y configuracion con selectores directos: verificados contra un origen HTTP de red local a tamano iPhone; queda pendiente la confirmacion en iPhone fisico.
 - `pnpm e2e`: configurado, pero no ejecutado localmente porque la descarga de navegadores de Playwright desde `cdn.playwright.dev` agoto timeout.
+- Cloudflare Pages: desplegado correctamente desde `feature/flujo-financiero-diario` en `https://simple-finance-379.pages.dev`; la respuesta HTTPS, la carga de la PWA y la ausencia de errores de consola se comprobaron el 2026-09-12.
 
 ## Bloqueos
 
 - Capacidades iOS nativas bloqueadas hasta disponer de macOS, firma Apple y dispositivo fisico.
-- Despliegue privado se evaluara en Fase 6.
+- La URL de Pages es pública durante la prueba. No introducir datos financieros reales hasta aplicar un dominio propio y Cloudflare Access.

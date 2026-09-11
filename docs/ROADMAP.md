@@ -59,8 +59,10 @@ Estado: iniciada.
 
 ## Fase 6 - Despliegue privado
 
-- Hosting elegido: Cloudflare Pages con integración GitHub; la guía de configuración está en `docs/DEPLOYMENT.md`.
-- Pendiente: autorizar la cuenta de Cloudflare, crear el proyecto y verificar la URL HTTPS desde iPhone con datos móviles.
+- Estado: en curso.
+- Hosting elegido y publicado: Cloudflare Pages con integración GitHub; la guía de configuración está en `docs/DEPLOYMENT.md`.
+- La rama experimental `feature/flujo-financiero-diario` se publica en `https://simple-finance-379.pages.dev` y se reconstruye automáticamente tras cada `push`.
+- Pendiente: verificar la instalación y los flujos principales desde Safari en iPhone con datos móviles.
 - El repositorio permanece privado y no se despliegan datos; la URL pública de prueba expone únicamente los recursos estáticos de la PWA. El acceso restringido requiere una fase posterior con dominio propio y Cloudflare Access.
 
 ## Fase 7 - Puente iOS nativo futuro
