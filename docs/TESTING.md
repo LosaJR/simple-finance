@@ -25,5 +25,6 @@ Checklist inicial:
 - Pulsar una categoría de Resumen y comprobar que solo se despliegan sus gastos del ciclo seleccionado justo debajo de esa categoría, con apertura suave y cierre al pulsarla de nuevo.
 - Configurar un límite mensual de prueba en una categoría y comprobar que solo cambia el importe, porcentaje y barra de consumo de esa categoría en Resumen.
 - Activar tema oscuro y revisar que no hay texto cortado.
+- Revisar el logo compacto y la ilustración de fondo en modo claro y noche; confirmar que campos, cifras y botones conservan contraste.
 
 No capturar ni adjuntar datos financieros reales en incidencias.

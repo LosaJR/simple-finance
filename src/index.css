@@ -1,22 +1,23 @@
 :root {
-  --paper: #f9f7f2;
-  --bg: #e7e3d9;
-  --surface: #f8f7f3;
-  --field: #efede7;
-  --text: #242823;
-  --muted: #6f746c;
-  --ink: #1f241f;
-  --summary-bg: #516b5a;
-  --summary-text: #f7f8f2;
-  --accent: #466a55;
-  --positive: #357356;
-  --danger: #ad5953;
-  --line: #d8d7cf;
-  --line-strong: #c3c5ba;
-  --shadow: 0 10px 24px rgba(42, 47, 40, 0.09);
-  --button-shadow: 0 4px 12px rgba(42, 47, 40, 0.11);
-  --nav-shadow: 0 -8px 26px rgba(42, 47, 40, 0.12);
-  --nav-active: #e2e9dd;
+  --paper: #f4faf7;
+  --bg: #d8e6e0;
+  --surface: #f6fbf8;
+  --field: #e9f2ee;
+  --text: #1c3943;
+  --muted: #607882;
+  --ink: #11313e;
+  --summary-bg: #0e4b5d;
+  --summary-text: #f2faf6;
+  --accent: #287b70;
+  --positive: #28795e;
+  --danger: #b55a59;
+  --line: #cadbd4;
+  --line-strong: #afc9c0;
+  --shadow: 0 10px 24px rgba(13, 57, 67, 0.11);
+  --button-shadow: 0 4px 12px rgba(13, 57, 67, 0.14);
+  --nav-shadow: 0 -8px 26px rgba(13, 57, 67, 0.16);
+  --nav-active: #d9eee5;
+  --background-wash: rgb(239 247 243 / 82%);
   color: var(--text);
   background: var(--bg);
   color-scheme: light;
@@ -30,24 +31,25 @@
 }
 
 :root[data-theme='dark'] {
-  --paper: #e9ebe3;
-  --bg: #20241f;
-  --surface: #2c312b;
-  --field: #242a24;
-  --text: #edf0e7;
-  --muted: #b8beb2;
-  --ink: #f2f4ed;
-  --summary-bg: #5d7965;
-  --summary-text: #f4f7ef;
-  --accent: #a9c7a4;
-  --positive: #95cd9d;
-  --danger: #f0a098;
-  --line: #434b42;
-  --line-strong: #5c6859;
-  --shadow: 0 10px 24px rgba(5, 8, 5, 0.25);
-  --button-shadow: 0 4px 12px rgba(5, 8, 5, 0.3);
-  --nav-shadow: 0 -8px 26px rgba(5, 8, 5, 0.35);
-  --nav-active: #3c4e3d;
+  --paper: #eaf5f0;
+  --bg: #062633;
+  --surface: #103541;
+  --field: #0a2a35;
+  --text: #e7f2ee;
+  --muted: #aec5c5;
+  --ink: #f1faf5;
+  --summary-bg: #0b5363;
+  --summary-text: #f3fcf7;
+  --accent: #87d8b7;
+  --positive: #8fd5ac;
+  --danger: #f1a29d;
+  --line: #285361;
+  --line-strong: #3d6972;
+  --shadow: 0 10px 24px rgba(0, 13, 20, 0.36);
+  --button-shadow: 0 4px 12px rgba(0, 13, 20, 0.42);
+  --nav-shadow: 0 -8px 26px rgba(0, 13, 20, 0.48);
+  --nav-active: #174957;
+  --background-wash: rgb(3 28 39 / 28%);
   color-scheme: dark;
 }
 
@@ -59,7 +61,11 @@ body {
   min-width: 320px;
   min-height: 100svh;
   margin: 0;
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--background-wash), var(--background-wash)), url('/simple-finance-background.png');
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
 }
 
 body::before {

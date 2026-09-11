@@ -56,6 +56,10 @@ Tarjetas y categorias no usan una segunda capa de secciones plegables. Cada una 
 
 La interfaz movil conserva una paleta neutra con acento verde, pero reduce bordes pesados y textura para priorizar lectura. Los iconos se reservan para orientacion, navegacion y acciones; las superficies se agrupan por tarea y la barra inferior mantiene icono y etiqueta para una navegacion inmediata. El balance separa ingresos y gastos dentro de la misma superficie, los movimientos usan un marcador por tipo y los campos se identifican con iconos de dominio.
 
+## 2026-09-11 - Identidad visual Simple Finance
+
+El logo y la ilustración de fondo proporcionados para Simple Finance se usan como activos locales de la PWA. La cabecera muestra solo el símbolo compacto del logo para conservar densidad, mientras que el fondo se presenta con una capa clara en modo día y con su contraste completo en modo noche. Las superficies mantienen opacidad y contraste suficientes para que cifras, campos y acciones no compitan con la ilustración.
+
 ## 2026-09-10 - Resumen centrado en gasto por categoría
 
 Resumen deja de ser una vista fija de últimos movimientos. Pasa a ser desplazable y muestra la distribución de gastos del ciclo por categoría mediante un gráfico circular, más una lista de consumo y límite. El calendario de la propia vista selecciona el año y el mes y actualiza ese mismo resumen, sin cambiar de pestaña. Al pulsar una categoría se despliega su extracto de gastos justo debajo de esa fila, con una apertura breve y el indicador de estado animado.

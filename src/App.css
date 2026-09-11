@@ -36,6 +36,24 @@
   text-transform: uppercase;
 }
 
+.brand-eyebrow {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.brand-mark {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background-image: url('/simple-finance-logo.png');
+  background-repeat: no-repeat;
+  background-position: 50% -10px;
+  background-size: 40px 40px;
+  box-shadow: 0 1px 3px rgba(5, 35, 48, 0.18);
+}
+
 .topbar h1,
 .section-title h2 {
   margin: 0;
@@ -331,12 +349,6 @@ label,
   border-radius: 50%;
   background: var(--surface);
   box-shadow: 0 0 0 6px color-mix(in srgb, var(--surface) 84%, transparent);
-}
-
-.expense-donut span {
-  color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 800;
 }
 
 .expense-donut strong {

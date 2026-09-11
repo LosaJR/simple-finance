@@ -193,6 +193,7 @@ function App() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = isDark ? 'dark' : 'light'
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#062633' : '#d8e6e0')
   }, [isDark])
 
   const primaryCard = useMemo(
@@ -671,7 +672,7 @@ function App() {
     <main className={`shell ${screen === 'home' ? 'home-shell' : screen === 'entry' ? 'entry-shell' : ''}`}>
       <header className="topbar">
         <div>
-          <p className="eyebrow">Simple Finance</p>
+          <p className="eyebrow brand-eyebrow"><span className="brand-mark" aria-hidden="true" />Simple Finance</p>
           <h1>{currentScreen.title}</h1>
         </div>
         <button className="icon-button" type="button" aria-label="Configuración" onClick={openSettings}>
@@ -743,7 +744,6 @@ function App() {
             <div className="spending-visual">
               <div className="expense-donut" style={{ background: expenseChartBackground }} aria-label="Distribución de gastos">
                 <div>
-                  <span>Gastado</span>
                   <strong>{formatCurrency(cycleExpenseCategories.totalCents)}</strong>
                 </div>
               </div>
@@ -759,7 +759,6 @@ function App() {
             <div className="section-title">
               <div>
                 <h2><Tags size={17} aria-hidden="true" />Categorías</h2>
-                <p>Límite individual de cada categoría en este ciclo.</p>
               </div>
             </div>
             {cycleExpenseCategories.entries.length === 0 ? (
@@ -785,7 +784,7 @@ function App() {
                         <div className="category-spending-copy">
                           <div>
                             <strong>{entry.category.name}</strong>
-                            <span>{entry.percentage}% de los gastos</span>
+                            <span>{entry.percentage}%</span>
                           </div>
                           <b>{formatCurrency(entry.amountCents)}{entry.category.limitCents ? ` / ${formatCurrency(entry.category.limitCents)}` : ''}</b>
                           {entry.category.limitCents ? (
