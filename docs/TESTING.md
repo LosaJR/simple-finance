@@ -27,5 +27,11 @@ Checklist inicial:
 - Activar tema oscuro y revisar que no hay texto cortado.
 - Recargar la aplicación y confirmar que inicia directamente en modo noche; cambiar a claro desde Configuración y comprobar que sigue disponible.
 - Revisar el logo compacto, la ilustración integrada en superficies translúcidas y el fondo en modo claro y noche; confirmar que campos, cifras y botones conservan contraste.
+- Registrar un comercio ficticio con `Recordar esta categoría` activado y comprobar que el siguiente registro sugiere esa categoría sin guardar nada automáticamente.
+- Guardar dos movimientos idénticos de prueba y comprobar que el segundo solicita confirmación.
+- Añadir un pago recurrente, comprobar que aparece como previsto y registrarlo manualmente; confirmar que adelanta la siguiente fecha una sola vez.
+- Buscar actividad por comercio, filtrar por categoría y activar `Solo pendientes`; limpiar filtros al terminar.
+- Exportar un CSV y una copia JSON de datos ficticios; probar restauración solo en un perfil de prueba, pues reemplaza los datos locales.
+- Activar `Contraste reforzado` desde Configuración y comprobar que límites, pendientes y acciones conservan texto explicativo.
 
 No capturar ni adjuntar datos financieros reales en incidencias.

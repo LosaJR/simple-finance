@@ -20,6 +20,9 @@ export interface AppSettings {
   paydayDay: number
   paydayAmountCents: number
   suppressedPayrollCycleIds: string[]
+  theme: 'dark' | 'light'
+  highContrast: boolean
+  onboardingCompleted: boolean
 }
 
 export interface Category {
@@ -41,8 +44,32 @@ export interface Transaction {
   paymentMethodId: string
   categoryId: string
   status: 'posted' | 'pending'
-  source?: 'manual' | 'payroll'
+  source?: 'manual' | 'payroll' | 'planned' | 'automation'
   cycleId: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface MerchantRule {
+  id: string
+  merchant: string
+  normalizedMerchant: string
+  categoryId: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type PlannedPaymentFrequency = 'weekly' | 'monthly' | 'yearly'
+
+export interface PlannedPayment {
+  id: string
+  name: string
+  amountCents: number
+  categoryId: string
+  paymentMethodId: string
+  frequency: PlannedPaymentFrequency
+  nextDueOn: string
+  active: boolean
   createdAt: string
   updatedAt: string
 }
@@ -55,12 +82,36 @@ export const transactionDraftSchema = z.object({
   paymentMethodId: z.string().min(1),
   categoryId: z.string().min(1),
   status: z.enum(['posted', 'pending']).default('posted'),
-  source: z.enum(['manual', 'payroll']).default('manual'),
+  source: z.enum(['manual', 'payroll', 'planned', 'automation']).default('manual'),
 })
 
 export type TransactionDraft = z.infer<typeof transactionDraftSchema>
 
 export const normalizeMerchant = (merchant: string) => merchant.trim() || 'Movimiento manual'
+
+export const normalizeMerchantKey = (merchant: string) =>
+  merchant
+    .trim()
+    .toLocaleLowerCase('es-ES')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+
+export const merchantRuleSchema = z.object({
+  merchant: z.string().trim().min(2).max(80),
+  categoryId: z.string().min(1),
+})
+
+export const plannedPaymentDraftSchema = z.object({
+  name: z.string().trim().min(2).max(80),
+  amountCents: z.number().int().positive(),
+  categoryId: z.string().min(1),
+  paymentMethodId: z.string().min(1),
+  frequency: z.enum(['weekly', 'monthly', 'yearly']),
+  nextDueOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+})
+
+export type PlannedPaymentDraft = z.infer<typeof plannedPaymentDraftSchema>
 
 export const DEFAULT_PAYMENT_METHODS: PaymentMethod[] = [
   {
@@ -78,6 +129,9 @@ export const DEFAULT_SETTINGS: AppSettings = {
   paydayDay: 1,
   paydayAmountCents: 0,
   suppressedPayrollCycleIds: [],
+  theme: 'dark',
+  highContrast: false,
+  onboardingCompleted: false,
 }
 
 export const DEFAULT_CATEGORIES: Category[] = [
@@ -152,4 +206,30 @@ export const getCycleId = (occurredOn: string, resetDay = 1) => {
   const finalCycleDay = new Date(closingPayday)
   finalCycleDay.setDate(finalCycleDay.getDate() - 1)
   return `${finalCycleDay.getFullYear()}-${String(finalCycleDay.getMonth() + 1).padStart(2, '0')}`
+}
+
+export const addFrequencyToDate = (occurredOn: string, frequency: PlannedPaymentFrequency) => {
+  const date = new Date(`${occurredOn}T12:00:00`)
+  if (frequency === 'weekly') date.setDate(date.getDate() + 7)
+  if (frequency === 'monthly') date.setMonth(date.getMonth() + 1)
+  if (frequency === 'yearly') date.setFullYear(date.getFullYear() + 1)
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
+export const isPotentialDuplicate = (
+  candidate: Pick<Transaction, 'amountCents' | 'merchant' | 'paymentMethodId' | 'occurredOn' | 'type'>,
+  transactions: Transaction[],
+) => {
+  const candidateDate = new Date(`${candidate.occurredOn}T12:00:00`).getTime()
+  const merchant = normalizeMerchantKey(candidate.merchant)
+  return transactions.some((transaction) => {
+    const transactionDate = new Date(`${transaction.occurredOn}T12:00:00`).getTime()
+    return (
+      transaction.type === candidate.type &&
+      transaction.amountCents === candidate.amountCents &&
+      transaction.paymentMethodId === candidate.paymentMethodId &&
+      normalizeMerchantKey(transaction.merchant) === merchant &&
+      Math.abs(transactionDate - candidateDate) <= 86_400_000
+    )
+  })
 }

@@ -40,16 +40,16 @@ Estado: iniciada.
 
 ## Fase 3 - Automatizacion personal
 
-- Reglas por comercio.
-- Pendientes de categorizar.
+- Reglas por comercio: disponible localmente.
+- Pendientes de categorizar: disponible como estado revisable; la entrada automatica queda bloqueada hasta la capa nativa.
 - Categorias frecuentes y selector completo.
-- Recurrentes con aviso individual.
+- Recurrentes: disponible con confirmacion manual y pausa por elemento. Los avisos de sistema siguen en la futura capa nativa.
 
 ## Fase 4 - Estadisticas y portabilidad
 
-- Gasto por categoria y evolucion por ciclos.
-- Comparativa de periodos.
-- Exportacion CSV y copia/restauracion JSON validada.
+- Gasto por categoria y disponible estimado por ciclo: disponible.
+- Comparativa básica frente al ciclo anterior: disponible; evolución detallada por periodos es el siguiente hito.
+- Exportacion CSV y copia/restauracion JSON validada: disponible.
 
 ## Fase 5 - Calidad y pruebas privadas
 

@@ -17,10 +17,14 @@ La interfaz de fase 0 usa navegacion local en el cliente con una barra inferior 
 
 - `PaymentMethod`: tarjeta, nombre, color, ultimos cuatro digitos opcional, activa y bandera unica de tarjeta principal. No se modelan cuentas ni efectivo.
 - `Category`: nombre, icono textual, color, tipos permitidos, límite mensual opcional y activo.
-- `Transaction`: gasto o ingreso, importe en centimos, comercio, fecha local, metodo, categoria, estado, ciclo y origen manual o nomina.
-- `AppSettings`: dia de cobro, cantidad de nomina y ciclos cuya nomina automatica fue eliminada localmente. Determinan el ciclo, la cuenta atras y el registro diferido de nomina.
+- `Transaction`: gasto o ingreso, importe en centimos, comercio, fecha local, metodo, categoria, estado, ciclo y origen manual, nomina, recurrente o automatizacion futura.
+- `MerchantRule`: comercio normalizado y categoria sugerida. Nunca modifica un movimiento existente ni registra datos por si solo.
+- `PlannedPayment`: pago recurrente local con importe, tarjeta, categoria, frecuencia, proxima fecha y estado. Solo crea una transaccion cuando la persona pulsa `Registrar`.
+- `AppSettings`: dia de cobro, cantidad de nomina, ciclos cuya nomina automatica fue eliminada, tema, contraste y estado de primera configuracion.
 
 Los importes se almacenan como enteros en centimos. Las fechas de movimientos usan formato `YYYY-MM-DD` y los calculos de ciclo se hacen con fecha local al mediodia para evitar desplazamientos por zona horaria. El resumen actual calcula el ciclo contra el dia de cobro vigente y desplaza un cobro de fin de semana al lunes. Agrupa los gastos por categoría para el gráfico circular y el consumo del límite. El calendario anual agrupa el historial por ciclos delimitados por esas fechas efectivas y etiqueta cada uno por su ultimo dia antes del siguiente cobro: el intervalo 25 de agosto a 25 de septiembre, y el de 1 de septiembre a 1 de octubre, se registran como septiembre. El borrado de una nomina automatica marca su ciclo para que no reaparezca en la siguiente carga.
+
+Las copias JSON se validan con Zod antes de sustituir el contenido local; el CSV es una exportacion de lectura de movimientos. No existe sincronizacion remota.
 
 ## Privacidad
 

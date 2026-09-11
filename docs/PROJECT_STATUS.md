@@ -12,11 +12,11 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
-Base local creada en la rama `feature/fase-0-base` con una experiencia funcional en IndexedDB. La correccion de prueba iPhone elimina la dependencia de `crypto.randomUUID` en HTTP local. La interfaz tiene Resumen desplazable con gráfico circular de gastos, calendario anual que actualiza su propio contenido y detalle expandible por categoría, Registrar compacto, Actividad y Configuracion, registro rapido por pasos, tarjeta principal persistente, categorías con límite mensual individual configurable, filtro por tarjeta, calendario anual por ciclos de nomina etiquetados por su cobro de cierre, edicion y eliminacion por deslizamiento, configuracion de tema y nomina, cuenta atras y registro diferido de nomina en dia laborable. Tarjetas y categorias se eligen desde selectores directos con botones `+` para añadirlas. La capa visual se acota a un lienzo de iPhone para la revision en Codex, con grupos suaves, transiciones breves para superficies que se abren, controles sobrios, desglose de balance, marcadores de ingreso/gasto e iconos de dominio. La identidad visual inicia en modo noche y usa el logo y fondo locales proporcionados, con superficies de cristal translúcidas en tarjetas, campos y navegación, una paleta azul petróleo y menta adaptada a día y noche, e iconos de categoría con fondo tonal propio. Repositorio privado creado en GitHub como `LosaJR/simple-finance`.
+Rama experimental `feature/flujo-financiero-diario` creada desde la base de Fase 0. Añade reglas locales por comercio, comprobacion de posibles duplicados, estado pendiente revisable, pagos recurrentes que requieren confirmacion explicita, disponible estimado del ciclo, filtro por texto/categoria/pendiente, edicion y archivado seguro de tarjetas y categorias, copia JSON validada y CSV. El tema noche y el contraste reforzado se guardan en el dispositivo. La aplicacion sigue siendo una PWA local: no recibe notificaciones, Apple Pay, Wallet ni datos de Atajos automaticamente.
 
 ## Siguiente tarea
 
-Revisar desde iPhone fisico el gráfico circular, el selector de mes/año, el detalle por categoría, los límites individuales por categoría, el deslizamiento de movimientos y la barra inferior opaca. Despues completar el CRUD seguro de tarjetas y categorías y los avisos nativos de límites.
+Revisar en iPhone fisico la rama experimental: primer inicio, registro rapido con regla, aviso de duplicado, pendientes, recurrentes, filtros, exportacion/restauracion y contraste reforzado. Despues decidir cuales de estas mejoras se integran en `main` y preparar la comparativa de ciclos.
 
 ## Verificaciones
 

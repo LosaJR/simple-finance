@@ -33,6 +33,10 @@ El propietario y un circulo cerrado de testers. No se recopilan datos, no hay ba
 - Reglas por comercio para categorizar transacciones futuras.
 - Recurrentes y avisos activables/desactivables por elemento.
 - Exportacion CSV y copia/restauracion JSON validada.
+- Bandeja de pendientes: un movimiento puede guardarse para revisar antes de incorporarlo a los filtros de actividad. La PWA no recibe esos movimientos automaticamente; la futura capa nativa sera quien los proponga desde una fuente autorizada.
+- Deteccion local de duplicados antes de guardar un movimiento manual, con confirmacion explicita.
+- Resumen con disponible estimado: ingresos del ciclo menos gastos registrados y pagos recurrentes previstos que siguen pendientes de confirmar.
+- Tema persistente y modo de contraste reforzado, sin depender exclusivamente del color para explicar limites o estados.
 
 ## Limites que deben comunicarse
 

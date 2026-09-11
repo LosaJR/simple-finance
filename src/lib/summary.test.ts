@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getCycleId, getPaydayDate, normalizeMerchant, type Transaction } from './finance'
+import { addFrequencyToDate, getCycleId, getPaydayDate, isPotentialDuplicate, normalizeMerchant, type Transaction } from './finance'
 import { createLocalId } from './storage'
 import {
   formatActivityDate,
@@ -87,6 +87,19 @@ describe('payday and monthly history', () => {
 describe('local identifiers', () => {
   it('creates an identifier when randomUUID is unavailable', () => {
     expect(createLocalId(null)).toMatch(/^[a-z0-9]+-[a-z0-9]+$/)
+  })
+})
+
+describe('daily safeguards', () => {
+  it('spots likely duplicate manual entries without blocking distinct transactions', () => {
+    const transaction = baseTransaction('expense', 1299)
+    expect(isPotentialDuplicate(transaction, [transaction])).toBe(true)
+    expect(isPotentialDuplicate({ ...transaction, amountCents: 1300 }, [transaction])).toBe(false)
+  })
+
+  it('moves a planned payment to its next local occurrence', () => {
+    expect(addFrequencyToDate('2026-01-31', 'monthly')).toBe('2026-03-03')
+    expect(addFrequencyToDate('2026-09-10', 'weekly')).toBe('2026-09-17')
   })
 })
 

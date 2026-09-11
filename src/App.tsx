@@ -2,16 +2,22 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowDownRight,
   ArrowUpRight,
+  Archive,
+  BadgeAlert,
   Banknote,
+  Check,
   CalendarDays,
   ChevronDown,
   CirclePlus,
   CreditCard,
+  Download,
+  Ellipsis,
   Fuel,
   Gamepad2,
   House,
   LayoutDashboard,
   ListFilter,
+  Search,
   Pencil,
   Plus,
   PieChart,
@@ -21,33 +27,53 @@ import {
   ShoppingBasket,
   Tags,
   Trash2,
+  Upload,
 } from 'lucide-react'
 import './App.css'
 import {
   DEFAULT_CATEGORIES,
   DEFAULT_PAYMENT_METHODS,
   getCycleId,
+  isPotentialDuplicate,
   normalizeMerchant,
   type Category,
+  type MerchantRule,
   type PaymentMethod,
+  type PlannedPayment,
+  plannedPaymentDraftSchema,
   type Transaction,
   type TransactionDraft,
   transactionDraftSchema,
 } from './lib/finance'
 import {
+  archiveCategory,
+  archivePaymentMethod,
+  createMerchantRule,
   createPaymentMethod,
   createCategory,
+  createPlannedPayment,
   createTransaction,
+  deleteMerchantRule,
+  deletePlannedPayment,
   deleteTransaction,
   ensureSeedData,
   ensureScheduledPayroll,
+  exportLocalBackup,
   getSettings,
   listCategories,
+  listMerchantRules,
   listPaymentMethods,
+  listPlannedPayments,
   listTransactions,
+  recordPlannedPayment,
+  restoreLocalBackup,
+  savePreferences,
   savePaydaySettings,
   setPrimaryPaymentMethod,
+  togglePlannedPayment,
+  updateCategory,
   updateCategoryLimit,
+  updatePaymentMethodName,
   updateTransaction,
 } from './lib/storage'
 import {
@@ -120,20 +146,30 @@ function App() {
   const [categories, setCategories] = useState<Category[]>([])
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [merchantRules, setMerchantRules] = useState<MerchantRule[]>([])
+  const [plannedPayments, setPlannedPayments] = useState<PlannedPayment[]>([])
   const [draft, setDraft] = useState<TransactionDraft>(initialDraft)
   const [amount, setAmount] = useState('')
   const [feedback, setFeedback] = useState('Datos guardados solo en este dispositivo.')
   const [homeFeedback, setHomeFeedback] = useState('')
   const [isDark, setIsDark] = useState(true)
+  const [highContrast, setHighContrast] = useState(false)
+  const [onboardingCompleted, setOnboardingCompleted] = useState(true)
   const [activityTab, setActivityTab] = useState<ActivityTab>('all')
   const [activityPaymentMethodId, setActivityPaymentMethodId] = useState('all')
   const [activityCycleId, setActivityCycleId] = useState<string | null>(null)
+  const [activityCategoryId, setActivityCategoryId] = useState('all')
+  const [activitySearch, setActivitySearch] = useState('')
+  const [activityPendingOnly, setActivityPendingOnly] = useState(false)
   const [screen, setScreen] = useState<AppScreen>('home')
   const [isAddingCard, setIsAddingCard] = useState(false)
   const [newCardName, setNewCardName] = useState('')
   const [selectedCardId, setSelectedCardId] = useState('')
   const [isAddingCategory, setIsAddingCategory] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState('')
+  const [categoryNameInput, setCategoryNameInput] = useState('')
+  const [categoryColorInput, setCategoryColorInput] = useState('#546f59')
+  const [cardNameInput, setCardNameInput] = useState('')
   const [selectedCategoryId, setSelectedCategoryId] = useState('')
   const [categoryLimitInput, setCategoryLimitInput] = useState('')
   const [categoryLimitFeedback, setCategoryLimitFeedback] = useState('')
@@ -149,6 +185,7 @@ function App() {
   const [quickAmount, setQuickAmount] = useState('')
   const [quickMerchant, setQuickMerchant] = useState('')
   const [quickCategoryId, setQuickCategoryId] = useState('')
+  const [quickRememberRule, setQuickRememberRule] = useState(false)
   const [quickFeedback, setQuickFeedback] = useState('')
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const [isSummaryCalendarOpen, setIsSummaryCalendarOpen] = useState(false)
@@ -160,24 +197,41 @@ function App() {
   const [editAmount, setEditAmount] = useState('')
   const [editFeedback, setEditFeedback] = useState('')
   const [openTransactionId, setOpenTransactionId] = useState<string | null>(null)
+  const [lastCreatedTransaction, setLastCreatedTransaction] = useState<Transaction | null>(null)
+  const [isAddingPlan, setIsAddingPlan] = useState(false)
+  const [plannedName, setPlannedName] = useState('')
+  const [plannedAmount, setPlannedAmount] = useState('')
+  const [plannedCategoryId, setPlannedCategoryId] = useState('')
+  const [plannedPaymentMethodId, setPlannedPaymentMethodId] = useState('')
+  const [plannedFrequency, setPlannedFrequency] = useState<PlannedPayment['frequency']>('monthly')
+  const [plannedDueOn, setPlannedDueOn] = useState(todayInputValue())
+  const [planFeedback, setPlanFeedback] = useState('')
+  const importInputRef = useRef<HTMLInputElement>(null)
   const [swipeOffsets, setSwipeOffsets] = useState<Record<string, number>>({})
   const swipeStart = useRef<{ id: string; x: number } | null>(null)
 
   const refreshData = async () => {
     await ensureSeedData()
     await ensureScheduledPayroll()
-    const [nextCategories, nextMethods, nextTransactions, nextSettings] = await Promise.all([
+    const [nextCategories, nextMethods, nextTransactions, nextSettings, nextRules, nextPlannedPayments] = await Promise.all([
       listCategories(),
       listPaymentMethods(),
       listTransactions(),
       getSettings(),
+      listMerchantRules(),
+      listPlannedPayments(),
     ])
     const primary = nextMethods.find((method) => method.isPrimary) ?? nextMethods[0]
     setCategories(nextCategories)
     setPaymentMethods(nextMethods)
     setTransactions(nextTransactions)
+    setMerchantRules(nextRules)
+    setPlannedPayments(nextPlannedPayments)
     setPaydayDay(nextSettings.paydayDay)
     setPaydayAmount(nextSettings.paydayAmountCents ? formatAmountInput(nextSettings.paydayAmountCents) : '')
+    setIsDark(nextSettings.theme !== 'light')
+    setHighContrast(nextSettings.highContrast)
+    setOnboardingCompleted(nextSettings.onboardingCompleted)
     setDraft((current) => ({
       ...current,
       categoryId: current.categoryId || nextCategories[0]?.id || '',
@@ -185,6 +239,8 @@ function App() {
     }))
     setSelectedCardId((current) => current || primary?.id || '')
     setSelectedCategoryId((current) => current || nextCategories[0]?.id || '')
+    setPlannedCategoryId((current) => current || nextCategories.find((category) => category.allowedTypes.includes('expense'))?.id || '')
+    setPlannedPaymentMethodId((current) => current || primary?.id || '')
   }
 
   useEffect(() => {
@@ -193,8 +249,9 @@ function App() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = isDark ? 'dark' : 'light'
+    document.documentElement.dataset.contrast = highContrast ? 'high' : 'normal'
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#062633' : '#d8e6e0')
-  }, [isDark])
+  }, [highContrast, isDark])
 
   const primaryCard = useMemo(
     () => paymentMethods.find((method) => method.isPrimary) ?? paymentMethods[0],
@@ -244,6 +301,45 @@ function App() {
           getCycleId(transaction.occurredOn, paydayDay) === selectedSummaryCycleId,
       ),
     [paydayDay, selectedSummaryCycleId, summaryCategoryId, transactions],
+  )
+
+const downloadFile = (name: string, contents: string, type: string) => {
+  const url = URL.createObjectURL(new Blob([contents], { type }))
+  const link = document.createElement('a')
+  link.href = url
+  link.download = name
+  link.click()
+  URL.revokeObjectURL(url)
+}
+  const selectedCycleIncomeCents = useMemo(
+    () => transactions
+      .filter((transaction) => transaction.type === 'income' && getCycleId(transaction.occurredOn, paydayDay) === selectedSummaryCycleId)
+      .reduce((total, transaction) => total + transaction.amountCents, 0),
+    [paydayDay, selectedSummaryCycleId, transactions],
+  )
+  const plannedCycleCents = useMemo(
+    () => plannedPayments
+      .filter((payment) => payment.active && getCycleId(payment.nextDueOn, paydayDay) === selectedSummaryCycleId)
+      .reduce((total, payment) => total + payment.amountCents, 0),
+    [paydayDay, plannedPayments, selectedSummaryCycleId],
+  )
+  const availableEstimateCents = selectedCycleIncomeCents - cycleExpenseCategories.totalCents - plannedCycleCents
+  const previousCycleExpenseCents = useMemo(() => {
+    const cycleDate = new Date(`${selectedSummaryCycleId}-01T12:00:00`)
+    cycleDate.setMonth(cycleDate.getMonth() - 1)
+    const previousCycleId = `${cycleDate.getFullYear()}-${String(cycleDate.getMonth() + 1).padStart(2, '0')}`
+    return transactions
+      .filter((transaction) => transaction.type === 'expense' && getCycleId(transaction.occurredOn, paydayDay) === previousCycleId)
+      .reduce((total, transaction) => total + transaction.amountCents, 0)
+  }, [paydayDay, selectedSummaryCycleId, transactions])
+  const expenseComparisonCents = cycleExpenseCategories.totalCents - previousCycleExpenseCents
+  const pendingTransactions = useMemo(
+    () => transactions.filter((transaction) => transaction.status === 'pending'),
+    [transactions],
+  )
+  const duePlannedPayments = useMemo(
+    () => plannedPayments.filter((payment) => payment.active && payment.nextDueOn <= todayInputValue()).slice(0, 3),
+    [plannedPayments],
   )
   const expenseChartBackground = useMemo(() => {
     if (cycleExpenseCategories.entries.length === 0) {
@@ -305,9 +401,12 @@ function App() {
         (transaction) =>
           (activityTab === 'all' || transaction.type === activityTab) &&
           (activityPaymentMethodId === 'all' || transaction.paymentMethodId === activityPaymentMethodId) &&
-          (activityCycleId === null || getCycleId(transaction.occurredOn, paydayDay) === activityCycleId),
+          (activityCategoryId === 'all' || transaction.categoryId === activityCategoryId) &&
+          (!activityPendingOnly || transaction.status === 'pending') &&
+          (activityCycleId === null || getCycleId(transaction.occurredOn, paydayDay) === activityCycleId) &&
+          (!activitySearch.trim() || `${transaction.merchant} ${transaction.amountCents / 100}`.toLocaleLowerCase('es-ES').includes(activitySearch.trim().toLocaleLowerCase('es-ES'))),
       ),
-    [activityCycleId, activityPaymentMethodId, activityTab, paydayDay, transactions],
+    [activityCategoryId, activityCycleId, activityPaymentMethodId, activityPendingOnly, activitySearch, activityTab, paydayDay, transactions],
   )
   const quickCategories = useMemo(
     () => categories.filter((category) => category.allowedTypes.includes(quickType)),
@@ -318,8 +417,14 @@ function App() {
 
   useEffect(() => {
     setCategoryLimitInput(selectedCategory?.limitCents ? formatAmountInput(selectedCategory.limitCents) : '')
+    setCategoryNameInput(selectedCategory?.name ?? '')
+    setCategoryColorInput(selectedCategory?.color ?? '#546f59')
     setCategoryLimitFeedback('')
-  }, [selectedCategory?.id, selectedCategory?.limitCents])
+  }, [selectedCategory?.color, selectedCategory?.id, selectedCategory?.limitCents, selectedCategory?.name])
+
+  useEffect(() => {
+    setCardNameInput(selectedCard?.name ?? '')
+  }, [selectedCard?.id, selectedCard?.name])
 
   const navigateTo = (nextScreen: AppScreen) => {
     setScreen(nextScreen)
@@ -328,7 +433,8 @@ function App() {
 
   const chooseQuickType = (type: QuickType) => {
     setQuickType(type)
-    setQuickCategoryId(categories.find((category) => category.allowedTypes.includes(type))?.id ?? '')
+    const recentCategory = transactions.find((transaction) => transaction.type === type)?.categoryId
+    setQuickCategoryId(recentCategory ?? categories.find((category) => category.allowedTypes.includes(type))?.id ?? '')
     setQuickStep('amount')
   }
 
@@ -336,6 +442,7 @@ function App() {
     setQuickType('expense')
     setQuickAmount('')
     setQuickMerchant('')
+    setQuickRememberRule(false)
     setQuickCategoryId(categories.find((category) => category.allowedTypes.includes('expense'))?.id ?? '')
     setQuickFeedback('')
     setQuickStep('type')
@@ -364,10 +471,17 @@ function App() {
     }
 
     try {
-      await createTransaction(parsed.data, paydayDay)
+      if (isPotentialDuplicate(parsed.data, transactions) && !window.confirm('Parece un movimiento ya registrado. ¿Quieres guardarlo de todas formas?')) {
+        return
+      }
+      const transaction = await createTransaction(parsed.data, paydayDay)
+      if (quickRememberRule && quickMerchant.trim()) {
+        await createMerchantRule(quickMerchant, quickCategoryId)
+      }
       await refreshData()
       closeQuickEntry()
-      setHomeFeedback(`Movimiento registrado con ${primaryCard?.name ?? 'la tarjeta principal'}.`)
+      setLastCreatedTransaction(transaction)
+      setHomeFeedback(`Movimiento registrado con ${primaryCard?.name ?? 'la tarjeta principal'}. Puedes deshacerlo.`)
     } catch {
       setQuickFeedback('No se ha podido registrar el movimiento. Inténtalo de nuevo.')
     }
@@ -387,8 +501,12 @@ function App() {
     }
 
     try {
-      await createTransaction(parsed.data, paydayDay)
-      setFeedback('Movimiento registrado.')
+      if (isPotentialDuplicate(parsed.data, transactions) && !window.confirm('Parece un movimiento ya registrado. ¿Quieres guardarlo de todas formas?')) {
+        return
+      }
+      const transaction = await createTransaction(parsed.data, paydayDay)
+      setLastCreatedTransaction(transaction)
+      setFeedback('Movimiento registrado. Puedes deshacerlo desde Resumen.')
       setAmount('')
       setDraft((current) => ({
         ...initialDraft,
@@ -443,6 +561,149 @@ function App() {
 
   const handleCategorySelection = (categoryId: string) => {
     setSelectedCategoryId(categoryId)
+  }
+
+  const handleQuickMerchantChange = (merchant: string) => {
+    setQuickMerchant(merchant)
+    const normalizedMerchant = merchant
+      .trim()
+      .toLocaleLowerCase('es-ES')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+    const suggestedRule = merchantRules.find((rule) => rule.normalizedMerchant === normalizedMerchant)
+    if (suggestedRule) {
+      setQuickCategoryId(suggestedRule.categoryId)
+      setQuickFeedback(`Categoría sugerida por la regla de ${suggestedRule.merchant}.`)
+    } else {
+      setQuickFeedback('')
+    }
+  }
+
+  const handleSaveCardDetails = async () => {
+    if (!selectedCard) return
+    try {
+      await updatePaymentMethodName(selectedCard.id, cardNameInput)
+      setFeedback('Tarjeta actualizada.')
+      await refreshData()
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : 'No se ha podido actualizar la tarjeta.')
+    }
+  }
+
+  const handleArchiveCard = async () => {
+    if (!selectedCard || !window.confirm(`¿Archivar ${selectedCard.name}? Sus movimientos se conservarán.`)) return
+    try {
+      await archivePaymentMethod(selectedCard.id)
+      setSelectedCardId('')
+      setFeedback('Tarjeta archivada. Los movimientos históricos siguen intactos.')
+      await refreshData()
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : 'No se ha podido archivar la tarjeta.')
+    }
+  }
+
+  const handleSaveCategoryDetails = async () => {
+    if (!selectedCategory) return
+    try {
+      await updateCategory(selectedCategory.id, { name: categoryNameInput, color: categoryColorInput, icon: selectedCategory.icon })
+      setFeedback('Categoría actualizada.')
+      await refreshData()
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : 'No se ha podido actualizar la categoría.')
+    }
+  }
+
+  const handleArchiveCategory = async () => {
+    if (!selectedCategory || !window.confirm(`¿Archivar ${selectedCategory.name}? Sus movimientos se conservarán.`)) return
+    try {
+      await archiveCategory(selectedCategory.id)
+      setSelectedCategoryId('')
+      setFeedback('Categoría archivada. Los movimientos históricos siguen intactos.')
+      await refreshData()
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : 'No se ha podido archivar la categoría.')
+    }
+  }
+
+  const handleSavePlannedPayment = async () => {
+    const parsed = plannedPaymentDraftSchema.safeParse({
+      name: plannedName,
+      amountCents: parseEuroToCents(plannedAmount),
+      categoryId: plannedCategoryId,
+      paymentMethodId: plannedPaymentMethodId,
+      frequency: plannedFrequency,
+      nextDueOn: plannedDueOn,
+    })
+    if (!parsed.success) {
+      setPlanFeedback('Completa nombre, importe, categoría, tarjeta y próxima fecha.')
+      return
+    }
+    await createPlannedPayment(parsed.data)
+    setPlannedName('')
+    setPlannedAmount('')
+    setIsAddingPlan(false)
+    setPlanFeedback('Pago recurrente añadido.')
+    await refreshData()
+  }
+
+  const handleRecordPlannedPayment = async (payment: PlannedPayment) => {
+    if (!window.confirm(`¿Registrar ${payment.name} como pagado?`)) return
+    await recordPlannedPayment(payment, paydayDay)
+    setHomeFeedback(`${payment.name} registrado y siguiente fecha actualizada.`)
+    await refreshData()
+  }
+
+  const handleSetTheme = async (theme: 'dark' | 'light') => {
+    setIsDark(theme === 'dark')
+    await savePreferences({ theme, highContrast, onboardingCompleted })
+  }
+
+  const handleSetHighContrast = async (enabled: boolean) => {
+    setHighContrast(enabled)
+    await savePreferences({ theme: isDark ? 'dark' : 'light', highContrast: enabled, onboardingCompleted })
+  }
+
+  const handleUndoLastTransaction = async () => {
+    if (!lastCreatedTransaction) return
+    await deleteTransaction(lastCreatedTransaction.id)
+    setLastCreatedTransaction(null)
+    setHomeFeedback('Movimiento deshecho.')
+    await refreshData()
+  }
+
+  const handleExportJson = async () => {
+    const backup = await exportLocalBackup()
+    downloadFile(`simple-finance-${todayInputValue()}.json`, JSON.stringify(backup, null, 2), 'application/json')
+    setFeedback('Copia JSON descargada.')
+  }
+
+  const handleExportCsv = () => {
+    const rows = [['Fecha', 'Tipo', 'Comercio', 'Categoría', 'Tarjeta', 'Importe']]
+    for (const transaction of transactions) {
+      rows.push([
+        transaction.occurredOn,
+        transaction.type === 'expense' ? 'Gasto' : 'Ingreso',
+        transaction.merchant,
+        categoryMap.get(transaction.categoryId)?.name ?? '',
+        methodMap.get(transaction.paymentMethodId)?.name ?? '',
+        (transaction.amountCents / 100).toFixed(2).replace('.', ','),
+      ])
+    }
+    const csv = rows.map((row) => row.map((value) => `"${value.replaceAll('"', '""')}"`).join(';')).join('\n')
+    downloadFile(`simple-finance-${todayInputValue()}.csv`, csv, 'text/csv;charset=utf-8')
+    setFeedback('Extracto CSV descargado.')
+  }
+
+  const handleRestoreBackup = async (file: File | undefined) => {
+    if (!file || !window.confirm('La restauración reemplazará los datos locales actuales. ¿Continuar?')) return
+    try {
+      await restoreLocalBackup(JSON.parse(await file.text()))
+      await refreshData()
+      setFeedback('Copia restaurada correctamente.')
+    } catch {
+      setFeedback('La copia no tiene un formato válido o no se ha podido restaurar.')
+    }
   }
 
   const handleSaveCategoryLimit = async () => {
@@ -504,6 +765,8 @@ function App() {
     setSettingsFeedback(
       paydayAmountCents > 0 ? 'Nómina configurada.' : 'Día guardado. Añade una cantidad para automatizar la nómina.',
     )
+    setOnboardingCompleted(true)
+    await savePreferences({ theme: isDark ? 'dark' : 'light', highContrast, onboardingCompleted: true })
   }
 
   const openTransactionEditor = (transaction: Transaction) => {
@@ -659,7 +922,22 @@ function App() {
                     {transaction.type === 'expense' ? '-' : '+'}
                     {formatCurrency(transaction.amountCents)}
                   </strong>
+                  <button
+                    className="transaction-more"
+                    type="button"
+                    aria-label={`Acciones para ${transaction.merchant}`}
+                    aria-expanded={!swipeable && openTransactionId === transaction.id}
+                    onClick={() => setOpenTransactionId((current) => current === transaction.id ? null : transaction.id)}
+                  >
+                    <Ellipsis size={19} aria-hidden="true" />
+                  </button>
                 </div>
+                {!swipeable && openTransactionId === transaction.id ? (
+                  <div className="transaction-action-popover" role="group" aria-label={`Acciones para ${transaction.merchant}`}>
+                    <button type="button" onClick={() => openTransactionEditor(transaction)}><Pencil size={16} aria-hidden="true" />Editar</button>
+                    <button type="button" onClick={() => void handleDeleteTransaction(transaction)}><Trash2 size={16} aria-hidden="true" />Eliminar</button>
+                  </div>
+                ) : null}
               </div>
             </li>
           )
@@ -694,6 +972,48 @@ function App() {
             </button>
           </article>
           {homeFeedback ? <p className="status-message" role="status">{homeFeedback}</p> : null}
+          {lastCreatedTransaction ? (
+            <button className="undo-banner" type="button" onClick={() => void handleUndoLastTransaction()}>
+              <Check size={16} aria-hidden="true" />Deshacer último movimiento
+            </button>
+          ) : null}
+          {!onboardingCompleted ? (
+            <section className="onboarding-panel" aria-label="Primeros pasos">
+              <BadgeAlert size={19} aria-hidden="true" />
+              <div><strong>Tu espacio está listo</strong><span>Configura la nómina y tu tarjeta principal antes de empezar.</span></div>
+              <button className="secondary-action compact-action" type="button" onClick={openSettings}>Empezar</button>
+            </section>
+          ) : null}
+          <section className="cycle-insights" aria-label="Disponibilidad estimada del ciclo">
+            <article>
+              <span>Disponible estimado</span>
+              <strong>{formatCurrency(availableEstimateCents)}</strong>
+              <small>Ingresos {formatCurrency(selectedCycleIncomeCents)} · previstos {formatCurrency(plannedCycleCents)}</small>
+            </article>
+            <article>
+              <span>Ritmo del ciclo</span>
+              <strong>{cycleExpenseCategories.totalCents > 0 ? `${Math.round((cycleExpenseCategories.totalCents / Math.max(selectedCycleIncomeCents || cycleExpenseCategories.totalCents, 1)) * 100)}%` : 'Sin gastos'}</strong>
+              <small>{selectedSummaryCycleId === currentCycleId ? `hasta la nómina en ${daysUntilPayday} días` : 'ciclo histórico'}</small>
+            </article>
+            <article>
+              <span>Frente al ciclo anterior</span>
+              <strong>{previousCycleExpenseCents === 0 ? 'Sin referencia' : `${expenseComparisonCents > 0 ? '+' : ''}${formatCurrency(expenseComparisonCents)}`}</strong>
+              <small>{previousCycleExpenseCents === 0 ? 'aún no hay gasto anterior' : expenseComparisonCents > 0 ? 'has gastado más' : 'has gastado menos'}</small>
+            </article>
+          </section>
+          {pendingTransactions.length > 0 ? (
+            <button className="pending-banner" type="button" onClick={() => { navigateTo('activity'); setActivityPendingOnly(true) }}>
+              <BadgeAlert size={18} aria-hidden="true" /><span><strong>{pendingTransactions.length} pendiente{pendingTransactions.length === 1 ? '' : 's'} de revisar</strong><small>Confirma o corrige antes de que cuente en tu balance.</small></span><ChevronDown size={18} aria-hidden="true" />
+            </button>
+          ) : null}
+          {duePlannedPayments.length > 0 ? (
+            <section className="due-payments" aria-label="Pagos previstos pendientes">
+              <div className="section-title"><h2><Repeat2 size={17} aria-hidden="true" />Por confirmar</h2><span>{duePlannedPayments.length}</span></div>
+              {duePlannedPayments.map((payment) => (
+                <div key={payment.id} className="due-payment-row"><div><strong>{payment.name}</strong><small>{formatCurrency(payment.amountCents)} · {payment.nextDueOn}</small></div><button className="secondary-action compact-action" type="button" onClick={() => void handleRecordPlannedPayment(payment)}>Registrar</button></div>
+              ))}
+            </section>
+          ) : null}
 
           <section className="spending-panel" aria-label="Gastos del ciclo actual">
             <div className="section-title">
@@ -795,7 +1115,14 @@ function App() {
                           </div>
                           <b>{formatCurrency(entry.amountCents)}{entry.category.limitCents ? ` / ${formatCurrency(entry.category.limitCents)}` : ''}</b>
                           {entry.category.limitCents ? (
-                            <span className="limit-track"><i style={{ width: `${limitRatio}%`, background: entry.category.color }} /></span>
+                            <>
+                              <span className="limit-status">
+                                {entry.amountCents >= entry.category.limitCents
+                                  ? `Límite superado por ${formatCurrency(entry.amountCents - entry.category.limitCents)}`
+                                  : `Quedan ${formatCurrency(entry.category.limitCents - entry.amountCents)}`}
+                              </span>
+                              <span className="limit-track" aria-label={`${limitRatio}% del límite usado`}><i style={{ width: `${limitRatio}%`, background: entry.category.color }} /></span>
+                            </>
                           ) : null}
                         </div>
                         <ChevronDown
@@ -902,6 +1229,15 @@ function App() {
             </select>
           </label>
 
+          <label className="pending-filter">
+            <input
+              type="checkbox"
+              checked={draft.status === 'pending'}
+              onChange={(event) => setDraft((current) => ({ ...current, status: event.target.checked ? 'pending' : 'posted' }))}
+            />
+            <span>Guardar como pendiente de confirmar</span>
+          </label>
+
           <button className="primary-action" type="submit">
             Guardar movimiento
           </button>
@@ -958,6 +1294,30 @@ function App() {
               ))}
             </select>
           </label>
+
+          <label className="activity-search">
+            <span className="field-title"><Search size={16} aria-hidden="true" />Buscar</span>
+            <input value={activitySearch} placeholder="Comercio o importe" onChange={(event) => setActivitySearch(event.target.value)} />
+          </label>
+
+          <div className="activity-filter-grid">
+            <label>
+              <span className="field-title"><Tags size={16} aria-hidden="true" />Categoría</span>
+              <select value={activityCategoryId} onChange={(event) => setActivityCategoryId(event.target.value)}>
+                <option value="all">Todas</option>
+                {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+              </select>
+            </label>
+            <label className="pending-filter">
+              <input type="checkbox" checked={activityPendingOnly} onChange={(event) => setActivityPendingOnly(event.target.checked)} />
+              <span>Solo pendientes</span>
+            </label>
+          </div>
+          {(activitySearch || activityCategoryId !== 'all' || activityPaymentMethodId !== 'all' || activityPendingOnly || activityCycleId) ? (
+            <button className="text-button" type="button" onClick={() => { setActivitySearch(''); setActivityCategoryId('all'); setActivityPaymentMethodId('all'); setActivityPendingOnly(false); setActivityCycleId(null) }}>
+              Limpiar filtros
+            </button>
+          ) : null}
 
           <div className="activity-tabs" role="tablist" aria-label="Filtro de actividad">
             {activityTabs.map((tab) => (
@@ -1016,6 +1376,10 @@ function App() {
             ) : (
               <span className="primary-tag">Tarjeta principal</span>
             )}
+            <div className="configuration-editor">
+              <label>Nombre de la tarjeta<input value={cardNameInput} onChange={(event) => setCardNameInput(event.target.value)} /></label>
+              <div className="inline-actions"><button className="secondary-action compact-action" type="button" onClick={() => void handleSaveCardDetails()}>Guardar nombre</button>{selectedCard && !selectedCard.isPrimary ? <button className="danger-action compact-action" type="button" onClick={() => void handleArchiveCard()}><Archive size={15} aria-hidden="true" />Archivar</button> : null}</div>
+            </div>
             {isAddingCard ? (
               <div className="card-creator">
                 <label>
@@ -1071,6 +1435,11 @@ function App() {
               </button>
             </div>
             <p className="limit-help">Este importe solo se aplica a {selectedCategory?.name ?? 'la categoría seleccionada'}.</p>
+            <div className="configuration-editor category-editor">
+              <label>Nombre<input value={categoryNameInput} onChange={(event) => setCategoryNameInput(event.target.value)} /></label>
+              <label>Color<input className="color-input" type="color" value={categoryColorInput} onChange={(event) => setCategoryColorInput(event.target.value)} /></label>
+              <div className="inline-actions"><button className="secondary-action compact-action" type="button" onClick={() => void handleSaveCategoryDetails()}>Guardar cambios</button><button className="danger-action compact-action" type="button" onClick={() => void handleArchiveCategory()}><Archive size={15} aria-hidden="true" />Archivar</button></div>
+            </div>
             {categoryLimitFeedback ? <p className="status-message" role="status">{categoryLimitFeedback}</p> : null}
             {isAddingCategory ? (
               <div className="card-creator">
@@ -1088,6 +1457,26 @@ function App() {
                 </button>
               </div>
             ) : null}
+          </section>
+
+          <section className="configuration-item" aria-label="Reglas por comercio">
+            <div className="section-title"><div><h2><Store size={17} aria-hidden="true" />Reglas por comercio</h2><p>La categoría se sugerirá al escribir ese comercio.</p></div></div>
+            {merchantRules.length === 0 ? <p className="muted-copy">Crea una regla desde el registro rápido al guardar un comercio.</p> : (
+              <ul className="simple-list">{merchantRules.map((rule) => <li key={rule.id}><span><strong>{rule.merchant}</strong><small>{categoryMap.get(rule.categoryId)?.name ?? 'Categoría archivada'}</small></span><button className="icon-button small-icon" type="button" aria-label={`Eliminar regla de ${rule.merchant}`} onClick={() => void deleteMerchantRule(rule.id).then(refreshData)}><Trash2 size={16} aria-hidden="true" /></button></li>)}</ul>
+            )}
+          </section>
+
+          <section className="configuration-item" aria-label="Pagos recurrentes">
+            <div className="section-title"><div><h2><Repeat2 size={17} aria-hidden="true" />Pagos recurrentes</h2><p>Se muestran para confirmar; no se registran solos.</p></div><button className="add-icon-button" type="button" aria-label="Añadir pago recurrente" onClick={() => setIsAddingPlan((current) => !current)}><Plus size={19} aria-hidden="true" /></button></div>
+            {isAddingPlan ? <div className="card-creator"><label>Nombre<input autoFocus value={plannedName} placeholder="Netflix" onChange={(event) => setPlannedName(event.target.value)} /></label><label>Importe<input inputMode="decimal" value={plannedAmount} placeholder="12,99" onChange={(event) => setPlannedAmount(event.target.value)} /></label><div className="field-grid"><label>Categoría<select value={plannedCategoryId} onChange={(event) => setPlannedCategoryId(event.target.value)}>{categories.filter((category) => category.allowedTypes.includes('expense')).map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label><label>Tarjeta<select value={plannedPaymentMethodId} onChange={(event) => setPlannedPaymentMethodId(event.target.value)}>{paymentMethods.map((method) => <option key={method.id} value={method.id}>{method.name}</option>)}</select></label></div><div className="field-grid"><label>Frecuencia<select value={plannedFrequency} onChange={(event) => setPlannedFrequency(event.target.value as PlannedPayment['frequency'])}><option value="weekly">Semanal</option><option value="monthly">Mensual</option><option value="yearly">Anual</option></select></label><label>Próxima fecha<input type="date" value={plannedDueOn} onChange={(event) => setPlannedDueOn(event.target.value)} /></label></div><button className="primary-action" type="button" onClick={() => void handleSavePlannedPayment()}>Guardar pago</button></div> : null}
+            {planFeedback ? <p className="status-message" role="status">{planFeedback}</p> : null}
+            {plannedPayments.length ? <ul className="simple-list">{plannedPayments.map((payment) => <li key={payment.id}><span><strong>{payment.name}</strong><small>{formatCurrency(payment.amountCents)} · {payment.frequency === 'monthly' ? 'Mensual' : payment.frequency === 'weekly' ? 'Semanal' : 'Anual'} · {payment.nextDueOn}</small></span><div className="list-actions"><button className="text-button" type="button" onClick={() => void togglePlannedPayment(payment.id, !payment.active).then(refreshData)}>{payment.active ? 'Pausar' : 'Activar'}</button><button className="icon-button small-icon" type="button" aria-label={`Eliminar ${payment.name}`} onClick={() => void deletePlannedPayment(payment.id).then(refreshData)}><Trash2 size={16} aria-hidden="true" /></button></div></li>)}</ul> : <p className="muted-copy">Añade las suscripciones o pagos que quieras anticipar.</p>}
+          </section>
+
+          <section className="configuration-item" aria-label="Datos locales">
+            <div className="section-title"><div><h2><Download size={17} aria-hidden="true" />Datos locales</h2><p>Exporta una copia privada o restáurala en este dispositivo.</p></div></div>
+            <div className="backup-actions"><button className="secondary-action" type="button" onClick={() => void handleExportCsv()}><Download size={16} aria-hidden="true" />CSV</button><button className="secondary-action" type="button" onClick={() => void handleExportJson()}><Download size={16} aria-hidden="true" />Copia JSON</button><button className="secondary-action" type="button" onClick={() => importInputRef.current?.click()}><Upload size={16} aria-hidden="true" />Restaurar</button></div>
+            <input ref={importInputRef} className="visually-hidden" type="file" accept="application/json" onChange={(event) => void handleRestoreBackup(event.target.files?.[0])} />
           </section>
         </section>
       ) : null}
@@ -1170,8 +1559,11 @@ function App() {
                   autoFocus
                   placeholder="Opcional"
                   value={quickMerchant}
-                  onChange={(event) => setQuickMerchant(event.target.value)}
+                  onChange={(event) => handleQuickMerchantChange(event.target.value)}
                 />
+                {quickMerchant.trim() ? (
+                  <span className="remember-rule"><input type="checkbox" checked={quickRememberRule} onChange={(event) => setQuickRememberRule(event.target.checked)} />Recordar esta categoría para este comercio</span>
+                ) : null}
               </label>
             ) : null}
 
@@ -1350,13 +1742,14 @@ function App() {
             <section className="settings-section" aria-labelledby="theme-title">
               <h3 id="theme-title">Tema</h3>
               <div className="segmented theme-selector" aria-label="Tema">
-                <button className={!isDark ? 'active' : ''} type="button" onClick={() => setIsDark(false)}>
+                <button className={!isDark ? 'active' : ''} type="button" onClick={() => void handleSetTheme('light')}>
                   Claro
                 </button>
-                <button className={isDark ? 'active' : ''} type="button" onClick={() => setIsDark(true)}>
+                <button className={isDark ? 'active' : ''} type="button" onClick={() => void handleSetTheme('dark')}>
                   Noche
                 </button>
               </div>
+              <label className="contrast-toggle"><input type="checkbox" checked={highContrast} onChange={(event) => void handleSetHighContrast(event.target.checked)} /><span>Contraste reforzado</span></label>
             </section>
 
             <section className="settings-section" aria-labelledby="payday-title">
