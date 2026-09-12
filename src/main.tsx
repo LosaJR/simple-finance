@@ -9,7 +9,7 @@ const updatePwa = () => {
   void navigator.serviceWorker.getRegistration().then((registration) => registration?.update())
 }
 
-if ('serviceWorker' in navigator) {
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (!reloadingForUpdate) {
       reloadingForUpdate = true
