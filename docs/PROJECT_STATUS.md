@@ -12,6 +12,8 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
+La eliminación de categorías usa ahora una confirmación dentro de la hoja de Configuración, en lugar de depender de un diálogo del navegador que podía no aparecer en la PWA. Los errores se muestran en esa misma hoja. La operación retira la categoría de uso futuro y conserva el histórico de movimientos.
+
 El extracto desplegable de una categoría en Inicio muestra ahora la fecha compacta junto al importe (`−12,50 € · 01/09`) y deja el texto secundario reservado a categoría y tarjeta. La evolución de Actividad etiqueta cada ciclo con sus importes de ingresos y gastos, y elimina el control redundante de extracto: pulsar de nuevo el ciclo activo restaura todos los movimientos.
 
 Actividad prioriza ahora el filtro de tipo, los filtros compactos en orden tarjeta, categoría y búsqueda, la evolución y, finalmente, los movimientos. Los campos táctiles usan 16 px en móvil para evitar el zoom automático de Safari. Inicio sustituye el nombre Resumen, elimina mensajes redundantes del gráfico y traslada Deshacer movimiento a Registrar. Configuración reduce Tarjetas a selector y alta modal, concentra crear, editar o eliminar categorías en hojas modales y deja Automatización centrada en pagos recurrentes.
@@ -20,7 +22,7 @@ Los filtros compactos de Actividad (tarjeta, búsqueda y categoría) eliminan su
 
 La publicación móvil usa GitHub Pages en `https://losajr.github.io/simple-finance/`. El repositorio permanece público durante el desarrollo para permitir esta modalidad; la PWA adapta su ruta base, manifiesto y service worker para funcionar desde `/simple-finance/`.
 
-Resumen muestra la versión visible `v1.7` junto a la marca. Se corresponde con la versión técnica `1.7.0` del paquete y sirve para confirmar en móvil que la PWA instalada ha recibido la compilación publicada.
+Resumen muestra la versión visible `v1.8` junto a la marca. Se corresponde con la versión técnica `1.8.0` del paquete y sirve para confirmar en móvil que la PWA instalada ha recibido la compilación publicada.
 
 Se corrigió el bloqueo de actualización heredado en PWA: el service worker entrante usa ahora activación y toma de control inmediatas. Esto permite sustituir una instalación anterior que detectaba actualizaciones pero las dejaba esperando.
 
