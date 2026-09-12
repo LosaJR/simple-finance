@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  Archive,
   BarChart3,
   BadgeAlert,
   Banknote,
-  Check,
   CalendarDays,
   ChevronDown,
   CircleAlert,
@@ -53,7 +51,6 @@ import {
 } from './lib/finance'
 import {
   archiveCategory,
-  archivePaymentMethod,
   closeCurrentCycle,
   createDemoDataset,
   createMerchantRule,
@@ -61,7 +58,6 @@ import {
   createCategory,
   createPlannedPayment,
   createTransaction,
-  deleteMerchantRule,
   deletePlannedPayment,
   deleteTransaction,
   ensureSeedData,
@@ -78,11 +74,9 @@ import {
   restoreLocalBackup,
   savePreferences,
   savePaydaySettings,
-  setPrimaryPaymentMethod,
   togglePlannedPayment,
   updateCategory,
   updateCategoryLimit,
-  updatePaymentMethodName,
   updateTransaction,
 } from './lib/storage'
 import {
@@ -120,6 +114,7 @@ type ActivityTab = 'all' | 'expense' | 'income'
 type AppScreen = 'home' | 'entry' | 'activity' | 'cards'
 type QuickType = 'expense' | 'income'
 type QuickStep = 'type' | 'amount' | 'merchant' | 'category'
+type ConfigurationDialog = 'card' | 'category-add' | 'category-edit' | null
 type BusyAction = 'quick' | 'entry' | 'planned' | 'planned-record' | 'settings' | 'cycle-reset' | 'edit' | null
 
 const activityTabs: { id: ActivityTab; label: string }[] = [
@@ -129,7 +124,7 @@ const activityTabs: { id: ActivityTab; label: string }[] = [
 ]
 
 const screens: { id: AppScreen; label: string; title: string; icon: typeof LayoutDashboard }[] = [
-  { id: 'home', label: 'Resumen', title: 'Control personal', icon: LayoutDashboard },
+  { id: 'home', label: 'Inicio', title: 'Inicio', icon: LayoutDashboard },
   { id: 'entry', label: 'Registrar', title: 'Nuevo movimiento', icon: CirclePlus },
   { id: 'activity', label: 'Actividad', title: 'Actividad', icon: ListFilter },
   { id: 'cards', label: 'Configuración', title: 'Configuración', icon: Settings2 },
@@ -179,14 +174,11 @@ function App() {
   const [activitySearch, setActivitySearch] = useState('')
   const [activityPendingOnly, setActivityPendingOnly] = useState(false)
   const [screen, setScreen] = useState<AppScreen>('home')
-  const [isAddingCard, setIsAddingCard] = useState(false)
+  const [configurationDialog, setConfigurationDialog] = useState<ConfigurationDialog>(null)
   const [newCardName, setNewCardName] = useState('')
   const [selectedCardId, setSelectedCardId] = useState('')
-  const [isAddingCategory, setIsAddingCategory] = useState(false)
-  const [newCategoryName, setNewCategoryName] = useState('')
   const [categoryNameInput, setCategoryNameInput] = useState('')
   const [categoryColorInput, setCategoryColorInput] = useState('#546f59')
-  const [cardNameInput, setCardNameInput] = useState('')
   const [selectedCategoryId, setSelectedCategoryId] = useState('')
   const [categoryLimitInput, setCategoryLimitInput] = useState('')
   const [categoryLimitFeedback, setCategoryLimitFeedback] = useState('')
@@ -230,6 +222,7 @@ function App() {
   const quickSheetRef = useRef<HTMLElement>(null)
   const editSheetRef = useRef<HTMLElement>(null)
   const settingsSheetRef = useRef<HTMLElement>(null)
+  const configurationSheetRef = useRef<HTMLElement>(null)
   const lastFocusedElementRef = useRef<HTMLElement | null>(null)
   const busyActionRef = useRef<BusyAction>(null)
   const wasModalOpenRef = useRef(false)
@@ -488,10 +481,6 @@ const downloadFile = (name: string, contents: string, type: string) => {
     setCategoryLimitFeedback('')
   }, [selectedCategory?.color, selectedCategory?.id, selectedCategory?.limitCents, selectedCategory?.name])
 
-  useEffect(() => {
-    setCardNameInput(selectedCard?.name ?? '')
-  }, [selectedCard?.id, selectedCard?.name])
-
   const navigateTo = (nextScreen: AppScreen) => {
     setScreen(nextScreen)
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -566,7 +555,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
       await refreshData()
       closeQuickEntry()
       setLastCreatedTransaction(transaction)
-      setHomeFeedback(`Movimiento registrado con ${primaryCard?.name ?? 'la tarjeta principal'}. Puedes deshacerlo.`)
+      setHomeFeedback(`Movimiento registrado con ${primaryCard?.name ?? 'la tarjeta principal'}.`)
     } catch {
       setQuickFeedback('No se ha podido registrar el movimiento. Inténtalo de nuevo.')
     } finally {
@@ -595,7 +584,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
     try {
       const transaction = await createTransaction(parsed.data, paydayDay)
       setLastCreatedTransaction(transaction)
-      setFeedback('Movimiento registrado. Puedes deshacerlo desde Resumen.')
+      setFeedback('')
       setAmount('')
       setDraft((current) => ({
         ...initialDraft,
@@ -612,6 +601,33 @@ const downloadFile = (name: string, contents: string, type: string) => {
     }
   }
 
+  const openConfigurationDialog = (dialog: Exclude<ConfigurationDialog, null>) => {
+    rememberOpeningFocus()
+    if (dialog === 'card') setNewCardName('')
+    if (dialog === 'category-add') {
+      setCategoryNameInput('')
+      setCategoryColorInput('#546f59')
+      setCategoryLimitInput('')
+      setCategoryLimitFeedback('')
+    }
+    setConfigurationDialog(dialog)
+  }
+
+  const closeConfigurationDialog = () => {
+    setConfigurationDialog(null)
+    setCategoryLimitFeedback('')
+  }
+
+  const getCategoryLimitCents = () => {
+    const trimmedLimit = categoryLimitInput.trim()
+    const limitCents = trimmedLimit ? parseEuroToCents(trimmedLimit) : undefined
+    if (trimmedLimit && (!limitCents || limitCents < 0)) {
+      setCategoryLimitFeedback('Introduce una cantidad mayor que cero o deja el campo vacío.')
+      return null
+    }
+    return limitCents
+  }
+
   const handleAddCard = async () => {
     const cardName = newCardName.trim()
     if (cardName.length < 2) {
@@ -623,7 +639,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
       const card = await createPaymentMethod(cardName)
       setSelectedCardId(card.id)
       setNewCardName('')
-      setIsAddingCard(false)
+      closeConfigurationDialog()
       setFeedback('Tarjeta añadida.')
       await refreshData()
     } catch {
@@ -632,17 +648,20 @@ const downloadFile = (name: string, contents: string, type: string) => {
   }
 
   const handleAddCategory = async () => {
-    const categoryName = newCategoryName.trim()
+    const categoryName = categoryNameInput.trim()
     if (categoryName.length < 2) {
       setFeedback('Escribe un nombre para la categoría.')
       return
     }
 
     try {
+      const limitCents = getCategoryLimitCents()
+      if (limitCents === null) return
       const category = await createCategory(categoryName)
+      await updateCategory(category.id, { name: categoryName, color: categoryColorInput, icon: category.icon })
+      await updateCategoryLimit(category.id, limitCents)
       setSelectedCategoryId(category.id)
-      setNewCategoryName('')
-      setIsAddingCategory(false)
+      closeConfigurationDialog()
       setFeedback('Categoría añadida.')
       await refreshData()
     } catch {
@@ -671,33 +690,14 @@ const downloadFile = (name: string, contents: string, type: string) => {
     }
   }
 
-  const handleSaveCardDetails = async () => {
-    if (!selectedCard) return
-    try {
-      await updatePaymentMethodName(selectedCard.id, cardNameInput)
-      setFeedback('Tarjeta actualizada.')
-      await refreshData()
-    } catch (error) {
-      setFeedback(error instanceof Error ? error.message : 'No se ha podido actualizar la tarjeta.')
-    }
-  }
-
-  const handleArchiveCard = async () => {
-    if (!selectedCard || !window.confirm(`¿Archivar ${selectedCard.name}? Sus movimientos se conservarán.`)) return
-    try {
-      await archivePaymentMethod(selectedCard.id)
-      setSelectedCardId('')
-      setFeedback('Tarjeta archivada. Los movimientos históricos siguen intactos.')
-      await refreshData()
-    } catch (error) {
-      setFeedback(error instanceof Error ? error.message : 'No se ha podido archivar la tarjeta.')
-    }
-  }
-
   const handleSaveCategoryDetails = async () => {
     if (!selectedCategory) return
     try {
+      const limitCents = getCategoryLimitCents()
+      if (limitCents === null) return
       await updateCategory(selectedCategory.id, { name: categoryNameInput, color: categoryColorInput, icon: selectedCategory.icon })
+      await updateCategoryLimit(selectedCategory.id, limitCents)
+      closeConfigurationDialog()
       setFeedback('Categoría actualizada.')
       await refreshData()
     } catch (error) {
@@ -710,6 +710,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
     try {
       await archiveCategory(selectedCategory.id)
       setSelectedCategoryId('')
+      closeConfigurationDialog()
       setFeedback('Categoría archivada. Los movimientos históricos siguen intactos.')
       await refreshData()
     } catch (error) {
@@ -774,6 +775,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
     await deleteTransaction(lastCreatedTransaction.id)
     setLastCreatedTransaction(null)
     setHomeFeedback('Movimiento deshecho.')
+    setFeedback('Movimiento deshecho.')
     await refreshData()
   }
 
@@ -832,42 +834,10 @@ const downloadFile = (name: string, contents: string, type: string) => {
     await refreshData()
   }
 
-  const handleSaveCategoryLimit = async () => {
-    if (!selectedCategory) {
-      return
-    }
-
-    const trimmedLimit = categoryLimitInput.trim()
-    const limitCents = trimmedLimit ? parseEuroToCents(trimmedLimit) : undefined
-    if (trimmedLimit && (!limitCents || limitCents < 0)) {
-      setCategoryLimitFeedback('Introduce una cantidad mayor que cero o deja el campo vacío.')
-      return
-    }
-
-    try {
-      await updateCategoryLimit(selectedCategory.id, limitCents)
-      setCategoryLimitFeedback(limitCents ? 'Límite mensual guardado.' : 'Límite mensual eliminado.')
-      await refreshData()
-    } catch {
-      setCategoryLimitFeedback('No se ha podido guardar el límite.')
-    }
-  }
-
   const selectSummaryCycle = (cycleId: string) => {
     setSummaryCycleId(cycleId)
     setSummaryCategoryId(null)
     setIsSummaryCalendarOpen(false)
-  }
-
-  const handleSetPrimaryCard = async (paymentMethodId: string) => {
-    try {
-      await setPrimaryPaymentMethod(paymentMethodId)
-      setDraft((current) => ({ ...current, paymentMethodId }))
-      setFeedback('Tarjeta principal actualizada.')
-      await refreshData()
-    } catch {
-      setFeedback('No se ha podido actualizar la tarjeta principal.')
-    }
   }
 
   const openSettings = () => {
@@ -977,17 +947,6 @@ const downloadFile = (name: string, contents: string, type: string) => {
     }
   }
 
-  const handleDeleteMerchantRule = async (rule: MerchantRule) => {
-    if (!window.confirm(`¿Eliminar la regla para ${rule.merchant}? La categoría sugerida dejará de aplicarse.`)) return
-    try {
-      await deleteMerchantRule(rule.id)
-      setFeedback('Regla eliminada.')
-      await refreshData()
-    } catch {
-      setFeedback('No se ha podido eliminar la regla.')
-    }
-  }
-
   const handleDeletePlannedPayment = async (payment: PlannedPayment) => {
     if (!window.confirm(`¿Eliminar ${payment.name}? No se borrarán movimientos ya registrados.`)) return
     try {
@@ -1017,7 +976,9 @@ const downloadFile = (name: string, contents: string, type: string) => {
         ? editSheetRef.current
         : isSettingsOpen
           ? settingsSheetRef.current
-          : null
+          : configurationDialog
+            ? configurationSheetRef.current
+            : null
 
     if (!activeDialog) {
       if (wasModalOpenRef.current) {
@@ -1045,7 +1006,8 @@ const downloadFile = (name: string, contents: string, type: string) => {
         event.preventDefault()
         if (isQuickEntryOpen) closeQuickEntry()
         else if (editingTransaction) closeTransactionEditor()
-        else closeSettings()
+        else if (isSettingsOpen) closeSettings()
+        else closeConfigurationDialog()
         return
       }
       if (event.key !== 'Tab') return
@@ -1066,7 +1028,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
       window.cancelAnimationFrame(frame)
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [editingTransaction, isQuickEntryOpen, isSettingsOpen])
+  }, [configurationDialog, editingTransaction, isQuickEntryOpen, isSettingsOpen])
 
   const handleDeleteTransaction = async (transaction: Transaction) => {
     if (!window.confirm(`¿Eliminar ${transaction.merchant}?`)) {
@@ -1217,7 +1179,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
       </header>
 
       {screen === 'home' ? (
-        <section className="screen-stack home-screen" aria-label="Resumen del ciclo actual">
+        <section className="screen-stack home-screen" aria-label="Inicio del ciclo actual">
           <article className="payday-banner">
             <span className="summary-symbol"><CalendarDays size={19} aria-hidden="true" /></span>
             <div className="payday-copy">
@@ -1230,11 +1192,6 @@ const downloadFile = (name: string, contents: string, type: string) => {
             </button>
           </article>
           {homeFeedback ? <p className="status-message" role="status">{homeFeedback}</p> : null}
-          {lastCreatedTransaction ? (
-            <button className="undo-banner" type="button" onClick={() => void handleUndoLastTransaction()}>
-              <Check size={16} aria-hidden="true" />Deshacer último movimiento
-            </button>
-          ) : null}
           {!onboardingCompleted ? (
             <section className="onboarding-panel" aria-label="Primeros pasos">
               <BadgeAlert size={19} aria-hidden="true" />
@@ -1337,11 +1294,6 @@ const downloadFile = (name: string, contents: string, type: string) => {
                   <strong>{formatCurrency(cycleExpenseCategories.totalCents)}</strong>
                 </div>
               </div>
-              <p>
-                {cycleExpenseCategories.entries.length > 0
-                  ? `${cycleExpenseCategories.entries.length} categorías utilizadas`
-                  : 'Aún no hay gastos en este ciclo'}
-              </p>
             </div>
           </section>
 
@@ -1509,18 +1461,14 @@ const downloadFile = (name: string, contents: string, type: string) => {
             </select>
           </label>
 
-          <label className="pending-filter">
-            <input
-              type="checkbox"
-              checked={draft.status === 'pending'}
-              onChange={(event) => setDraft((current) => ({ ...current, status: event.target.checked ? 'pending' : 'posted' }))}
-            />
-            <span>Guardar como pendiente de confirmar</span>
-          </label>
-
           <button className="primary-action" type="submit" disabled={busyAction === 'entry'}>
             {busyAction === 'entry' ? 'Guardando...' : 'Guardar movimiento'}
           </button>
+          {lastCreatedTransaction ? (
+            <button className="undo-entry-action" type="button" onClick={() => void handleUndoLastTransaction()}>
+              <RotateCcw size={17} aria-hidden="true" />Deshacer movimiento
+            </button>
+          ) : null}
         </form>
       ) : null}
 
@@ -1628,15 +1576,15 @@ const downloadFile = (name: string, contents: string, type: string) => {
               </select>
             </label>
             <label className="compact-activity-filter">
-              <Search size={16} aria-hidden="true" />
-              <input aria-label="Buscar" value={activitySearch} placeholder="Buscar" onChange={(event) => setActivitySearch(event.target.value)} />
-            </label>
-            <label className="compact-activity-filter">
               <Tags size={16} aria-hidden="true" />
-              <select value={activityCategoryId} onChange={(event) => setActivityCategoryId(event.target.value)}>
+              <select aria-label="Categoría" value={activityCategoryId} onChange={(event) => setActivityCategoryId(event.target.value)}>
                 <option value="all">Todas</option>
                 {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
               </select>
+            </label>
+            <label className="compact-activity-filter">
+              <Search size={16} aria-hidden="true" />
+              <input aria-label="Buscar" value={activitySearch} placeholder="Buscar" onChange={(event) => setActivitySearch(event.target.value)} />
             </label>
           </div>
           {(activitySearch || activityCategoryId !== 'all' || activityPaymentMethodId !== 'all' || activityPendingOnly || activityCycleId) ? (
@@ -1677,42 +1625,15 @@ const downloadFile = (name: string, contents: string, type: string) => {
                 type="button"
                 aria-label="Añadir tarjeta"
                 title="Añadir tarjeta"
-                onClick={() => setIsAddingCard((current) => !current)}
+                onClick={() => openConfigurationDialog('card')}
               >
                 <Plus size={19} aria-hidden="true" />
               </button>
             </div>
-            {selectedCard && !selectedCard.isPrimary ? (
-              <button className="secondary-action" type="button" onClick={() => handleSetPrimaryCard(selectedCard.id)}>
-                Usar como principal
-              </button>
-            ) : (
-              <span className="primary-tag">Tarjeta principal</span>
-            )}
-            <div className="configuration-editor">
-              <label>Nombre de la tarjeta<input value={cardNameInput} onChange={(event) => setCardNameInput(event.target.value)} /></label>
-              <div className="inline-actions"><button className="secondary-action compact-action" type="button" onClick={() => void handleSaveCardDetails()}>Guardar nombre</button>{selectedCard && !selectedCard.isPrimary ? <button className="danger-action compact-action" type="button" onClick={() => void handleArchiveCard()}><Archive size={15} aria-hidden="true" />Archivar</button> : null}</div>
-            </div>
-            {isAddingCard ? (
-              <div className="card-creator">
-                <label>
-                  Nombre de la tarjeta
-                  <input
-                    autoFocus
-                    placeholder="Tarjeta de viajes"
-                    value={newCardName}
-                    onChange={(event) => setNewCardName(event.target.value)}
-                  />
-                </label>
-                <button className="primary-action" type="button" onClick={handleAddCard}>
-                  Guardar tarjeta
-                </button>
-              </div>
-            ) : null}
           </section>
 
           <section className="configuration-item" aria-label="Categorías">
-            <div className="configuration-select-row">
+            <div className="configuration-select-row configuration-category-row">
               <label>
                 <span className="field-title"><Tags size={16} aria-hidden="true" />Categorías</span>
                 <select value={selectedCategory?.id ?? ''} onChange={(event) => handleCategorySelection(event.target.value)}>
@@ -1723,65 +1644,20 @@ const downloadFile = (name: string, contents: string, type: string) => {
                   ))}
                 </select>
               </label>
-              <button
-                className="add-icon-button"
-                type="button"
-                aria-label="Añadir categoría"
-                title="Añadir categoría"
-                onClick={() => setIsAddingCategory((current) => !current)}
-              >
-                <Plus size={19} aria-hidden="true" />
-              </button>
-            </div>
-            <div className="category-limit-control">
-              <label>
-                <span className="field-title"><PieChart size={16} aria-hidden="true" />Límite mensual de {selectedCategory?.name ?? 'esta categoría'}</span>
-                <input
-                  inputMode="decimal"
-                  placeholder="Ej. 250,00 €"
-                  value={categoryLimitInput}
-                  onChange={(event) => setCategoryLimitInput(event.target.value)}
-                />
-              </label>
-              <button className="secondary-action" type="button" onClick={handleSaveCategoryLimit}>
-                Guardar límite
-              </button>
-            </div>
-            <p className="limit-help">Este importe solo se aplica a {selectedCategory?.name ?? 'la categoría seleccionada'}.</p>
-            <div className="configuration-editor category-editor">
-              <label>Nombre<input value={categoryNameInput} onChange={(event) => setCategoryNameInput(event.target.value)} /></label>
-              <label>Color<input className="color-input" type="color" value={categoryColorInput} onChange={(event) => setCategoryColorInput(event.target.value)} /></label>
-              <div className="inline-actions"><button className="secondary-action compact-action" type="button" onClick={() => void handleSaveCategoryDetails()}>Guardar cambios</button><button className="danger-action compact-action" type="button" onClick={() => void handleArchiveCategory()}><Archive size={15} aria-hidden="true" />Archivar</button></div>
-            </div>
-            {categoryLimitFeedback ? <p className="status-message" role="status">{categoryLimitFeedback}</p> : null}
-            {isAddingCategory ? (
-              <div className="card-creator">
-                <label>
-                  Nombre de la categoría
-                  <input
-                    autoFocus
-                    placeholder="Mascotas"
-                    value={newCategoryName}
-                    onChange={(event) => setNewCategoryName(event.target.value)}
-                  />
-                </label>
-                <button className="primary-action" type="button" onClick={handleAddCategory}>
-                  Guardar categoría
+              <div className="configuration-select-actions">
+                <button className="add-icon-button" type="button" aria-label="Editar categoría" title="Editar categoría" onClick={() => openConfigurationDialog('category-edit')}>
+                  <Pencil size={17} aria-hidden="true" />
+                </button>
+                <button className="add-icon-button" type="button" aria-label="Añadir categoría" title="Añadir categoría" onClick={() => openConfigurationDialog('category-add')}>
+                  <Plus size={19} aria-hidden="true" />
                 </button>
               </div>
-            ) : null}
+            </div>
           </section>
 
           </div>
           <div className="configuration-group" aria-labelledby="configuration-automation-title">
             <h3 id="configuration-automation-title">Automatización</h3>
-
-          <section className="configuration-item" aria-label="Reglas por comercio">
-            <div className="section-title"><div><h2><Store size={17} aria-hidden="true" />Reglas por comercio</h2><p>La categoría se sugerirá al escribir ese comercio.</p></div></div>
-            {merchantRules.length === 0 ? <p className="muted-copy">Crea una regla desde el registro rápido al guardar un comercio.</p> : (
-              <ul className="simple-list">{merchantRules.map((rule) => <li key={rule.id}><span><strong>{rule.merchant}</strong><small>{categoryMap.get(rule.categoryId)?.name ?? 'Categoría archivada'}</small></span><button className="icon-button small-icon" type="button" aria-label={`Eliminar regla de ${rule.merchant}`} onClick={() => void handleDeleteMerchantRule(rule)}><Trash2 size={16} aria-hidden="true" /></button></li>)}</ul>
-            )}
-          </section>
 
           <section className="configuration-item" aria-label="Pagos recurrentes">
             <div className="section-title"><div><h2><Repeat2 size={17} aria-hidden="true" />Pagos recurrentes</h2><p>Se muestran para confirmar; no se registran solos.</p></div><button className="add-icon-button" type="button" aria-label="Añadir pago recurrente" onClick={() => setIsAddingPlan((current) => !current)}><Plus size={19} aria-hidden="true" /></button></div>
@@ -1921,6 +1797,62 @@ const downloadFile = (name: string, contents: string, type: string) => {
                 )}
               </div>
             ) : null}
+          </section>
+        </div>
+      ) : null}
+
+      {configurationDialog ? (
+        <div className="modal-layer" role="dialog" aria-modal="true" aria-labelledby="configuration-dialog-title">
+          <section ref={configurationSheetRef} className="settings-sheet configuration-sheet">
+            <div className="sheet-heading">
+              <div>
+                <p className="eyebrow">Configuración</p>
+                <h2 id="configuration-dialog-title">
+                  {configurationDialog === 'card'
+                    ? 'Añadir tarjeta'
+                    : configurationDialog === 'category-add'
+                      ? 'Añadir categoría'
+                      : 'Editar categoría'}
+                </h2>
+              </div>
+              <button className="close-button" type="button" aria-label="Cerrar" onClick={closeConfigurationDialog}>Cerrar</button>
+            </div>
+
+            {configurationDialog === 'card' ? (
+              <>
+                <label>
+                  Nombre de la tarjeta
+                  <input data-initial-focus placeholder="Tarjeta de viajes" value={newCardName} onChange={(event) => setNewCardName(event.target.value)} />
+                </label>
+                <button className="primary-action" type="button" onClick={() => void handleAddCard()}>Guardar tarjeta</button>
+              </>
+            ) : (
+              <>
+                <label>
+                  Nombre
+                  <input data-initial-focus placeholder="Mascotas" value={categoryNameInput} onChange={(event) => setCategoryNameInput(event.target.value)} />
+                </label>
+                <div className="field-grid">
+                  <label>
+                    Color
+                    <input className="color-input" type="color" value={categoryColorInput} onChange={(event) => setCategoryColorInput(event.target.value)} />
+                  </label>
+                  <label>
+                    Límite mensual
+                    <input inputMode="decimal" placeholder="250,00 €" value={categoryLimitInput} onChange={(event) => setCategoryLimitInput(event.target.value)} />
+                  </label>
+                </div>
+                {categoryLimitFeedback ? <p className="status-message error" role="alert">{categoryLimitFeedback}</p> : null}
+                <div className="sheet-actions">
+                  {configurationDialog === 'category-edit' ? (
+                    <button className="danger-action" type="button" onClick={() => void handleArchiveCategory()}><Trash2 size={16} aria-hidden="true" />Eliminar</button>
+                  ) : <span />}
+                  <button className="primary-action" type="button" onClick={() => void (configurationDialog === 'category-add' ? handleAddCategory() : handleSaveCategoryDetails())}>
+                    Guardar categoría
+                  </button>
+                </div>
+              </>
+            )}
           </section>
         </div>
       ) : null}

@@ -626,6 +626,18 @@ label,
   box-shadow: var(--button-shadow);
 }
 
+.activity-panel .activity-tabs {
+  order: 1;
+  gap: 2px;
+  padding: 2px;
+  background: transparent;
+}
+
+.activity-panel .activity-tabs button {
+  min-height: 36px;
+  font-size: 0.78rem;
+}
+
 label {
   display: grid;
   gap: 7px;
@@ -1048,6 +1060,15 @@ textarea {
   min-width: 0;
 }
 
+.configuration-category-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.configuration-select-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .category-limit-control {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -1253,6 +1274,7 @@ textarea {
 
 .cycle-trend {
   display: grid;
+  order: 4;
   gap: 10px;
   padding: 0 0 14px;
   border-bottom: 1px solid var(--line);
@@ -1372,6 +1394,7 @@ textarea {
 
 .activity-quick-filters {
   display: grid;
+  order: 2;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
@@ -1398,7 +1421,22 @@ textarea {
   padding: 0;
   color: var(--text);
   background: transparent;
-  font-size: 0.75rem;
+  -webkit-appearance: none;
+  appearance: none;
+  font-size: 16px;
+}
+
+.activity-panel > .text-button {
+  order: 3;
+  justify-self: start;
+  min-height: 30px;
+  padding: 0;
+  font-size: 0.76rem;
+}
+
+.activity-panel > .transaction-list,
+.activity-panel > .empty-state {
+  order: 5;
 }
 
 .compact-activity-filter input::placeholder {
@@ -1457,6 +1495,21 @@ textarea {
   border-color: color-mix(in srgb, var(--positive) 48%, var(--line));
   color: var(--positive);
   background: color-mix(in srgb, var(--positive) 10%, var(--field-glass));
+  font-weight: 800;
+}
+
+.undo-entry-action {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 0;
+  padding: 0;
+  color: var(--accent);
+  background: transparent;
+  font: inherit;
+  font-size: 0.84rem;
   font-weight: 800;
 }
 
@@ -1798,6 +1851,14 @@ textarea {
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
+  }
+}
+
+@media (hover: none) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
   }
 }
 

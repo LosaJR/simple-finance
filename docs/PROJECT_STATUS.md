@@ -12,6 +12,8 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
+Actividad prioriza ahora el filtro de tipo, los filtros compactos en orden tarjeta, categoría y búsqueda, la evolución y, finalmente, los movimientos. Los campos táctiles usan 16 px en móvil para evitar el zoom automático de Safari. Inicio sustituye el nombre Resumen, elimina mensajes redundantes del gráfico y traslada Deshacer movimiento a Registrar. Configuración reduce Tarjetas a selector y alta modal, concentra crear, editar o eliminar categorías en hojas modales y deja Automatización centrada en pagos recurrentes.
+
 Los filtros compactos de Actividad (tarjeta, búsqueda y categoría) eliminan su relleno interior para integrarse visualmente con la vista sin perder borde ni foco accesible.
 
 La publicación móvil usa GitHub Pages en `https://losajr.github.io/simple-finance/`. El repositorio permanece público durante el desarrollo para permitir esta modalidad; la PWA adapta su ruta base, manifiesto y service worker para funcionar desde `/simple-finance/`.
