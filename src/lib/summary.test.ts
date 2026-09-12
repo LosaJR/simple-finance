@@ -8,6 +8,7 @@ import {
   getDaysUntilPayday,
   parseEuroToCents,
   summarizeCategoryLimit,
+  summarizeCycleTrend,
   summarizeCurrentCycle,
   summarizeMonthlyHistory,
 } from './summary'
@@ -145,6 +146,20 @@ describe('daily availability and category limits', () => {
       trackPercentage: 100,
       excessCents: 1200,
     })
+  })
+
+  it('builds an ordered cycle trend using payroll boundaries', () => {
+    const transactions: Transaction[] = [
+      { ...baseTransaction('expense', 12000), occurredOn: '2026-08-26' },
+      { ...baseTransaction('income', 190000), occurredOn: '2026-08-26' },
+      { ...baseTransaction('expense', 8500), occurredOn: '2026-09-03' },
+      { ...baseTransaction('income', 200000), occurredOn: '2026-09-25' },
+    ]
+
+    expect(summarizeCycleTrend(transactions, 25)).toEqual([
+      { cycleId: '2026-09', expenseCents: 20500, incomeCents: 190000, netCents: 169500 },
+      { cycleId: '2026-10', expenseCents: 0, incomeCents: 200000, netCents: 200000 },
+    ])
   })
 })
 

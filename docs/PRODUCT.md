@@ -18,6 +18,7 @@ El propietario y un circulo cerrado de testers. No se recopilan datos, no hay ba
 - El comercio o concepto es opcional para preservar el registro manual cuando no exista una fuente automatica.
 - La actividad se consulta por fecha y hora en las pestañas Global, Gastos e Ingresos.
 - La actividad puede filtrarse por todas las tarjetas o una tarjeta concreta.
+- Actividad muestra la evolución de los últimos seis ciclos con barras de ingresos y gastos; tocar un ciclo abre su extracto filtrado.
 - La navegacion movil separa Resumen, Registrar, Actividad y Configuracion en vistas propias; cada vista solo desplaza el contenido que necesita.
 - Resumen ofrece un registro rapido superpuesto con los pasos gasto o ingreso, importe, concepto y categoria; usa la tarjeta principal y el momento actual sin pedirlos.
 - Resumen mantiene los ultimos movimientos compactos y permite deslizarlos a la izquierda para editar o eliminar el movimiento.

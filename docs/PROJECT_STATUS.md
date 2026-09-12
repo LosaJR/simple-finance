@@ -12,6 +12,8 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
+Se inició la Fase 4 con una evolución visual en Actividad. Resume hasta seis ciclos recientes con barras de ingresos y gastos, comunica la variación del gasto frente al ciclo anterior y permite abrir el extracto del ciclo al tocar su barra. La agregación por ciclos y los casos de nómina se cubren con pruebas unitarias.
+
 Se reordenó la estrategia nativa: Android será la primera plataforma publicada y de pruebas, usando Capacitor sobre la misma interfaz React y la misma lógica financiera local. La capa iOS conserva sus capacidades exclusivas como trabajo posterior. La publicación Android requerirá Android Studio, firma, cuenta de Google Play, una política de privacidad y pruebas físicas antes de habilitar funcionalidades nativas o automatizaciones.
 
 Se incorporó el cierre manual de ciclo desde Ajustes. Cierra el extracto con los movimientos del día anterior, inicia uno nuevo en la fecha actual y mantiene el historial disponible. Los cálculos y las copias JSON almacenan estos límites manuales, incluyendo varios cierres dentro del mismo periodo programado. Las pruebas cubren reinicios, mes de febrero, nóminas el día 31 y desplazamientos por fin de semana.

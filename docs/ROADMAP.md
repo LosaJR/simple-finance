@@ -51,7 +51,7 @@ Estado: iniciada.
 ## Fase 4 - Estadisticas y portabilidad
 
 - Gasto por categoria y disponible estimado por ciclo: disponible.
-- Comparativa básica frente al ciclo anterior: disponible; evolución detallada por periodos es el siguiente hito.
+- Comparativa básica frente al ciclo anterior y evolución visual de los últimos seis ciclos: disponibles.
 - Exportacion CSV y copia/restauracion JSON validada: disponible.
 
 ## Fase 5 - Calidad y pruebas privadas
