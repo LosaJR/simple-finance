@@ -57,7 +57,7 @@ Estado: iniciada.
 
 ## Fase 5 - Calidad y pruebas privadas
 
-- Accesibilidad, estados vacios, errores y pulido visual.
+- Accesibilidad, estados vacios, errores y pulido visual: primer pase completado (objetivos de 44 px, contraste, foco modal, estados de guardado y confirmaciones de borrado).
 - Checklist iPhone Safari.
 - Plantilla de bugs para testers.
 

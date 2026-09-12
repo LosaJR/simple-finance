@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { addFrequencyToDate, getCycleId, getPaydayDate, isPotentialDuplicate, normalizeMerchant, type Transaction } from './finance'
+import { addFrequencyToDate, getCycleBounds, getCycleId, getPaydayDate, isPotentialDuplicate, normalizeMerchant, type Transaction } from './finance'
 import { createLocalId } from './storage'
 import {
   formatActivityDate,
+  formatCycleRange,
   getDailyAvailableCents,
   getDaysUntilPayday,
   parseEuroToCents,
@@ -97,6 +98,11 @@ describe('daily availability and category limits', () => {
     expect(getDailyAvailableCents(12500, 5)).toBe(2500)
     expect(getDailyAvailableCents(-12500, 5)).toBe(-2500)
     expect(getDailyAvailableCents(12500, 0)).toBe(12500)
+  })
+
+  it('describes the effective interval between two paydays', () => {
+    expect(getCycleBounds('2026-09', 25)).toEqual({ start: '2026-08-25', end: '2026-09-24' })
+    expect(formatCycleRange('2026-09', 25)).toBe('Del 25 ago al 24 sept')
   })
 
   it('marks category limits before and after the threshold', () => {
