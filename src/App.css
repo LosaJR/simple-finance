@@ -863,6 +863,13 @@ textarea {
   white-space: nowrap;
 }
 
+.transaction-list strong small {
+  margin-left: 5px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
 .transaction-list strong.expense {
   color: var(--danger);
 }
@@ -1322,16 +1329,16 @@ textarea {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
   gap: 8px;
-  min-height: 132px;
+  min-height: 150px;
   align-items: end;
 }
 
 .trend-chart button {
   display: grid;
   min-width: 0;
-  min-height: 132px;
-  grid-template-rows: 96px auto;
-  gap: 7px;
+  min-height: 150px;
+  grid-template-rows: 96px auto auto;
+  gap: 5px;
   align-items: end;
   border: 0;
   border-bottom: 2px solid var(--line);
@@ -1375,6 +1382,30 @@ textarea {
 
 .trend-expense {
   background: color-mix(in srgb, var(--danger) 72%, var(--field));
+}
+
+.trend-amounts {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  font-size: 0.58rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.trend-amounts span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trend-income-amount {
+  color: var(--positive);
+}
+
+.trend-expense-amount {
+  color: var(--danger);
 }
 
 .trend-chart strong {

@@ -91,7 +91,7 @@ import {
   summarizeCycleTrend,
 } from './lib/summary'
 
-const APP_VERSION = '1.6'
+const APP_VERSION = '1.7'
 
 const todayInputValue = () => {
   const today = new Date()
@@ -136,6 +136,14 @@ const formatAmountInput = (amountCents: number) =>
   new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
     amountCents / 100,
   )
+
+const formatCompactDate = (isoDate: string) =>
+  new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit' }).format(
+    new Date(`${isoDate}T12:00:00`),
+  )
+
+const formatTrendCurrency = (amountCents: number) =>
+  `${new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(amountCents / 100)}€`
 
 const formatCycleLabel = (cycleId: string) =>
   new Intl.DateTimeFormat('es-ES', { month: 'short' })
@@ -1065,7 +1073,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
     swipeStart.current = null
   }
 
-  const renderTransactions = (items: Transaction[], swipeable = false) => {
+  const renderTransactions = (items: Transaction[], swipeable = false, showCompactDate = false) => {
     if (items.length === 0) {
       return (
         <div className="empty-state">
@@ -1131,13 +1139,14 @@ const downloadFile = (name: string, contents: string, type: string) => {
                   <div>
                     <span className="merchant">{transaction.merchant}</span>
                     <span className="metadata">
-                      {category?.name ?? 'Sin categoría'} · {method?.name ?? 'Sin tarjeta'} ·{' '}
-                      {formatActivityDate(transaction.occurredOn, transaction.createdAt)}
+                      {category?.name ?? 'Sin categoría'} · {method?.name ?? 'Sin tarjeta'}
+                      {!showCompactDate ? ` · ${formatActivityDate(transaction.occurredOn, transaction.createdAt)}` : null}
                     </span>
                   </div>
                   <strong className={transaction.type}>
                     {transaction.type === 'expense' ? '-' : '+'}
                     {formatCurrency(transaction.amountCents)}
+                    {showCompactDate ? <small>{formatCompactDate(transaction.occurredOn)}</small> : null}
                   </strong>
                   <button
                     className="transaction-more"
@@ -1365,7 +1374,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
                       </button>
                       {summaryCategoryId === entry.category.id ? (
                         <section className="category-expenses category-expenses-inline" aria-label={`Gastos de ${entry.category.name}`}>
-                          {renderTransactions(selectedSummaryCategoryTransactions)}
+                          {renderTransactions(selectedSummaryCategoryTransactions, false, true)}
                         </section>
                       ) : null}
                     </li>
@@ -1527,16 +1536,15 @@ const downloadFile = (name: string, contents: string, type: string) => {
                       <span className="trend-income" style={{ height: `${Math.max((cycle.incomeCents / largestTrendAmount) * 100, cycle.incomeCents ? 8 : 0)}%` }} />
                       <span className="trend-expense" style={{ height: `${Math.max((cycle.expenseCents / largestTrendAmount) * 100, cycle.expenseCents ? 8 : 0)}%` }} />
                     </span>
+                    <span className="trend-amounts" aria-hidden="true">
+                      <span className="trend-income-amount">+{formatTrendCurrency(cycle.incomeCents)}</span>
+                      <span className="trend-expense-amount">-{formatTrendCurrency(cycle.expenseCents)}</span>
+                    </span>
                     <strong>{formatCycleLabel(cycle.cycleId)}</strong>
                   </button>
                 ))}
               </div>
             ) : <p className="trend-caption">Registra movimientos en distintos ciclos para ver su evolución.</p>}
-            {activityCycleId ? (
-              <button className="cycle-filter" type="button" onClick={() => setActivityCycleId(null)}>
-                Extracto de {formatCycleLabel(activityCycleId)} · Mostrar todo
-              </button>
-            ) : null}
             {cycleTrend.length ? (
               trendExpenseDeltaCents === null ? (
                 <p className="trend-caption">Registra otro ciclo para ver la comparación.</p>
