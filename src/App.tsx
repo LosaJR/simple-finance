@@ -91,7 +91,7 @@ import {
   summarizeCycleTrend,
 } from './lib/summary'
 
-const APP_VERSION = '1.7'
+const APP_VERSION = '1.8'
 
 const todayInputValue = () => {
   const today = new Date()
@@ -190,6 +190,7 @@ function App() {
   const [selectedCategoryId, setSelectedCategoryId] = useState('')
   const [categoryLimitInput, setCategoryLimitInput] = useState('')
   const [categoryLimitFeedback, setCategoryLimitFeedback] = useState('')
+  const [isConfirmingCategoryDeletion, setIsConfirmingCategoryDeletion] = useState(false)
   const [paydayDay, setPaydayDay] = useState(1)
   const [paydayAmount, setPaydayAmount] = useState('')
   const [manualCycleClosures, setManualCycleClosures] = useState<ManualCycleClosure[]>([])
@@ -611,6 +612,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
 
   const openConfigurationDialog = (dialog: Exclude<ConfigurationDialog, null>) => {
     rememberOpeningFocus()
+    setIsConfirmingCategoryDeletion(false)
     if (dialog === 'card') setNewCardName('')
     if (dialog === 'category-add') {
       setCategoryNameInput('')
@@ -624,6 +626,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
   const closeConfigurationDialog = () => {
     setConfigurationDialog(null)
     setCategoryLimitFeedback('')
+    setIsConfirmingCategoryDeletion(false)
   }
 
   const getCategoryLimitCents = () => {
@@ -714,7 +717,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
   }
 
   const handleArchiveCategory = async () => {
-    if (!selectedCategory || !window.confirm(`¿Archivar ${selectedCategory.name}? Sus movimientos se conservarán.`)) return
+    if (!selectedCategory) return
     try {
       await archiveCategory(selectedCategory.id)
       setSelectedCategoryId('')
@@ -722,7 +725,8 @@ const downloadFile = (name: string, contents: string, type: string) => {
       setFeedback('Categoría archivada. Los movimientos históricos siguen intactos.')
       await refreshData()
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : 'No se ha podido archivar la categoría.')
+      setCategoryLimitFeedback(error instanceof Error ? error.message : 'No se ha podido eliminar la categoría.')
+      setIsConfirmingCategoryDeletion(false)
     }
   }
 
@@ -1851,14 +1855,24 @@ const downloadFile = (name: string, contents: string, type: string) => {
                   </label>
                 </div>
                 {categoryLimitFeedback ? <p className="status-message error" role="alert">{categoryLimitFeedback}</p> : null}
-                <div className="sheet-actions">
-                  {configurationDialog === 'category-edit' ? (
-                    <button className="danger-action" type="button" onClick={() => void handleArchiveCategory()}><Trash2 size={16} aria-hidden="true" />Eliminar</button>
-                  ) : <span />}
-                  <button className="primary-action" type="button" onClick={() => void (configurationDialog === 'category-add' ? handleAddCategory() : handleSaveCategoryDetails())}>
-                    Guardar categoría
-                  </button>
-                </div>
+                {configurationDialog === 'category-edit' && isConfirmingCategoryDeletion ? (
+                  <section className="delete-category-confirmation" aria-label="Confirmar eliminación de categoría">
+                    <p>La categoría dejará de estar disponible. Los movimientos ya registrados se conservarán.</p>
+                    <div className="sheet-actions">
+                      <button className="secondary-action" type="button" onClick={() => setIsConfirmingCategoryDeletion(false)}>Cancelar</button>
+                      <button className="danger-action" type="button" onClick={() => void handleArchiveCategory()}><Trash2 size={16} aria-hidden="true" />Eliminar categoría</button>
+                    </div>
+                  </section>
+                ) : (
+                  <div className="sheet-actions">
+                    {configurationDialog === 'category-edit' ? (
+                      <button className="danger-action" type="button" onClick={() => setIsConfirmingCategoryDeletion(true)}><Trash2 size={16} aria-hidden="true" />Eliminar</button>
+                    ) : <span />}
+                    <button className="primary-action" type="button" onClick={() => void (configurationDialog === 'category-add' ? handleAddCategory() : handleSaveCategoryDetails())}>
+                      Guardar categoría
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </section>
