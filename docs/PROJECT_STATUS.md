@@ -12,6 +12,8 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
+Se reforzó la actualización de la PWA instalada. Al descargar una versión nueva, el navegador recibe ahora una orden explícita para activar el service worker en espera y recargar la interfaz, en vez de depender de que iOS cierre todas las instancias antiguas por su cuenta.
+
 Se corrigió la composición móvil de Registrar y Actividad. Registrar reserva espacio real tras el formulario para que Guardar movimiento quede siempre por encima de la navegación inferior. Actividad reúne el calendario dentro del encabezado de Evolución reciente, hace mucho más evidente el ciclo seleccionado, reduce los filtros de tarjeta, búsqueda y categoría a una única fila compacta y elimina el control visible de Solo pendientes.
 
 Se inició la Fase 4 con una evolución visual en Actividad. Resume hasta seis ciclos recientes con barras de ingresos y gastos, comunica la variación del gasto frente al ciclo anterior y permite abrir el extracto del ciclo al tocar su barra. La agregación por ciclos y los casos de nómina se cubren con pruebas unitarias.

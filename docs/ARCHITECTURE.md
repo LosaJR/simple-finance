@@ -4,7 +4,7 @@
 
 - React + Vite.
 - TypeScript estricto.
-- PWA con `vite-plugin-pwa` y service worker generado. Comprueba actualizaciones al abrirse, recuperar el foco y cada hora; una versión nueva toma el control y recarga la PWA automáticamente.
+- PWA con `vite-plugin-pwa` y service worker generado. Comprueba actualizaciones al abrirse, recuperar el foco y cada hora; cuando detecta una nueva versión, activa explícitamente el worker en espera, toma el control y recarga la PWA automáticamente.
 - IndexedDB mediante Dexie para datos locales.
 - Zod para validar entradas e importaciones futuras.
 - Vitest para logica financiera y Playwright para flujos principales.
