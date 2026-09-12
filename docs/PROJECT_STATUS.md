@@ -12,6 +12,8 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
+Se simplificó la composición visual de las cuatro vistas. Actividad y Configuración financiera ya no usan un recuadro exterior; sus grupos se delimitan por espaciado y separadores. Las secciones de categorías del Resumen también pasan a ser un bloque abierto, mientras que nómina, gráfico y formulario de registro conservan una superficie por ser herramientas focales. Se establecieron márgenes móviles compartidos, una escala tipográfica estable y una separación vertical consistente entre secciones.
+
 Se aclaró la separación entre Ajustes y Configuración financiera. El botón superior usa ahora un engranaje y abre Ajustes: tema, contraste, nómina y datos locales (exportación, restauración y demostración). La pestaña inferior conserva solo tarjetas, categorías, reglas por comercio y pagos recurrentes.
 
 Se aplicó el primer pase de calidad UX/UI derivado de la auditoría. Los controles de interacción principal cumplen un objetivo táctil mínimo de 44 px, el modo claro refuerza el contraste de texto secundario, acciones y errores sobre superficies translúcidas, y Configuración se organiza en Base financiera y Automatización. Los paneles de registro rápido, edición y ajustes retienen el foco, admiten `Escape` y lo devuelven al control de origen al cerrarse.
