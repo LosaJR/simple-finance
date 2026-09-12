@@ -5,8 +5,16 @@ import App from './App.tsx'
 
 let reloadingForUpdate = false
 
+const activateWaitingWorker = (registration: ServiceWorkerRegistration) => {
+  registration.waiting?.postMessage({ type: 'SKIP_WAITING' })
+}
+
 const updatePwa = () => {
-  void navigator.serviceWorker.getRegistration().then((registration) => registration?.update())
+  void navigator.serviceWorker.getRegistration().then(async (registration) => {
+    if (!registration) return
+    await registration.update()
+    activateWaitingWorker(registration)
+  })
 }
 
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
@@ -18,7 +26,17 @@ if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   })
 
   void navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' }).then((registration) => {
+    registration.addEventListener('updatefound', () => {
+      const installing = registration.installing
+      installing?.addEventListener('statechange', () => {
+        if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+          activateWaitingWorker(registration)
+        }
+      })
+    })
+
     void registration.update()
+    activateWaitingWorker(registration)
     window.addEventListener('focus', updatePwa)
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') updatePwa()
