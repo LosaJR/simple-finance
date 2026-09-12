@@ -1521,52 +1521,45 @@ const downloadFile = (name: string, contents: string, type: string) => {
 
       {screen === 'activity' ? (
         <section className="activity-panel screen-stack" aria-label="Actividad">
-          <div className="section-title">
-            <h2><ListFilter size={17} aria-hidden="true" />Todos los movimientos</h2>
-            <button
-              className="calendar-button"
-              type="button"
-              aria-label="Ver resumen mensual"
-              title="Ver resumen mensual"
-              onClick={() => setIsCalendarOpen((current) => !current)}
-            >
-              <CalendarDays size={19} aria-hidden="true" />
-            </button>
-          </div>
-
-          {isCalendarOpen ? (
-            <section className="monthly-calendar" aria-label="Resumen de ciclos del año">
-              {monthlyCalendar.map((month) => (
-                <button
-                  key={month.cycleId}
-                  className={activityCycleId === month.cycleId ? 'active' : ''}
-                  type="button"
-                  aria-pressed={activityCycleId === month.cycleId}
-                  onClick={() => setActivityCycleId((current) => (current === month.cycleId ? null : month.cycleId))}
-                >
-                  <strong>{month.label}</strong>
-                  <span className="calendar-income">+{formatCurrency(month.incomeCents)}</span>
-                  <span className="calendar-expense">-{formatCurrency(month.expenseCents)}</span>
-                </button>
-              ))}
-            </section>
-          ) : null}
-
-          {activityCycleId ? (
-            <button className="cycle-filter" type="button" onClick={() => setActivityCycleId(null)}>
-              Extracto de {formatCycleLabel(activityCycleId)} · Mostrar todo
-            </button>
-          ) : null}
-
-          {cycleTrend.length ? (
-            <section className="cycle-trend" aria-labelledby="trend-title">
-              <div className="section-title">
-                <div>
-                  <h3 id="trend-title"><BarChart3 size={17} aria-hidden="true" />Evolución reciente</h3>
-                  <p>Ingresos y gastos por ciclo.</p>
-                </div>
-                <small>Últimos {cycleTrend.length}</small>
+          <section className="cycle-trend" aria-labelledby="trend-title">
+            <div className="section-title">
+              <div>
+                <h3 id="trend-title"><BarChart3 size={17} aria-hidden="true" />Evolución reciente</h3>
+                <p>Ingresos y gastos por ciclo.</p>
               </div>
+              <div className="trend-actions">
+                {cycleTrend.length ? <small>Últimos {cycleTrend.length}</small> : null}
+                <button
+                  className="calendar-button"
+                  type="button"
+                  aria-label="Ver resumen mensual"
+                  title="Ver resumen mensual"
+                  onClick={() => setIsCalendarOpen((current) => !current)}
+                >
+                  <CalendarDays size={19} aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+
+            {isCalendarOpen ? (
+              <section className="monthly-calendar" aria-label="Resumen de ciclos del año">
+                {monthlyCalendar.map((month) => (
+                  <button
+                    key={month.cycleId}
+                    className={activityCycleId === month.cycleId ? 'active' : ''}
+                    type="button"
+                    aria-pressed={activityCycleId === month.cycleId}
+                    onClick={() => setActivityCycleId((current) => (current === month.cycleId ? null : month.cycleId))}
+                  >
+                    <strong>{month.label}</strong>
+                    <span className="calendar-income">+{formatCurrency(month.incomeCents)}</span>
+                    <span className="calendar-expense">-{formatCurrency(month.expenseCents)}</span>
+                  </button>
+                ))}
+              </section>
+            ) : null}
+
+            {cycleTrend.length ? (
               <div className="trend-chart" aria-label="Gráfico de evolución por ciclo">
                 {cycleTrend.map((cycle) => (
                   <button
@@ -1585,7 +1578,14 @@ const downloadFile = (name: string, contents: string, type: string) => {
                   </button>
                 ))}
               </div>
-              {trendExpenseDeltaCents === null ? (
+            ) : <p className="trend-caption">Registra movimientos en distintos ciclos para ver su evolución.</p>}
+            {activityCycleId ? (
+              <button className="cycle-filter" type="button" onClick={() => setActivityCycleId(null)}>
+                Extracto de {formatCycleLabel(activityCycleId)} · Mostrar todo
+              </button>
+            ) : null}
+            {cycleTrend.length ? (
+              trendExpenseDeltaCents === null ? (
                 <p className="trend-caption">Registra otro ciclo para ver la comparación.</p>
               ) : (
                 <p className="trend-caption">
@@ -1595,45 +1595,9 @@ const downloadFile = (name: string, contents: string, type: string) => {
                       ? `Has gastado ${formatCurrency(trendExpenseDeltaCents)} más que en el ciclo anterior.`
                       : `Has gastado ${formatCurrency(Math.abs(trendExpenseDeltaCents))} menos que en el ciclo anterior.`}
                 </p>
-              )}
-            </section>
-          ) : null}
-
-          <label className="activity-method-filter">
-            <span className="field-title"><CreditCard size={16} aria-hidden="true" />Tarjeta</span>
-            <select value={activityPaymentMethodId} onChange={(event) => setActivityPaymentMethodId(event.target.value)}>
-              <option value="all">Todas las tarjetas</option>
-              {paymentMethods.map((method) => (
-                <option key={method.id} value={method.id}>
-                  {method.name}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="activity-search">
-            <span className="field-title"><Search size={16} aria-hidden="true" />Buscar</span>
-            <input value={activitySearch} placeholder="Comercio o importe" onChange={(event) => setActivitySearch(event.target.value)} />
-          </label>
-
-          <div className="activity-filter-grid">
-            <label>
-              <span className="field-title"><Tags size={16} aria-hidden="true" />Categoría</span>
-              <select value={activityCategoryId} onChange={(event) => setActivityCategoryId(event.target.value)}>
-                <option value="all">Todas</option>
-                {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-              </select>
-            </label>
-            <label className="pending-filter">
-              <input type="checkbox" checked={activityPendingOnly} onChange={(event) => setActivityPendingOnly(event.target.checked)} />
-              <span>Solo pendientes</span>
-            </label>
-          </div>
-          {(activitySearch || activityCategoryId !== 'all' || activityPaymentMethodId !== 'all' || activityPendingOnly || activityCycleId) ? (
-            <button className="text-button" type="button" onClick={() => { setActivitySearch(''); setActivityCategoryId('all'); setActivityPaymentMethodId('all'); setActivityPendingOnly(false); setActivityCycleId(null) }}>
-              Limpiar filtros
-            </button>
-          ) : null}
+              )
+            ) : null}
+          </section>
 
           <div className="activity-tabs" role="tablist" aria-label="Filtro de actividad">
             {activityTabs.map((tab) => (
@@ -1649,6 +1613,32 @@ const downloadFile = (name: string, contents: string, type: string) => {
               </button>
             ))}
           </div>
+
+          <div className="activity-quick-filters" aria-label="Filtros de actividad">
+            <label className="compact-activity-filter">
+              <CreditCard size={16} aria-hidden="true" />
+              <select aria-label="Tarjeta" value={activityPaymentMethodId} onChange={(event) => setActivityPaymentMethodId(event.target.value)}>
+                <option value="all">Todas</option>
+                {paymentMethods.map((method) => <option key={method.id} value={method.id}>{method.name}</option>)}
+              </select>
+            </label>
+            <label className="compact-activity-filter">
+              <Search size={16} aria-hidden="true" />
+              <input aria-label="Buscar" value={activitySearch} placeholder="Buscar" onChange={(event) => setActivitySearch(event.target.value)} />
+            </label>
+            <label className="compact-activity-filter">
+              <Tags size={16} aria-hidden="true" />
+              <select value={activityCategoryId} onChange={(event) => setActivityCategoryId(event.target.value)}>
+                <option value="all">Todas</option>
+                {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+              </select>
+            </label>
+          </div>
+          {(activitySearch || activityCategoryId !== 'all' || activityPaymentMethodId !== 'all' || activityPendingOnly || activityCycleId) ? (
+            <button className="text-button" type="button" onClick={() => { setActivitySearch(''); setActivityCategoryId('all'); setActivityPaymentMethodId('all'); setActivityPendingOnly(false); setActivityCycleId(null) }}>
+              Limpiar filtros
+            </button>
+          ) : null}
 
           {renderTransactions(visibleTransactions)}
         </section>
