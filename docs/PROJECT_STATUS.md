@@ -20,7 +20,7 @@ La rama también incorpora una carga opcional de datos ficticios, identificados 
 
 ## Siguiente tarea
 
-Revisar desde Safari en iPhone, con datos móviles, la versión publicada en `https://simple-finance-379.pages.dev`: primer inicio, carga de demostración, disponible diario, estados de límite, pagos recurrentes, registro rápido con regla, aviso de duplicado, pendientes, filtros, exportación/restauración y contraste reforzado.
+Aplicar la revisión UX/UI antes de avanzar de fase: objetivos táctiles de al menos 44 pt, contraste AA consistente sobre superficies translúcidas, foco contenido en las hojas modales, estados de guardado para evitar dobles acciones y una etiqueta explícita del intervalo de cada ciclo de nómina. Después, revisar desde Safari en iPhone, con datos móviles, la versión publicada en `https://simple-finance-379.pages.dev`.
 
 ## Verificaciones
 
@@ -30,6 +30,7 @@ Revisar desde Safari en iPhone, con datos móviles, la versión publicada en `ht
 - Registro de movimiento, nomina en dia laborable, tarjeta principal, filtro por tarjeta, calendario por ciclos y configuracion con selectores directos: verificados contra un origen HTTP de red local a tamano iPhone; queda pendiente la confirmacion en iPhone fisico.
 - `pnpm e2e`: configurado, pero no ejecutado localmente porque la descarga de navegadores de Playwright desde `cdn.playwright.dev` agoto timeout.
 - Cloudflare Pages: desplegado correctamente en `https://simple-finance-379.pages.dev` desde `main`; los despliegues automáticos de producción están activados.
+- Auditoría UX/UI: completada el 2026-09-12 contra heurísticas de Nielsen, Leyes de UX, guías de Apple y WCAG 2.2. La base de navegación, registro progresivo, feedback y movimiento reducido es correcta; los ajustes prioritarios se registran en la siguiente tarea.
 
 ## Bloqueos
 
