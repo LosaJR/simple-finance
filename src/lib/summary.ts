@@ -2,6 +2,7 @@ import {
   getCycleBounds,
   getCycleId,
   getPaydayDate,
+  getScheduledCycleId,
   type ManualCycleClosure,
   type PaymentMethod,
   type Transaction,
@@ -117,6 +118,31 @@ export const summarizeMonthlyHistory = (transactions: Transaction[]) => {
   return [...summaries.entries()]
     .sort(([first], [second]) => second.localeCompare(first))
     .map(([month, summary]) => ({ month, ...summary }))
+}
+
+export interface CycleTrend {
+  cycleId: string
+  expenseCents: number
+  incomeCents: number
+  netCents: number
+}
+
+export const summarizeCycleTrend = (transactions: Transaction[], paydayDay: number, limit = 6): CycleTrend[] => {
+  const summaries = new Map<string, Omit<CycleTrend, 'cycleId'>>()
+
+  for (const transaction of transactions) {
+    const cycleId = getScheduledCycleId(transaction.occurredOn, paydayDay)
+    const summary = summaries.get(cycleId) ?? { expenseCents: 0, incomeCents: 0, netCents: 0 }
+    if (transaction.type === 'expense') summary.expenseCents += transaction.amountCents
+    if (transaction.type === 'income') summary.incomeCents += transaction.amountCents
+    summary.netCents = summary.incomeCents - summary.expenseCents
+    summaries.set(cycleId, summary)
+  }
+
+  return [...summaries.entries()]
+    .sort(([first], [second]) => first.localeCompare(second))
+    .slice(-limit)
+    .map(([cycleId, summary]) => ({ cycleId, ...summary }))
 }
 
 export const formatMonthYear = (month: string) =>

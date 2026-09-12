@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Archive,
+  BarChart3,
   BadgeAlert,
   Banknote,
   Check,
@@ -93,6 +94,7 @@ import {
   getDaysUntilPayday,
   parseEuroToCents,
   summarizeCategoryLimit,
+  summarizeCycleTrend,
 } from './lib/summary'
 
 const todayInputValue = () => {
@@ -445,6 +447,14 @@ const downloadFile = (name: string, contents: string, type: string) => {
       }
     })
   }, [paydayDay, transactions])
+  const cycleTrend = useMemo(() => summarizeCycleTrend(transactions, paydayDay), [paydayDay, transactions])
+  const latestTrend = cycleTrend.at(-1)
+  const previousTrend = cycleTrend.at(-2)
+  const largestTrendAmount = Math.max(
+    1,
+    ...cycleTrend.flatMap((cycle) => [cycle.expenseCents, cycle.incomeCents]),
+  )
+  const trendExpenseDeltaCents = latestTrend && previousTrend ? latestTrend.expenseCents - previousTrend.expenseCents : null
   const methodMap = useMemo(
     () => new Map(paymentMethods.map((method) => [method.id, method])),
     [paymentMethods],
@@ -1546,6 +1556,47 @@ const downloadFile = (name: string, contents: string, type: string) => {
             <button className="cycle-filter" type="button" onClick={() => setActivityCycleId(null)}>
               Extracto de {formatCycleLabel(activityCycleId)} · Mostrar todo
             </button>
+          ) : null}
+
+          {cycleTrend.length ? (
+            <section className="cycle-trend" aria-labelledby="trend-title">
+              <div className="section-title">
+                <div>
+                  <h3 id="trend-title"><BarChart3 size={17} aria-hidden="true" />Evolución reciente</h3>
+                  <p>Ingresos y gastos por ciclo.</p>
+                </div>
+                <small>Últimos {cycleTrend.length}</small>
+              </div>
+              <div className="trend-chart" aria-label="Gráfico de evolución por ciclo">
+                {cycleTrend.map((cycle) => (
+                  <button
+                    key={cycle.cycleId}
+                    className={activityCycleId === cycle.cycleId ? 'active' : ''}
+                    type="button"
+                    aria-pressed={activityCycleId === cycle.cycleId}
+                    aria-label={`${formatCycleLabel(cycle.cycleId)}: ingresos ${formatCurrency(cycle.incomeCents)}, gastos ${formatCurrency(cycle.expenseCents)}`}
+                    onClick={() => setActivityCycleId((current) => (current === cycle.cycleId ? null : cycle.cycleId))}
+                  >
+                    <span className="trend-bars" aria-hidden="true">
+                      <span className="trend-income" style={{ height: `${Math.max((cycle.incomeCents / largestTrendAmount) * 100, cycle.incomeCents ? 8 : 0)}%` }} />
+                      <span className="trend-expense" style={{ height: `${Math.max((cycle.expenseCents / largestTrendAmount) * 100, cycle.expenseCents ? 8 : 0)}%` }} />
+                    </span>
+                    <strong>{formatCycleLabel(cycle.cycleId)}</strong>
+                  </button>
+                ))}
+              </div>
+              {trendExpenseDeltaCents === null ? (
+                <p className="trend-caption">Registra otro ciclo para ver la comparación.</p>
+              ) : (
+                <p className="trend-caption">
+                  {trendExpenseDeltaCents === 0
+                    ? 'Tus gastos se mantienen igual que en el ciclo anterior.'
+                    : trendExpenseDeltaCents > 0
+                      ? `Has gastado ${formatCurrency(trendExpenseDeltaCents)} más que en el ciclo anterior.`
+                      : `Has gastado ${formatCurrency(Math.abs(trendExpenseDeltaCents))} menos que en el ciclo anterior.`}
+                </p>
+              )}
+            </section>
           ) : null}
 
           <label className="activity-method-filter">
