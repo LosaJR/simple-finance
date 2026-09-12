@@ -12,7 +12,9 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
-Resumen muestra la versión visible `v1.4` junto a la marca. Se corresponde con la versión técnica `1.4.0` del paquete y sirve para confirmar en móvil que la PWA instalada ha recibido la compilación publicada.
+Resumen muestra la versión visible `v1.5` junto a la marca. Se corresponde con la versión técnica `1.5.0` del paquete y sirve para confirmar en móvil que la PWA instalada ha recibido la compilación publicada.
+
+Se corrigió el bloqueo de actualización heredado en PWA: el service worker entrante usa ahora activación y toma de control inmediatas. Esto permite sustituir una instalación anterior que detectaba actualizaciones pero las dejaba esperando.
 
 Se reforzó la actualización de la PWA instalada. Al descargar una versión nueva, el navegador recibe ahora una orden explícita para activar el service worker en espera y recargar la interfaz, en vez de depender de que iOS cierre todas las instancias antiguas por su cuenta.
 
