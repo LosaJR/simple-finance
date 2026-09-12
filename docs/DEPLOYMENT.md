@@ -4,25 +4,24 @@
 
 Permitir abrir Simple Finance desde Safari en iPhone con una URL HTTPS estable, sin depender de la red Wi-Fi ni de que el ordenador local permanezca encendido.
 
-## Opcion elegida
+## Alojamiento principal
 
-Cloudflare Pages con integración GitHub.
+GitHub Pages como alternativa independiente para las pruebas móviles.
 
-- El repositorio `LosaJR/simple-finance` puede continuar privado.
-- El despliegue compila la PWA estática y la publica en una URL `*.pages.dev`.
+- El despliegue compila la PWA estática y la publica en `https://losajr.github.io/simple-finance/` cuando GitHub Pages esté habilitado para el repositorio.
 - Cada `push` a la rama elegida actualiza la aplicación automáticamente.
 - No se suben movimientos, copias JSON ni secretos: los datos continúan en IndexedDB del navegador de cada dispositivo.
 
 Para la prueba actual, configurar como rama de producción `feature/flujo-financiero-diario`. De ese modo la URL remota muestra la versión experimental y la rama base no cambia. Cuando la revisión esté aprobada, se cambiará la producción a `main` o se fusionará la rama.
 
-## Despliegue activo
+## Respaldo actual
 
 - URL de prueba: `https://simple-finance-379.pages.dev`
 - Proyecto de Cloudflare Pages: `simple-finance`
-- Rama de producción actual: `feature/flujo-financiero-diario`
+- Rama de producción actual: `main`
 - Fecha de primera publicación: 2026-09-12
 
-Cloudflare reconstruye y publica automáticamente esta URL tras cada `push` a la rama configurada.
+Cloudflare se mantiene como respaldo. GitHub Pages se publica desde el flujo `Publish mobile preview` al actualizar `main`.
 
 ## Configuracion inicial
 

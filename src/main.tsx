@@ -18,6 +18,9 @@ const updatePwa = () => {
 }
 
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  const serviceWorkerUrl = `${import.meta.env.BASE_URL}sw.js`
+  const serviceWorkerScope = import.meta.env.BASE_URL
+
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (!reloadingForUpdate) {
       reloadingForUpdate = true
@@ -25,7 +28,7 @@ if (import.meta.env.PROD && 'serviceWorker' in navigator) {
     }
   })
 
-  void navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' }).then((registration) => {
+  void navigator.serviceWorker.register(serviceWorkerUrl, { scope: serviceWorkerScope, updateViaCache: 'none' }).then((registration) => {
     registration.addEventListener('updatefound', () => {
       const installing = registration.installing
       installing?.addEventListener('statechange', () => {
