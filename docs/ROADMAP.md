@@ -38,9 +38,8 @@ Estado: iniciada.
 - Disponible diario: disponible en Resumen para repartir el saldo estimado hasta la próxima nómina.
 - Próximos pagos recurrentes: visibles en Resumen y confirmables solo cuando vencen.
 - Dia de reinicio configurable.
-- Reinicio manual con historial.
 - Aviso al aproximarse al 90% del límite mediante la futura capa de notificaciones nativas.
-- Pruebas de cambios de mes y reinicios.
+- Pruebas de cambios de mes, fines de semana y reinicios: disponibles.
 
 ## Fase 3 - Automatizacion personal
 

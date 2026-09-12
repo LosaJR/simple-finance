@@ -20,9 +20,21 @@ export interface AppSettings {
   paydayDay: number
   paydayAmountCents: number
   suppressedPayrollCycleIds: string[]
+  manualCycleClosures: ManualCycleClosure[]
   theme: 'dark' | 'light'
   highContrast: boolean
   onboardingCompleted: boolean
+}
+
+export interface ManualCycleClosure {
+  id: string
+  scheduledCycleId: string
+  closedOn: string
+}
+
+export interface CycleBounds {
+  start: string
+  end: string
 }
 
 export interface Category {
@@ -129,6 +141,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   paydayDay: 1,
   paydayAmountCents: 0,
   suppressedPayrollCycleIds: [],
+  manualCycleClosures: [],
   theme: 'dark',
   highContrast: false,
   onboardingCompleted: false,
@@ -194,7 +207,7 @@ export const getPaydayDate = (year: number, month: number, paydayDay: number) =>
   return payday
 }
 
-export const getCycleId = (occurredOn: string, resetDay = 1) => {
+export const getScheduledCycleId = (occurredOn: string, resetDay = 1) => {
   const date = new Date(`${occurredOn}T12:00:00`)
   const year = date.getFullYear()
   const month = date.getMonth()
@@ -208,10 +221,48 @@ export const getCycleId = (occurredOn: string, resetDay = 1) => {
   return `${finalCycleDay.getFullYear()}-${String(finalCycleDay.getMonth() + 1).padStart(2, '0')}`
 }
 
+export const getCycleId = (
+  occurredOn: string,
+  resetDay = 1,
+  manualCycleClosures: ManualCycleClosure[] = [],
+) => {
+  const scheduledCycleId = getScheduledCycleId(occurredOn, resetDay)
+  const manualClosure = manualCycleClosures
+    .filter((closure) => closure.scheduledCycleId === scheduledCycleId && occurredOn <= closure.closedOn)
+    .sort((first, second) => first.closedOn.localeCompare(second.closedOn))[0]
+
+  return manualClosure?.id ?? scheduledCycleId
+}
+
 const formatIsoDate = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 
-export const getCycleBounds = (cycleId: string, resetDay = 1) => {
+const getNextIsoDate = (isoDate: string) => {
+  const date = new Date(`${isoDate}T12:00:00`)
+  date.setDate(date.getDate() + 1)
+  return formatIsoDate(date)
+}
+
+export const getCycleBounds = (
+  cycleId: string,
+  resetDay = 1,
+  manualCycleClosures: ManualCycleClosure[] = [],
+): CycleBounds | null => {
+  const manualClosure = manualCycleClosures.find((closure) => closure.id === cycleId)
+  if (manualClosure) {
+    const scheduledBounds = getCycleBounds(manualClosure.scheduledCycleId, resetDay)
+    if (!scheduledBounds) return null
+    const previousClosure = manualCycleClosures
+      .filter(
+        (closure) =>
+          closure.scheduledCycleId === manualClosure.scheduledCycleId && closure.closedOn < manualClosure.closedOn,
+      )
+      .sort((first, second) => second.closedOn.localeCompare(first.closedOn))[0]
+    const start = previousClosure ? getNextIsoDate(previousClosure.closedOn) : scheduledBounds.start
+
+    return { start, end: manualClosure.closedOn }
+  }
+
   const [year, month] = cycleId.split('-').map(Number)
   const dates = Array.from({ length: 7 }, (_, index) => {
     const nominalMonth = new Date(year, month - 4 + index, 1)
@@ -234,7 +285,12 @@ export const getCycleBounds = (cycleId: string, resetDay = 1) => {
 
   const end = new Date(closingPayday)
   end.setDate(end.getDate() - 1)
-  return { start: formatIsoDate(openingPayday), end: formatIsoDate(end) }
+  const latestManualClosure = manualCycleClosures
+    .filter((closure) => closure.scheduledCycleId === cycleId)
+    .sort((first, second) => second.closedOn.localeCompare(first.closedOn))[0]
+  const start = latestManualClosure ? getNextIsoDate(latestManualClosure.closedOn) : formatIsoDate(openingPayday)
+
+  return { start, end: formatIsoDate(end) }
 }
 
 export const addFrequencyToDate = (occurredOn: string, frequency: PlannedPaymentFrequency) => {

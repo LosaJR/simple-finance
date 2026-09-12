@@ -31,6 +31,33 @@ describe('cycle ids', () => {
     expect(getCycleId('2026-05-31', 31)).toBe('2026-05')
     expect(getCycleId('2026-06-01', 31)).toBe('2026-06')
   })
+
+  it('keeps February and March separate when a day 31 payday falls on a weekend', () => {
+    const payday = getPaydayDate(2027, 1, 31)
+    expect([payday.getFullYear(), payday.getMonth(), payday.getDate()]).toEqual([2027, 2, 1])
+    expect(getCycleId('2027-02-28', 31)).toBe('2027-02')
+    expect(getCycleId('2027-03-01', 31)).toBe('2027-03')
+  })
+
+  it('splits a scheduled cycle after a manual closure without changing its history', () => {
+    const closures = [{ id: 'manual-2026-09-11', scheduledCycleId: '2026-09', closedOn: '2026-09-11' }]
+
+    expect(getCycleId('2026-09-08', 25, closures)).toBe('manual-2026-09-11')
+    expect(getCycleId('2026-09-12', 25, closures)).toBe('2026-09')
+    expect(getCycleBounds('manual-2026-09-11', 25, closures)).toEqual({ start: '2026-08-25', end: '2026-09-11' })
+    expect(getCycleBounds('2026-09', 25, closures)).toEqual({ start: '2026-09-12', end: '2026-09-24' })
+  })
+
+  it('keeps each manual closure as a separate historical interval', () => {
+    const closures = [
+      { id: 'manual-2026-09-11', scheduledCycleId: '2026-09', closedOn: '2026-09-11' },
+      { id: 'manual-2026-09-16', scheduledCycleId: '2026-09', closedOn: '2026-09-16' },
+    ]
+
+    expect(getCycleId('2026-09-12', 25, closures)).toBe('manual-2026-09-16')
+    expect(getCycleBounds('manual-2026-09-16', 25, closures)).toEqual({ start: '2026-09-12', end: '2026-09-16' })
+    expect(getCycleBounds('2026-09', 25, closures)).toEqual({ start: '2026-09-17', end: '2026-09-24' })
+  })
 })
 
 describe('financial summary', () => {

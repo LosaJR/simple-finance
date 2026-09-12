@@ -1,4 +1,11 @@
-import { getCycleBounds, getCycleId, getPaydayDate, type PaymentMethod, type Transaction } from './finance'
+import {
+  getCycleBounds,
+  getCycleId,
+  getPaydayDate,
+  type ManualCycleClosure,
+  type PaymentMethod,
+  type Transaction,
+} from './finance'
 
 export const formatCurrency = (amountCents: number) =>
   new Intl.NumberFormat('es-ES', {
@@ -71,8 +78,8 @@ export const getDaysUntilPayday = (paydayDay: number, today = new Date()) => {
   return Math.round((nextPayday.getTime() - currentDate.getTime()) / 86_400_000)
 }
 
-export const formatCycleRange = (cycleId: string, paydayDay: number) => {
-  const bounds = getCycleBounds(cycleId, paydayDay)
+export const formatCycleRange = (cycleId: string, paydayDay: number, manualCycleClosures: ManualCycleClosure[] = []) => {
+  const bounds = getCycleBounds(cycleId, paydayDay, manualCycleClosures)
   if (!bounds) return 'Intervalo de ciclo no disponible'
   return `Del ${formatLocalDate(bounds.start)} al ${formatLocalDate(bounds.end)}`
 }
