@@ -1,36 +1,43 @@
+:root {
+  --page-gutter: 18px;
+  --screen-space: 24px;
+  --text-meta: 0.78rem;
+  --text-body: 0.9rem;
+  --text-section: 1.1rem;
+}
+
 .shell {
   position: relative;
   z-index: 1;
   width: min(430px, 100%);
   min-height: 100svh;
   margin: 0 auto;
-  padding: calc(env(safe-area-inset-top) + 22px) 16px calc(env(safe-area-inset-bottom) + 124px);
+  padding: calc(env(safe-area-inset-top) + var(--page-gutter)) var(--page-gutter) calc(env(safe-area-inset-bottom) + 96px);
 }
 
 .home-shell {
   height: auto;
   overflow: visible;
-  padding-bottom: calc(env(safe-area-inset-bottom) + 110px);
 }
 
 .entry-shell {
   height: 100svh;
   overflow: hidden;
-  padding-bottom: calc(env(safe-area-inset-bottom) + 82px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 96px);
 }
 
 .topbar {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 12px;
+  gap: 14px;
   align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: var(--screen-space);
 }
 
 .eyebrow {
   margin: 0 0 4px;
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: var(--text-meta);
   font-weight: 800;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -61,13 +68,13 @@
 
 .topbar h1 {
   color: var(--ink);
-  font-size: 1.85rem;
-  line-height: 1.08;
+  font-size: 1.9rem;
+  line-height: 1.12;
 }
 
 .screen-stack {
   display: grid;
-  gap: 14px;
+  gap: var(--screen-space);
 }
 
 .icon-button,
@@ -255,11 +262,11 @@ label,
 }
 
 .home-screen {
-  gap: 10px;
+  gap: var(--screen-space);
 }
 
 .home-shell .topbar {
-  margin-bottom: 12px;
+  margin-bottom: var(--screen-space);
 }
 
 .home-shell .payday-banner,
@@ -273,12 +280,12 @@ label,
 }
 
 .entry-shell .topbar {
-  margin-bottom: 12px;
+  margin-bottom: 18px;
 }
 
 .entry-shell .entry-panel {
-  gap: 10px;
-  padding: 14px;
+  gap: 14px;
+  padding: 18px;
 }
 
 .entry-shell .entry-panel label {
@@ -309,11 +316,10 @@ label,
   white-space: nowrap;
 }
 
-.spending-panel,
-.category-spending-panel {
+.spending-panel {
   display: grid;
-  gap: 16px;
-  padding: 18px;
+  gap: 20px;
+  padding: 20px;
   border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
   border-radius: 8px;
   background: linear-gradient(145deg, var(--surface-glass), var(--surface-tint));
@@ -482,12 +488,12 @@ label,
 .category-spending-copy strong,
 .category-spending-copy b {
   color: var(--text);
-  font-size: 0.88rem;
+  font-size: var(--text-body);
 }
 
 .category-spending-copy span:not(.limit-track) {
   color: var(--muted);
-  font-size: 0.76rem;
+  font-size: var(--text-meta);
 }
 
 .limit-track {
@@ -518,10 +524,17 @@ label,
 }
 
 .entry-panel,
-.activity-panel,
-.cards-panel,
 .compact-panel {
   padding: 18px;
+}
+
+.activity-panel,
+.cards-panel {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .section-title {
@@ -536,19 +549,21 @@ label,
   gap: 8px;
   align-items: center;
   color: var(--ink);
-  font-size: 1.08rem;
+  font-size: var(--text-section);
+  line-height: 1.25;
 }
 
 .section-title p {
-  margin: 4px 0 0;
-  font-size: 0.86rem;
+  margin: 6px 0 0;
+  font-size: var(--text-body);
+  line-height: 1.45;
 }
 
 .cycle-range {
   display: block;
-  margin-top: 3px;
+  margin-top: 5px;
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: var(--text-meta);
   font-weight: 700;
 }
 
@@ -898,7 +913,7 @@ textarea {
   grid-template-columns: repeat(4, 1fr);
   gap: 2px;
   width: 100%;
-  padding: 7px 12px calc(env(safe-area-inset-bottom) + 7px);
+  padding: 8px var(--page-gutter) calc(env(safe-area-inset-bottom) + 8px);
   border-top: 1px solid color-mix(in srgb, var(--line-strong) 72%, transparent);
   background: color-mix(in srgb, var(--surface-glass) 88%, transparent);
   box-shadow: var(--nav-shadow);
@@ -1002,12 +1017,11 @@ textarea {
 
 .configuration-item {
   display: grid;
-  gap: 10px;
-  padding: 14px;
-  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
-  border-radius: 8px;
-  background: linear-gradient(145deg, var(--surface-glass), var(--surface-tint));
-  backdrop-filter: blur(16px) saturate(118%);
+  gap: 14px;
+  padding: 22px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: transparent;
 }
 
 .configuration-select-row {
@@ -1236,15 +1250,22 @@ textarea {
   backdrop-filter: blur(16px) saturate(118%);
 }
 
+.category-spending-panel {
+  display: grid;
+  gap: 16px;
+  padding-top: var(--screen-space);
+  border-top: 1px solid var(--line);
+}
+
 .configuration-group {
   display: grid;
-  gap: 10px;
+  gap: 0;
 }
 
 .configuration-group > h3 {
-  margin: 4px 2px -2px;
+  margin: 0 0 8px;
   color: var(--muted);
-  font-size: 0.74rem;
+  font-size: var(--text-meta);
   font-weight: 800;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -1467,7 +1488,7 @@ textarea {
   gap: 6px;
   align-items: center;
   justify-content: center;
-  min-height: 42px;
+  min-height: 44px;
   border: 1px solid color-mix(in srgb, var(--danger) 46%, var(--line));
   border-radius: 8px;
   padding: 0 11px;
@@ -1613,12 +1634,9 @@ textarea {
 }
 
 @media (max-width: 420px) {
-  .shell {
-    padding-inline: 12px;
-  }
-
-  .bottom-nav {
-    padding-inline: 12px;
+  :root {
+    --page-gutter: 14px;
+    --screen-space: 20px;
   }
 
   .field-grid,
@@ -1638,20 +1656,8 @@ textarea {
     margin-top: 2px;
   }
 
-  .home-shell .topbar h1 {
-    font-size: 1.75rem;
-  }
-
   .home-shell .metric {
     padding: 10px;
-  }
-
-  .entry-shell .topbar h1 {
-    font-size: 1.75rem;
-  }
-
-  .bottom-nav button {
-    font-size: 0.7rem;
   }
 
   .activity-filter-grid,
