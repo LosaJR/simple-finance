@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ArrowDownRight,
-  ArrowUpRight,
   Archive,
   BadgeAlert,
   Banknote,
@@ -17,6 +15,7 @@ import {
   House,
   LayoutDashboard,
   ListFilter,
+  Minus,
   Search,
   Pencil,
   Plus,
@@ -930,9 +929,9 @@ const downloadFile = (name: string, contents: string, type: string) => {
                 <div className="transaction-content">
                   <span className={`transaction-marker ${transaction.type}`}>
                     {transaction.type === 'expense' ? (
-                      <ArrowDownRight size={17} aria-hidden="true" />
+                      <Minus size={18} strokeWidth={2.5} aria-hidden="true" />
                     ) : (
-                      <ArrowUpRight size={17} aria-hidden="true" />
+                      <Plus size={18} strokeWidth={2.5} aria-hidden="true" />
                     )}
                   </span>
                   <div>

@@ -14,7 +14,7 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 Rama experimental `feature/flujo-financiero-diario` creada desde la base de Fase 0. Añade reglas locales por comercio, comprobacion de posibles duplicados, estado pendiente revisable, pagos recurrentes que requieren confirmacion explicita, disponible estimado del ciclo, filtro por texto/categoria/pendiente, edicion y archivado seguro de tarjetas y categorias, copia JSON validada y CSV. El tema noche y el contraste reforzado se guardan en el dispositivo. La aplicacion sigue siendo una PWA local: no recibe notificaciones, Apple Pay, Wallet ni datos de Atajos automaticamente.
 
-La rama también incorpora una carga opcional de datos ficticios, identificados como `Demostración`, desde enero hasta el día actual. Genera una nómina de prueba y gastos realistas rotatorios por las categorías activas para revisar gráficos, ciclos y filtros; se puede eliminar sin tocar otros movimientos locales.
+La rama también incorpora una carga opcional de datos ficticios, identificados como `Demostración`, desde enero hasta el día actual. Genera una nómina de prueba y gastos realistas rotatorios por las categorías activas para revisar gráficos, ciclos y filtros; se puede eliminar sin tocar otros movimientos locales. Los marcadores de cualquier movimiento usan `+` para ingresos y `−` para gastos, en lugar de flechas direccionales.
 
 ## Siguiente tarea
 
