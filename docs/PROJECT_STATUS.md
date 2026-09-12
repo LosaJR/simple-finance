@@ -29,7 +29,7 @@ Revisar desde Safari en iPhone, con datos móviles, la versión publicada en `ht
 - Serena `project health-check`: correcto con salida UTF-8.
 - Registro de movimiento, nomina en dia laborable, tarjeta principal, filtro por tarjeta, calendario por ciclos y configuracion con selectores directos: verificados contra un origen HTTP de red local a tamano iPhone; queda pendiente la confirmacion en iPhone fisico.
 - `pnpm e2e`: configurado, pero no ejecutado localmente porque la descarga de navegadores de Playwright desde `cdn.playwright.dev` agoto timeout.
-- Cloudflare Pages: desplegado correctamente en `https://simple-finance-379.pages.dev`; queda configurarlo para tomar `main` como rama de producción tras la promoción.
+- Cloudflare Pages: desplegado correctamente en `https://simple-finance-379.pages.dev` desde `main`; los despliegues automáticos de producción están activados.
 
 ## Bloqueos
 

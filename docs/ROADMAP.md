@@ -65,7 +65,7 @@ Estado: iniciada.
 
 - Estado: en curso.
 - Hosting elegido y publicado: Cloudflare Pages con integración GitHub; la guía de configuración está en `docs/DEPLOYMENT.md`.
-- `main` es la base aprobada. La URL `https://simple-finance-379.pages.dev` sigue publicando el mismo commit desde `feature/flujo-financiero-diario` hasta cambiar en el panel de Cloudflare su rama de producción a `main`; ese ajuste requiere la sesión de la persona propietaria en Cloudflare.
+- `main` es la base aprobada y la rama de producción de Cloudflare Pages. Cada `push` a `main` reconstruye automáticamente `https://simple-finance-379.pages.dev`.
 - Pendiente: verificar la instalación y los flujos principales desde Safari en iPhone con datos móviles.
 - El repositorio permanece privado y no se despliegan datos; la URL pública de prueba expone únicamente los recursos estáticos de la PWA. El acceso restringido requiere una fase posterior con dominio propio y Cloudflare Access.
 
