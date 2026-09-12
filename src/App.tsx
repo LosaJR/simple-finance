@@ -91,7 +91,7 @@ import {
   summarizeCycleTrend,
 } from './lib/summary'
 
-const APP_VERSION = '1.5'
+const APP_VERSION = '1.6'
 
 const todayInputValue = () => {
   const today = new Date()
