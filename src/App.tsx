@@ -23,6 +23,7 @@ import {
   Plus,
   PieChart,
   Repeat2,
+  RotateCcw,
   Settings,
   Settings2,
   Store,
@@ -36,10 +37,12 @@ import {
   DEFAULT_CATEGORIES,
   DEFAULT_PAYMENT_METHODS,
   getCycleId,
+  getScheduledCycleId,
   isPotentialDuplicate,
   normalizeMerchant,
   type Category,
   type MerchantRule,
+  type ManualCycleClosure,
   type PaymentMethod,
   type PlannedPayment,
   plannedPaymentDraftSchema,
@@ -50,6 +53,7 @@ import {
 import {
   archiveCategory,
   archivePaymentMethod,
+  closeCurrentCycle,
   createDemoDataset,
   createMerchantRule,
   createPaymentMethod,
@@ -112,7 +116,7 @@ type ActivityTab = 'all' | 'expense' | 'income'
 type AppScreen = 'home' | 'entry' | 'activity' | 'cards'
 type QuickType = 'expense' | 'income'
 type QuickStep = 'type' | 'amount' | 'merchant' | 'category'
-type BusyAction = 'quick' | 'entry' | 'planned' | 'planned-record' | 'settings' | 'edit' | null
+type BusyAction = 'quick' | 'entry' | 'planned' | 'planned-record' | 'settings' | 'cycle-reset' | 'edit' | null
 
 const activityTabs: { id: ActivityTab; label: string }[] = [
   { id: 'all', label: 'Global' },
@@ -184,6 +188,7 @@ function App() {
   const [categoryLimitFeedback, setCategoryLimitFeedback] = useState('')
   const [paydayDay, setPaydayDay] = useState(1)
   const [paydayAmount, setPaydayAmount] = useState('')
+  const [manualCycleClosures, setManualCycleClosures] = useState<ManualCycleClosure[]>([])
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [settingsPaydayDay, setSettingsPaydayDay] = useState(1)
   const [settingsPaydayAmount, setSettingsPaydayAmount] = useState('')
@@ -246,6 +251,7 @@ function App() {
     setPlannedPayments(nextPlannedPayments)
     setPaydayDay(nextSettings.paydayDay)
     setPaydayAmount(nextSettings.paydayAmountCents ? formatAmountInput(nextSettings.paydayAmountCents) : '')
+    setManualCycleClosures(nextSettings.manualCycleClosures)
     setIsDark(nextSettings.theme !== 'light')
     setHighContrast(nextSettings.highContrast)
     setOnboardingCompleted(nextSettings.onboardingCompleted)
@@ -286,12 +292,18 @@ function App() {
     () => new Map(categories.map((category) => [category.id, category])),
     [categories],
   )
-  const currentCycleId = useMemo(() => getCycleId(todayInputValue(), paydayDay), [paydayDay])
+  const currentCycleId = useMemo(
+    () => getCycleId(todayInputValue(), paydayDay, manualCycleClosures),
+    [manualCycleClosures, paydayDay],
+  )
   const selectedSummaryCycleId = summaryCycleId ?? currentCycleId
   const cycleExpenseCategories = useMemo(() => {
     const amounts = new Map<string, number>()
     for (const transaction of transactions) {
-      if (transaction.type !== 'expense' || getCycleId(transaction.occurredOn, paydayDay) !== selectedSummaryCycleId) {
+      if (
+        transaction.type !== 'expense' ||
+        getCycleId(transaction.occurredOn, paydayDay, manualCycleClosures) !== selectedSummaryCycleId
+      ) {
         continue
       }
       amounts.set(transaction.categoryId, (amounts.get(transaction.categoryId) ?? 0) + transaction.amountCents)
@@ -308,16 +320,16 @@ function App() {
       .sort((first, second) => second.amountCents - first.amountCents)
 
     return { entries, totalCents }
-  }, [categoryMap, paydayDay, selectedSummaryCycleId, transactions])
+  }, [categoryMap, manualCycleClosures, paydayDay, selectedSummaryCycleId, transactions])
   const selectedSummaryCategoryTransactions = useMemo(
     () =>
       transactions.filter(
         (transaction) =>
           transaction.type === 'expense' &&
           transaction.categoryId === summaryCategoryId &&
-          getCycleId(transaction.occurredOn, paydayDay) === selectedSummaryCycleId,
+          getCycleId(transaction.occurredOn, paydayDay, manualCycleClosures) === selectedSummaryCycleId,
       ),
-    [paydayDay, selectedSummaryCycleId, summaryCategoryId, transactions],
+    [manualCycleClosures, paydayDay, selectedSummaryCycleId, summaryCategoryId, transactions],
   )
 
 const downloadFile = (name: string, contents: string, type: string) => {
@@ -330,15 +342,22 @@ const downloadFile = (name: string, contents: string, type: string) => {
 }
   const selectedCycleIncomeCents = useMemo(
     () => transactions
-      .filter((transaction) => transaction.type === 'income' && getCycleId(transaction.occurredOn, paydayDay) === selectedSummaryCycleId)
+      .filter(
+        (transaction) =>
+          transaction.type === 'income' &&
+          getCycleId(transaction.occurredOn, paydayDay, manualCycleClosures) === selectedSummaryCycleId,
+      )
       .reduce((total, transaction) => total + transaction.amountCents, 0),
-    [paydayDay, selectedSummaryCycleId, transactions],
+    [manualCycleClosures, paydayDay, selectedSummaryCycleId, transactions],
   )
   const plannedCycleCents = useMemo(
     () => plannedPayments
-      .filter((payment) => payment.active && getCycleId(payment.nextDueOn, paydayDay) === selectedSummaryCycleId)
+      .filter(
+        (payment) =>
+          payment.active && getCycleId(payment.nextDueOn, paydayDay, manualCycleClosures) === selectedSummaryCycleId,
+      )
       .reduce((total, payment) => total + payment.amountCents, 0),
-    [paydayDay, plannedPayments, selectedSummaryCycleId],
+    [manualCycleClosures, paydayDay, plannedPayments, selectedSummaryCycleId],
   )
   const availableEstimateCents = selectedCycleIncomeCents - cycleExpenseCategories.totalCents - plannedCycleCents
   const daysUntilPayday = useMemo(() => getDaysUntilPayday(paydayDay), [paydayDay])
@@ -351,9 +370,13 @@ const downloadFile = (name: string, contents: string, type: string) => {
     cycleDate.setMonth(cycleDate.getMonth() - 1)
     const previousCycleId = `${cycleDate.getFullYear()}-${String(cycleDate.getMonth() + 1).padStart(2, '0')}`
     return transactions
-      .filter((transaction) => transaction.type === 'expense' && getCycleId(transaction.occurredOn, paydayDay) === previousCycleId)
+      .filter(
+        (transaction) =>
+          transaction.type === 'expense' &&
+          getCycleId(transaction.occurredOn, paydayDay, manualCycleClosures) === previousCycleId,
+      )
       .reduce((total, transaction) => total + transaction.amountCents, 0)
-  }, [paydayDay, selectedSummaryCycleId, transactions])
+  }, [manualCycleClosures, paydayDay, selectedSummaryCycleId, transactions])
   const expenseComparisonCents = cycleExpenseCategories.totalCents - previousCycleExpenseCents
   const pendingTransactions = useMemo(
     () => transactions.filter((transaction) => transaction.status === 'pending'),
@@ -363,11 +386,15 @@ const downloadFile = (name: string, contents: string, type: string) => {
     () =>
       selectedSummaryCycleId === currentCycleId
         ? plannedPayments
-            .filter((payment) => payment.active && getCycleId(payment.nextDueOn, paydayDay) === currentCycleId)
+            .filter(
+              (payment) =>
+                payment.active &&
+                getCycleId(payment.nextDueOn, paydayDay, manualCycleClosures) === currentCycleId,
+            )
             .sort((first, second) => first.nextDueOn.localeCompare(second.nextDueOn))
             .slice(0, 3)
         : [],
-    [currentCycleId, paydayDay, plannedPayments, selectedSummaryCycleId],
+    [currentCycleId, manualCycleClosures, paydayDay, plannedPayments, selectedSummaryCycleId],
   )
   const expenseChartBackground = useMemo(() => {
     if (cycleExpenseCategories.entries.length === 0) {
@@ -401,7 +428,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
     const year = new Date().getFullYear()
     const summaries = new Map<string, { expenseCents: number; incomeCents: number }>()
     for (const transaction of transactions) {
-      const cycleId = getCycleId(transaction.occurredOn, paydayDay)
+      const cycleId = getScheduledCycleId(transaction.occurredOn, paydayDay)
       const summary = summaries.get(cycleId) ?? { expenseCents: 0, incomeCents: 0 }
       if (transaction.type === 'expense') summary.expenseCents += transaction.amountCents
       if (transaction.type === 'income') summary.incomeCents += transaction.amountCents
@@ -430,7 +457,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
           (activityPaymentMethodId === 'all' || transaction.paymentMethodId === activityPaymentMethodId) &&
           (activityCategoryId === 'all' || transaction.categoryId === activityCategoryId) &&
           (!activityPendingOnly || transaction.status === 'pending') &&
-          (activityCycleId === null || getCycleId(transaction.occurredOn, paydayDay) === activityCycleId) &&
+          (activityCycleId === null || getScheduledCycleId(transaction.occurredOn, paydayDay) === activityCycleId) &&
           (!activitySearch.trim() || `${transaction.merchant} ${transaction.amountCents / 100}`.toLocaleLowerCase('es-ES').includes(activitySearch.trim().toLocaleLowerCase('es-ES'))),
       ),
     [activityCategoryId, activityCycleId, activityPaymentMethodId, activityPendingOnly, activitySearch, activityTab, paydayDay, transactions],
@@ -864,6 +891,31 @@ const downloadFile = (name: string, contents: string, type: string) => {
     }
   }
 
+  const handleManualCycleReset = async () => {
+    if (
+      !window.confirm(
+        'El ciclo actual se cerrará con los movimientos de ayer. Los movimientos de hoy iniciarán un ciclo nuevo y el historial se conservará.',
+      )
+    ) {
+      return
+    }
+    if (!beginSaving('cycle-reset')) return
+
+    try {
+      const closure = await closeCurrentCycle()
+      await refreshData()
+      setSettingsFeedback(
+        closure
+          ? `Ciclo cerrado el ${formatLocalDate(closure.closedOn)}. Los movimientos anteriores siguen disponibles en Actividad.`
+          : 'El ciclo ya empieza hoy o no hay días anteriores que cerrar.',
+      )
+    } catch {
+      setSettingsFeedback('No se ha podido reiniciar el ciclo.')
+    } finally {
+      finishSaving()
+    }
+  }
+
   const openTransactionEditor = (transaction: Transaction) => {
     rememberOpeningFocus()
     setOpenTransactionId(null)
@@ -1222,7 +1274,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
               <div>
                 <h2><PieChart size={17} aria-hidden="true" />Gastos del ciclo</h2>
                 <p>{formatCycleLabel(selectedSummaryCycleId)} · {formatCurrency(cycleExpenseCategories.totalCents)}</p>
-                <small className="cycle-range">{formatCycleRange(selectedSummaryCycleId, paydayDay)}</small>
+                <small className="cycle-range">{formatCycleRange(selectedSummaryCycleId, paydayDay, manualCycleClosures)}</small>
               </div>
               <button
                 className="calendar-button"
@@ -1995,6 +2047,24 @@ const downloadFile = (name: string, contents: string, type: string) => {
                 {busyAction === 'settings' ? 'Guardando...' : 'Guardar nómina'}
               </button>
               {settingsFeedback ? <p className="status-message" role="status">{settingsFeedback}</p> : null}
+            </section>
+
+            <section className="settings-section" aria-labelledby="cycle-reset-title">
+              <h3 id="cycle-reset-title">Ciclo</h3>
+              <p className="muted-copy">Cierra el ciclo con los movimientos de ayer. Hoy empezará un nuevo extracto sin borrar el historial.</p>
+              <button className="secondary-action" type="button" disabled={busyAction === 'cycle-reset'} onClick={() => void handleManualCycleReset()}>
+                <RotateCcw size={16} aria-hidden="true" />
+                {busyAction === 'cycle-reset' ? 'Reiniciando...' : 'Reiniciar ciclo hoy'}
+              </button>
+              {manualCycleClosures.length ? (
+                <ul className="simple-list cycle-closure-list" aria-label="Cierres manuales">
+                  {[...manualCycleClosures].sort((first, second) => second.closedOn.localeCompare(first.closedOn)).map((closure) => (
+                    <li key={closure.id}>
+                      <span><strong>Ciclo cerrado</strong><small>{formatCycleRange(closure.id, paydayDay, manualCycleClosures)}</small></span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </section>
 
             <section className="settings-section" aria-labelledby="data-title">

@@ -12,6 +12,8 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
+Se incorporó el cierre manual de ciclo desde Ajustes. Cierra el extracto con los movimientos del día anterior, inicia uno nuevo en la fecha actual y mantiene el historial disponible. Los cálculos y las copias JSON almacenan estos límites manuales, incluyendo varios cierres dentro del mismo periodo programado. Las pruebas cubren reinicios, mes de febrero, nóminas el día 31 y desplazamientos por fin de semana.
+
 Se simplificó la composición visual de las cuatro vistas. Actividad y Configuración financiera ya no usan un recuadro exterior; sus grupos se delimitan por espaciado y separadores. Las secciones de categorías del Resumen también pasan a ser un bloque abierto, mientras que nómina, gráfico y formulario de registro conservan una superficie por ser herramientas focales. Se establecieron márgenes móviles compartidos, una escala tipográfica estable y una separación vertical consistente entre secciones.
 
 Se aclaró la separación entre Ajustes y Configuración financiera. El botón superior usa ahora un engranaje y abre Ajustes: tema, contraste, nómina y datos locales (exportación, restauración y demostración). La pestaña inferior conserva solo tarjetas, categorías, reglas por comercio y pagos recurrentes.
@@ -28,7 +30,7 @@ La rama también incorpora una carga opcional de datos ficticios, identificados 
 
 ## Siguiente tarea
 
-Confirmar desde Safari en iPhone, con datos móviles, la versión publicada en `https://simple-finance-379.pages.dev`: instalación de la PWA, navegación inferior, apertura/cierre de hojas, registro rápido, edición, controles táctiles y actualización automática. Tras esa comprobación, revisar los pendientes de la Fase 2 y preparar el checklist privado de la Fase 5.
+Confirmar desde Safari en iPhone, con datos móviles, la versión publicada en `https://simple-finance-379.pages.dev`: instalación de la PWA, navegación inferior, apertura/cierre de hojas, registro rápido, edición, cierre manual de ciclo, controles táctiles y actualización automática. Tras esa comprobación, preparar el checklist privado de la Fase 5 y decidir el siguiente bloque de estadísticas detalladas.
 
 ## Verificaciones
 
