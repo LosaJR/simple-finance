@@ -12,6 +12,8 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
+Resumen muestra la versión visible `v1.4` junto a la marca. Se corresponde con la versión técnica `1.4.0` del paquete y sirve para confirmar en móvil que la PWA instalada ha recibido la compilación publicada.
+
 Se reforzó la actualización de la PWA instalada. Al descargar una versión nueva, el navegador recibe ahora una orden explícita para activar el service worker en espera y recargar la interfaz, en vez de depender de que iOS cierre todas las instancias antiguas por su cuenta.
 
 Se corrigió la composición móvil de Registrar y Actividad. Registrar reserva espacio real tras el formulario para que Guardar movimiento quede siempre por encima de la navegación inferior. Actividad reúne el calendario dentro del encabezado de Evolución reciente, hace mucho más evidente el ciclo seleccionado, reduce los filtros de tarjeta, búsqueda y categoría a una única fila compacta y elimina el control visible de Solo pendientes.
