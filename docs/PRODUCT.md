@@ -36,6 +36,9 @@ El propietario y un circulo cerrado de testers. No se recopilan datos, no hay ba
 - Bandeja de pendientes: un movimiento puede guardarse para revisar antes de incorporarlo a los filtros de actividad. La PWA no recibe esos movimientos automaticamente; la futura capa nativa sera quien los proponga desde una fuente autorizada.
 - Deteccion local de duplicados antes de guardar un movimiento manual, con confirmacion explicita.
 - Resumen con disponible estimado: ingresos del ciclo menos gastos registrados y pagos recurrentes previstos que siguen pendientes de confirmar.
+- Resumen muestra el disponible diario sugerido, repartiendo el disponible estimado entre los días que faltan para el siguiente cobro.
+- Cada límite individual comunica su estado además del importe: seguimiento normal, atención al 75%, proximidad al 90% y exceso. El importe restante o superado siempre acompaña al estado.
+- Los pagos recurrentes del ciclo actual se muestran en Resumen como próximos pagos; solo se pueden registrar cuando su fecha ha llegado, para evitar anticipar un gasto por error.
 - Tema persistente y modo de contraste reforzado, sin depender exclusivamente del color para explicar limites o estados.
 - Configuración ofrece un conjunto opcional de datos ficticios, marcado como `Demostración`, desde enero hasta la fecha actual. Sirve solo para probar la interfaz y puede retirarse sin borrar los demás movimientos locales.
 
@@ -48,3 +51,4 @@ El propietario y un circulo cerrado de testers. No se recopilan datos, no hay ba
 - El dia de cobro se usa ya para el ciclo, la cuenta atras y el registro local de nomina al abrir la aplicacion. Una notificacion fiable con la app cerrada requiere la futura capa nativa y una prueba en iPhone fisico.
 - Capacidades nativas deben probarse en iPhone fisico antes de declararse disponibles.
 - El aviso cuando una categoría alcance el 90% de su límite requiere la futura capa nativa de notificaciones y no se anuncia todavía como disponible.
+- No hay cuentas ni inicio de sesión mientras los datos vivan exclusivamente en IndexedDB. El acceso con Apple o Google se abordará junto con sincronización remota cifrada, recuperación de cuenta y controles de privacidad; no se añadirá como una pantalla aislada.

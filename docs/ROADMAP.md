@@ -21,6 +21,8 @@ Issues previstos:
 
 ## Fase 1 - Fundamentos financieros
 
+Estado: completada.
+
 - Dashboard responsive para iPhone.
 - Tarjeta principal configurable, tarjetas adicionales y CRUD seguro de tarjetas y categorias desde Configuracion.
 - Registro manual compacto de gastos e ingresos, con edicion y eliminacion del movimiento.
@@ -32,7 +34,9 @@ Issues previstos:
 
 Estado: iniciada.
 
-- Límite mensual opcional por categoría: disponible en Configuración y visible en Resumen.
+- Límite mensual opcional por categoría: disponible en Configuración y visible en Resumen con importe restante, progreso y estado al 75%, 90% y 100%.
+- Disponible diario: disponible en Resumen para repartir el saldo estimado hasta la próxima nómina.
+- Próximos pagos recurrentes: visibles en Resumen y confirmables solo cuando vencen.
 - Dia de reinicio configurable.
 - Reinicio manual con historial.
 - Aviso al aproximarse al 90% del límite mediante la futura capa de notificaciones nativas.
@@ -71,3 +75,11 @@ Bloqueada hasta macOS, Apple Developer y pruebas en iPhone fisico.
 
 - Exponer un App Intent para registrar un movimiento desde Atajos con importe, comercio y tarjeta.
 - Evaluar en dispositivo el disparador de transaccion de Wallet y sus datos disponibles.
+
+## Fase 8 - Identidad y sincronizacion futura
+
+Estado: planificada tras validar el uso local privado.
+
+- Diseñar almacenamiento remoto cifrado y sincronización entre dispositivos.
+- Migrar de forma explícita los datos locales existentes, con exportación y borrado de cuenta.
+- Incorporar inicio de sesión con Apple y Google solo sobre esa base de privacidad y recuperación.

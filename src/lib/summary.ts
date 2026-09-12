@@ -71,6 +71,25 @@ export const getDaysUntilPayday = (paydayDay: number, today = new Date()) => {
   return Math.round((nextPayday.getTime() - currentDate.getTime()) / 86_400_000)
 }
 
+export type CategoryLimitStatus = 'normal' | 'attention' | 'near-limit' | 'exceeded'
+
+export const summarizeCategoryLimit = (spentCents: number, limitCents: number) => {
+  const ratio = limitCents > 0 ? spentCents / limitCents : 0
+  const status: CategoryLimitStatus =
+    ratio >= 1 ? 'exceeded' : ratio >= 0.9 ? 'near-limit' : ratio >= 0.75 ? 'attention' : 'normal'
+
+  return {
+    status,
+    usedPercentage: Math.round(ratio * 100),
+    trackPercentage: Math.min(Math.max(ratio * 100, 0), 100),
+    remainingCents: Math.max(limitCents - spentCents, 0),
+    excessCents: Math.max(spentCents - limitCents, 0),
+  }
+}
+
+export const getDailyAvailableCents = (availableCents: number, daysUntilPayday: number) =>
+  Math.trunc(availableCents / Math.max(daysUntilPayday, 1))
+
 export const summarizeMonthlyHistory = (transactions: Transaction[]) => {
   const summaries = new Map<string, { expenseCents: number; incomeCents: number }>()
 

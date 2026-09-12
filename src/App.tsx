@@ -6,6 +6,8 @@ import {
   Check,
   CalendarDays,
   ChevronDown,
+  CircleAlert,
+  CircleCheck,
   CirclePlus,
   CreditCard,
   Download,
@@ -80,8 +82,11 @@ import {
 import {
   formatActivityDate,
   formatCurrency,
+  formatLocalDate,
+  getDailyAvailableCents,
   getDaysUntilPayday,
   parseEuroToCents,
+  summarizeCategoryLimit,
 } from './lib/summary'
 
 const todayInputValue = () => {
@@ -326,6 +331,11 @@ const downloadFile = (name: string, contents: string, type: string) => {
     [paydayDay, plannedPayments, selectedSummaryCycleId],
   )
   const availableEstimateCents = selectedCycleIncomeCents - cycleExpenseCategories.totalCents - plannedCycleCents
+  const daysUntilPayday = useMemo(() => getDaysUntilPayday(paydayDay), [paydayDay])
+  const dailyAvailableCents =
+    selectedSummaryCycleId === currentCycleId
+      ? getDailyAvailableCents(availableEstimateCents, daysUntilPayday)
+      : null
   const previousCycleExpenseCents = useMemo(() => {
     const cycleDate = new Date(`${selectedSummaryCycleId}-01T12:00:00`)
     cycleDate.setMonth(cycleDate.getMonth() - 1)
@@ -339,9 +349,15 @@ const downloadFile = (name: string, contents: string, type: string) => {
     () => transactions.filter((transaction) => transaction.status === 'pending'),
     [transactions],
   )
-  const duePlannedPayments = useMemo(
-    () => plannedPayments.filter((payment) => payment.active && payment.nextDueOn <= todayInputValue()).slice(0, 3),
-    [plannedPayments],
+  const plannedPaymentsForSummary = useMemo(
+    () =>
+      selectedSummaryCycleId === currentCycleId
+        ? plannedPayments
+            .filter((payment) => payment.active && getCycleId(payment.nextDueOn, paydayDay) === currentCycleId)
+            .sort((first, second) => first.nextDueOn.localeCompare(second.nextDueOn))
+            .slice(0, 3)
+        : [],
+    [currentCycleId, paydayDay, plannedPayments, selectedSummaryCycleId],
   )
   const expenseChartBackground = useMemo(() => {
     if (cycleExpenseCategories.entries.length === 0) {
@@ -371,7 +387,6 @@ const downloadFile = (name: string, contents: string, type: string) => {
       }),
     [summaryCalendarYear],
   )
-  const daysUntilPayday = useMemo(() => getDaysUntilPayday(paydayDay), [paydayDay])
   const monthlyCalendar = useMemo(() => {
     const year = new Date().getFullYear()
     const summaries = new Map<string, { expenseCents: number; incomeCents: number }>()
@@ -1014,8 +1029,8 @@ const downloadFile = (name: string, contents: string, type: string) => {
               <small>Ingresos {formatCurrency(selectedCycleIncomeCents)} · previstos {formatCurrency(plannedCycleCents)}</small>
             </article>
             <article>
-              <span>Ritmo del ciclo</span>
-              <strong>{cycleExpenseCategories.totalCents > 0 ? `${Math.round((cycleExpenseCategories.totalCents / Math.max(selectedCycleIncomeCents || cycleExpenseCategories.totalCents, 1)) * 100)}%` : 'Sin gastos'}</strong>
+              <span>Disponible al día</span>
+              <strong>{dailyAvailableCents === null ? '—' : formatCurrency(dailyAvailableCents)}</strong>
               <small>{selectedSummaryCycleId === currentCycleId ? `hasta la nómina en ${daysUntilPayday} días` : 'ciclo histórico'}</small>
             </article>
             <article>
@@ -1029,12 +1044,23 @@ const downloadFile = (name: string, contents: string, type: string) => {
               <BadgeAlert size={18} aria-hidden="true" /><span><strong>{pendingTransactions.length} pendiente{pendingTransactions.length === 1 ? '' : 's'} de revisar</strong><small>Confirma o corrige antes de que cuente en tu balance.</small></span><ChevronDown size={18} aria-hidden="true" />
             </button>
           ) : null}
-          {duePlannedPayments.length > 0 ? (
-            <section className="due-payments" aria-label="Pagos previstos pendientes">
-              <div className="section-title"><h2><Repeat2 size={17} aria-hidden="true" />Por confirmar</h2><span>{duePlannedPayments.length}</span></div>
-              {duePlannedPayments.map((payment) => (
-                <div key={payment.id} className="due-payment-row"><div><strong>{payment.name}</strong><small>{formatCurrency(payment.amountCents)} · {payment.nextDueOn}</small></div><button className="secondary-action compact-action" type="button" onClick={() => void handleRecordPlannedPayment(payment)}>Registrar</button></div>
-              ))}
+          {plannedPaymentsForSummary.length > 0 ? (
+            <section className="planned-payments" aria-label="Próximos pagos previstos">
+              <div className="section-title"><h2><Repeat2 size={17} aria-hidden="true" />Próximos pagos</h2><span>{plannedPaymentsForSummary.length}</span></div>
+              {plannedPaymentsForSummary.map((payment) => {
+                const isDue = payment.nextDueOn <= todayInputValue()
+                const dateLabel = payment.nextDueOn === todayInputValue()
+                  ? 'Vence hoy'
+                  : payment.nextDueOn < todayInputValue()
+                    ? `Pendiente desde ${formatLocalDate(payment.nextDueOn)}`
+                    : formatLocalDate(payment.nextDueOn)
+                return (
+                  <div key={payment.id} className={isDue ? 'planned-payment-row is-due' : 'planned-payment-row'}>
+                    <div><strong>{payment.name}</strong><small>{formatCurrency(payment.amountCents)} · {dateLabel}</small></div>
+                    {isDue ? <button className="secondary-action compact-action" type="button" onClick={() => void handleRecordPlannedPayment(payment)}>Registrar</button> : null}
+                  </div>
+                )
+              })}
             </section>
           ) : null}
 
@@ -1110,9 +1136,10 @@ const downloadFile = (name: string, contents: string, type: string) => {
               <ul className="category-spending-list">
                 {cycleExpenseCategories.entries.map((entry) => {
                   const Icon = getCategoryIcon(entry.category.id)
-                  const limitRatio = entry.category.limitCents
-                    ? Math.min((entry.amountCents / entry.category.limitCents) * 100, 100)
-                    : 0
+                  const limit = entry.category.limitCents
+                    ? summarizeCategoryLimit(entry.amountCents, entry.category.limitCents)
+                    : null
+                  const LimitIcon = limit?.status === 'normal' ? CircleCheck : CircleAlert
                   return (
                     <li key={entry.category.id}>
                       <button
@@ -1137,14 +1164,23 @@ const downloadFile = (name: string, contents: string, type: string) => {
                             <span>{entry.percentage}%</span>
                           </div>
                           <b>{formatCurrency(entry.amountCents)}{entry.category.limitCents ? ` / ${formatCurrency(entry.category.limitCents)}` : ''}</b>
-                          {entry.category.limitCents ? (
+                          {entry.category.limitCents && limit ? (
                             <>
-                              <span className="limit-status">
-                                {entry.amountCents >= entry.category.limitCents
-                                  ? `Límite superado por ${formatCurrency(entry.amountCents - entry.category.limitCents)}`
-                                  : `Quedan ${formatCurrency(entry.category.limitCents - entry.amountCents)}`}
+                              <span className={`limit-status ${limit.status}`}>
+                                <LimitIcon size={14} aria-hidden="true" />
+                                {limit.status === 'exceeded'
+                                  ? `Límite superado por ${formatCurrency(limit.excessCents)}`
+                                  : limit.status === 'near-limit'
+                                    ? `Cerca del límite · quedan ${formatCurrency(limit.remainingCents)}`
+                                    : limit.status === 'attention'
+                                      ? `Atención · ${limit.usedPercentage}% usado · quedan ${formatCurrency(limit.remainingCents)}`
+                                      : `Quedan ${formatCurrency(limit.remainingCents)}`}
                               </span>
-                              <span className="limit-track" aria-label={`${limitRatio}% del límite usado`}><i style={{ width: `${limitRatio}%`, background: entry.category.color }} /></span>
+                              <span
+                                className={`limit-track ${limit.status}`}
+                                aria-label={`${limit.usedPercentage}% del límite usado`}
+                                style={limit.status === 'normal' ? { color: entry.category.color } : undefined}
+                              ><i style={{ width: `${limit.trackPercentage}%` }} /></span>
                             </>
                           ) : null}
                         </div>

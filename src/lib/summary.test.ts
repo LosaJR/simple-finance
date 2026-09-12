@@ -3,8 +3,10 @@ import { addFrequencyToDate, getCycleId, getPaydayDate, isPotentialDuplicate, no
 import { createLocalId } from './storage'
 import {
   formatActivityDate,
+  getDailyAvailableCents,
   getDaysUntilPayday,
   parseEuroToCents,
+  summarizeCategoryLimit,
   summarizeCurrentCycle,
   summarizeMonthlyHistory,
 } from './summary'
@@ -87,6 +89,29 @@ describe('payday and monthly history', () => {
 describe('local identifiers', () => {
   it('creates an identifier when randomUUID is unavailable', () => {
     expect(createLocalId(null)).toMatch(/^[a-z0-9]+-[a-z0-9]+$/)
+  })
+})
+
+describe('daily availability and category limits', () => {
+  it('divides the estimated balance between the remaining days', () => {
+    expect(getDailyAvailableCents(12500, 5)).toBe(2500)
+    expect(getDailyAvailableCents(-12500, 5)).toBe(-2500)
+    expect(getDailyAvailableCents(12500, 0)).toBe(12500)
+  })
+
+  it('marks category limits before and after the threshold', () => {
+    expect(summarizeCategoryLimit(7400, 10000)).toMatchObject({
+      status: 'normal',
+      usedPercentage: 74,
+      remainingCents: 2600,
+    })
+    expect(summarizeCategoryLimit(7500, 10000).status).toBe('attention')
+    expect(summarizeCategoryLimit(9000, 10000).status).toBe('near-limit')
+    expect(summarizeCategoryLimit(11200, 10000)).toMatchObject({
+      status: 'exceeded',
+      trackPercentage: 100,
+      excessCents: 1200,
+    })
   })
 })
 

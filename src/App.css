@@ -501,6 +501,7 @@ label,
   display: block;
   height: 100%;
   border-radius: inherit;
+  background: currentColor;
 }
 
 .category-expenses {
@@ -1214,7 +1215,7 @@ textarea {
 .undo-banner,
 .pending-banner,
 .onboarding-panel,
-.due-payments,
+.planned-payments,
 .cycle-insights {
   border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
   border-radius: 8px;
@@ -1259,7 +1260,7 @@ textarea {
 
 .pending-banner small,
 .onboarding-panel span,
-.due-payment-row small,
+.planned-payment-row small,
 .cycle-insights small,
 .simple-list small {
   color: var(--muted);
@@ -1302,17 +1303,17 @@ textarea {
   font-size: 1rem;
 }
 
-.due-payments {
+.planned-payments {
   display: grid;
   gap: 8px;
   padding: 14px;
 }
 
-.due-payments .section-title h2 {
+.planned-payments .section-title h2 {
   font-size: 0.94rem;
 }
 
-.due-payments .section-title > span {
+.planned-payments .section-title > span {
   display: grid;
   min-width: 23px;
   height: 23px;
@@ -1324,7 +1325,7 @@ textarea {
   font-weight: 800;
 }
 
-.due-payment-row {
+.planned-payment-row {
   display: flex;
   gap: 10px;
   align-items: center;
@@ -1333,7 +1334,11 @@ textarea {
   border-top: 1px solid var(--line);
 }
 
-.due-payment-row div,
+.planned-payment-row.is-due {
+  border-color: color-mix(in srgb, var(--danger) 42%, var(--line));
+}
+
+.planned-payment-row div,
 .simple-list li > span {
   display: grid;
   min-width: 0;
@@ -1341,9 +1346,40 @@ textarea {
 }
 
 .limit-status {
+  display: inline-flex;
   grid-column: 1 / -1;
-  color: var(--muted);
+  gap: 5px;
+  align-items: center;
   font-size: 0.73rem;
+  font-weight: 700;
+}
+
+.category-spending-copy .limit-status.normal {
+  color: var(--positive);
+}
+
+.category-spending-copy .limit-status.attention {
+  color: color-mix(in srgb, var(--accent) 56%, var(--danger));
+}
+
+.category-spending-copy .limit-status.near-limit {
+  color: color-mix(in srgb, var(--danger) 76%, var(--accent));
+}
+
+.category-spending-copy .limit-status.exceeded {
+  color: var(--danger);
+}
+
+.limit-track.attention {
+  color: color-mix(in srgb, var(--accent) 56%, var(--danger));
+}
+
+.limit-track.near-limit {
+  color: color-mix(in srgb, var(--danger) 76%, var(--accent));
+}
+
+.limit-track.exceeded {
+  color: var(--danger);
 }
 
 .activity-filter-grid {

@@ -24,6 +24,8 @@ La interfaz de fase 0 usa navegacion local en el cliente con una barra inferior 
 
 Los importes se almacenan como enteros en centimos. Las fechas de movimientos usan formato `YYYY-MM-DD` y los calculos de ciclo se hacen con fecha local al mediodia para evitar desplazamientos por zona horaria. El resumen actual calcula el ciclo contra el dia de cobro vigente y desplaza un cobro de fin de semana al lunes. Agrupa los gastos por categoría para el gráfico circular y el consumo del límite. El calendario anual agrupa el historial por ciclos delimitados por esas fechas efectivas y etiqueta cada uno por su ultimo dia antes del siguiente cobro: el intervalo 25 de agosto a 25 de septiembre, y el de 1 de septiembre a 1 de octubre, se registran como septiembre. El borrado de una nomina automatica marca su ciclo para que no reaparezca en la siguiente carga.
 
+El Resumen deriva un disponible diario del saldo estimado y los días hasta nómina. Los límites individuales se calculan por categoría y ciclo, con estados locales al 75%, 90% y 100%, sin enviar información fuera del dispositivo. Los pagos recurrentes siguen siendo planes locales: se muestran por su próxima fecha y solo se materializan como movimiento después de que la persona lo confirme.
+
 Las copias JSON se validan con Zod antes de sustituir el contenido local; el CSV es una exportacion de lectura de movimientos. No existe sincronizacion remota.
 
 ## Privacidad
@@ -33,3 +35,7 @@ No hay backend, analitica ni SDKs externos. Los datos quedan en IndexedDB del na
 ## Extension futura
 
 Capacitor debe envolver la PWA sin romper la capa de dominio. App Intents, Atajos, notificaciones locales, Face ID/PIN, widgets y Apple Watch viven en la fase nativa y requieren macOS, cuenta Apple Developer y pruebas en dispositivo fisico. La app nativa expondra un App Intent de registro de movimiento parametrizado para que Atajos pueda invocarlo; los datos de una transaccion solo se aceptaran cuando una fuente autorizada los entregue.
+
+## Identidad y sincronizacion futura
+
+La autenticación con Apple o Google no aporta recuperación ni continuidad si los datos permanecen solo en IndexedDB. Se incorporará con una capa remota separada que incluya identidad, almacenamiento por usuario, sincronización entre dispositivos, exportación y borrado de cuenta. Antes de escoger proveedor se definirá un modelo de cifrado, minimización de metadatos, recuperación y migración desde los datos locales. La sesión nunca sustituirá la posibilidad de usar la aplicación privada y local.
