@@ -97,6 +97,8 @@ import {
   summarizeCycleTrend,
 } from './lib/summary'
 
+const APP_VERSION = '1.4'
+
 const todayInputValue = () => {
   const today = new Date()
   const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60_000)
@@ -1203,7 +1205,10 @@ const downloadFile = (name: string, contents: string, type: string) => {
     <main className={`shell ${screen === 'home' ? 'home-shell' : screen === 'entry' ? 'entry-shell' : ''}`}>
       <header className="topbar">
         <div>
-          <p className="eyebrow brand-eyebrow"><span className="brand-mark" aria-hidden="true" />Simple Finance</p>
+          <p className="eyebrow brand-eyebrow">
+            <span className="brand-mark" aria-hidden="true" />Simple Finance
+            {screen === 'home' ? <span className="app-version">v{APP_VERSION}</span> : null}
+          </p>
           <h1>{currentScreen.title}</h1>
         </div>
         <button className="icon-button" type="button" aria-label="Abrir ajustes" onClick={openSettings}>
