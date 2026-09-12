@@ -12,6 +12,10 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
+Se aplicó el primer pase de calidad UX/UI derivado de la auditoría. Los controles de interacción principal cumplen un objetivo táctil mínimo de 44 px, el modo claro refuerza el contraste de texto secundario, acciones y errores sobre superficies translúcidas, y Configuración se organiza en Base financiera, Automatización y Datos y privacidad. Los paneles de registro rápido, edición y ajustes retienen el foco, admiten `Escape` y lo devuelven al control de origen al cerrarse.
+
+Los guardados de movimientos, nómina y pagos recurrentes comunican `Guardando...` y bloquean dobles pulsaciones. Borrar reglas por comercio y pagos recurrentes exige confirmar la acción y aclara qué información histórica permanece. El Resumen muestra el intervalo efectivo de cada ciclo entre fechas de cobro, además de su etiqueta mensual.
+
 Se consolidó el flujo financiero diario y se mejoró el Resumen con disponible diario, estados explícitos por límite individual (75%, 90% y exceso) y próximos pagos recurrentes. Los pagos futuros se pueden consultar desde el ciclo actual, pero solo se registran al llegar su vencimiento. Las pruebas unitarias cubren la aritmética de disponible diario y los umbrales de límite.
 
 La autenticación con Apple o Google queda registrada para la futura Fase 8. Depende de sincronización remota cifrada, cuentas, recuperación y migración desde IndexedDB; hasta entonces la aplicación conserva el modelo privado por dispositivo.
@@ -20,7 +24,7 @@ La rama también incorpora una carga opcional de datos ficticios, identificados 
 
 ## Siguiente tarea
 
-Aplicar la revisión UX/UI antes de avanzar de fase: objetivos táctiles de al menos 44 pt, contraste AA consistente sobre superficies translúcidas, foco contenido en las hojas modales, estados de guardado para evitar dobles acciones y una etiqueta explícita del intervalo de cada ciclo de nómina. Después, revisar desde Safari en iPhone, con datos móviles, la versión publicada en `https://simple-finance-379.pages.dev`.
+Confirmar desde Safari en iPhone, con datos móviles, la versión publicada en `https://simple-finance-379.pages.dev`: instalación de la PWA, navegación inferior, apertura/cierre de hojas, registro rápido, edición, controles táctiles y actualización automática. Tras esa comprobación, revisar los pendientes de la Fase 2 y preparar el checklist privado de la Fase 5.
 
 ## Verificaciones
 
@@ -30,7 +34,7 @@ Aplicar la revisión UX/UI antes de avanzar de fase: objetivos táctiles de al m
 - Registro de movimiento, nomina en dia laborable, tarjeta principal, filtro por tarjeta, calendario por ciclos y configuracion con selectores directos: verificados contra un origen HTTP de red local a tamano iPhone; queda pendiente la confirmacion en iPhone fisico.
 - `pnpm e2e`: configurado, pero no ejecutado localmente porque la descarga de navegadores de Playwright desde `cdn.playwright.dev` agoto timeout.
 - Cloudflare Pages: desplegado correctamente en `https://simple-finance-379.pages.dev` desde `main`; los despliegues automáticos de producción están activados.
-- Auditoría UX/UI: completada el 2026-09-12 contra heurísticas de Nielsen, Leyes de UX, guías de Apple y WCAG 2.2. La base de navegación, registro progresivo, feedback y movimiento reducido es correcta; los ajustes prioritarios se registran en la siguiente tarea.
+- Auditoría UX/UI: completada el 2026-09-12 contra heurísticas de Nielsen, Leyes de UX, guías de Apple y WCAG 2.2. El pase prioritario de contraste, objetivos táctiles, seguridad de acciones, feedback de guardado, foco modal e intervalos de ciclo está incorporado y verificado localmente.
 
 ## Bloqueos
 

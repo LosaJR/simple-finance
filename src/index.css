@@ -4,13 +4,13 @@
   --surface: #f6fbf8;
   --field: #e9f2ee;
   --text: #1c3943;
-  --muted: #607882;
+  --muted: #526a73;
   --ink: #11313e;
   --summary-bg: #0e4b5d;
   --summary-text: #f2faf6;
-  --accent: #287b70;
+  --accent: #1f6f65;
   --positive: #28795e;
-  --danger: #b55a59;
+  --danger: #9f4145;
   --line: #cadbd4;
   --line-strong: #afc9c0;
   --shadow: 0 10px 24px rgba(13, 57, 67, 0.11);
@@ -96,6 +96,11 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
 }
 
 button:focus-visible,

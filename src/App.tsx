@@ -81,6 +81,7 @@ import {
 } from './lib/storage'
 import {
   formatActivityDate,
+  formatCycleRange,
   formatCurrency,
   formatLocalDate,
   getDailyAvailableCents,
@@ -110,6 +111,7 @@ type ActivityTab = 'all' | 'expense' | 'income'
 type AppScreen = 'home' | 'entry' | 'activity' | 'cards'
 type QuickType = 'expense' | 'income'
 type QuickStep = 'type' | 'amount' | 'merchant' | 'category'
+type BusyAction = 'quick' | 'entry' | 'planned' | 'planned-record' | 'settings' | 'edit' | null
 
 const activityTabs: { id: ActivityTab; label: string }[] = [
   { id: 'all', label: 'Global' },
@@ -213,7 +215,14 @@ function App() {
   const [plannedDueOn, setPlannedDueOn] = useState(todayInputValue())
   const [planFeedback, setPlanFeedback] = useState('')
   const [demoFeedback, setDemoFeedback] = useState('')
+  const [busyAction, setBusyAction] = useState<BusyAction>(null)
   const importInputRef = useRef<HTMLInputElement>(null)
+  const quickSheetRef = useRef<HTMLElement>(null)
+  const editSheetRef = useRef<HTMLElement>(null)
+  const settingsSheetRef = useRef<HTMLElement>(null)
+  const lastFocusedElementRef = useRef<HTMLElement | null>(null)
+  const busyActionRef = useRef<BusyAction>(null)
+  const wasModalOpenRef = useRef(false)
   const [swipeOffsets, setSwipeOffsets] = useState<Record<string, number>>({})
   const swipeStart = useRef<{ id: string; x: number } | null>(null)
 
@@ -455,7 +464,24 @@ const downloadFile = (name: string, contents: string, type: string) => {
     setQuickStep('amount')
   }
 
+  const rememberOpeningFocus = () => {
+    lastFocusedElementRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+  }
+
+  const beginSaving = (action: Exclude<BusyAction, null>) => {
+    if (busyActionRef.current) return false
+    busyActionRef.current = action
+    setBusyAction(action)
+    return true
+  }
+
+  const finishSaving = () => {
+    busyActionRef.current = null
+    setBusyAction(null)
+  }
+
   const openQuickEntry = () => {
+    rememberOpeningFocus()
     setQuickType('expense')
     setQuickAmount('')
     setQuickMerchant('')
@@ -487,10 +513,12 @@ const downloadFile = (name: string, contents: string, type: string) => {
       return
     }
 
+    if (isPotentialDuplicate(parsed.data, transactions) && !window.confirm('Parece un movimiento ya registrado. ¿Quieres guardarlo de todas formas?')) {
+      return
+    }
+    if (!beginSaving('quick')) return
+
     try {
-      if (isPotentialDuplicate(parsed.data, transactions) && !window.confirm('Parece un movimiento ya registrado. ¿Quieres guardarlo de todas formas?')) {
-        return
-      }
       const transaction = await createTransaction(parsed.data, paydayDay)
       if (quickRememberRule && quickMerchant.trim()) {
         await createMerchantRule(quickMerchant, quickCategoryId)
@@ -501,6 +529,8 @@ const downloadFile = (name: string, contents: string, type: string) => {
       setHomeFeedback(`Movimiento registrado con ${primaryCard?.name ?? 'la tarjeta principal'}. Puedes deshacerlo.`)
     } catch {
       setQuickFeedback('No se ha podido registrar el movimiento. Inténtalo de nuevo.')
+    } finally {
+      finishSaving()
     }
   }
 
@@ -517,10 +547,12 @@ const downloadFile = (name: string, contents: string, type: string) => {
       return
     }
 
+    if (isPotentialDuplicate(parsed.data, transactions) && !window.confirm('Parece un movimiento ya registrado. ¿Quieres guardarlo de todas formas?')) {
+      return
+    }
+    if (!beginSaving('entry')) return
+
     try {
-      if (isPotentialDuplicate(parsed.data, transactions) && !window.confirm('Parece un movimiento ya registrado. ¿Quieres guardarlo de todas formas?')) {
-        return
-      }
       const transaction = await createTransaction(parsed.data, paydayDay)
       setLastCreatedTransaction(transaction)
       setFeedback('Movimiento registrado. Puedes deshacerlo desde Resumen.')
@@ -535,6 +567,8 @@ const downloadFile = (name: string, contents: string, type: string) => {
       await refreshData()
     } catch {
       setFeedback('No se ha podido registrar el movimiento. Inténtalo de nuevo.')
+    } finally {
+      finishSaving()
     }
   }
 
@@ -656,19 +690,33 @@ const downloadFile = (name: string, contents: string, type: string) => {
       setPlanFeedback('Completa nombre, importe, categoría, tarjeta y próxima fecha.')
       return
     }
-    await createPlannedPayment(parsed.data)
-    setPlannedName('')
-    setPlannedAmount('')
-    setIsAddingPlan(false)
-    setPlanFeedback('Pago recurrente añadido.')
-    await refreshData()
+    if (!beginSaving('planned')) return
+    try {
+      await createPlannedPayment(parsed.data)
+      setPlannedName('')
+      setPlannedAmount('')
+      setIsAddingPlan(false)
+      setPlanFeedback('Pago recurrente añadido.')
+      await refreshData()
+    } catch {
+      setPlanFeedback('No se ha podido guardar el pago recurrente.')
+    } finally {
+      finishSaving()
+    }
   }
 
   const handleRecordPlannedPayment = async (payment: PlannedPayment) => {
     if (!window.confirm(`¿Registrar ${payment.name} como pagado?`)) return
-    await recordPlannedPayment(payment, paydayDay)
-    setHomeFeedback(`${payment.name} registrado y siguiente fecha actualizada.`)
-    await refreshData()
+    if (!beginSaving('planned-record')) return
+    try {
+      await recordPlannedPayment(payment, paydayDay)
+      setHomeFeedback(`${payment.name} registrado y siguiente fecha actualizada.`)
+      await refreshData()
+    } catch {
+      setHomeFeedback('No se ha podido registrar el pago recurrente.')
+    } finally {
+      finishSaving()
+    }
   }
 
   const handleSetTheme = async (theme: 'dark' | 'light') => {
@@ -783,6 +831,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
   }
 
   const openSettings = () => {
+    rememberOpeningFocus()
     setSettingsPaydayDay(paydayDay)
     setSettingsPaydayAmount(paydayAmount)
     setSettingsFeedback('')
@@ -795,19 +844,27 @@ const downloadFile = (name: string, contents: string, type: string) => {
       return
     }
 
-    const paydayAmountCents = parseEuroToCents(settingsPaydayAmount)
-    await savePaydaySettings(settingsPaydayDay, paydayAmountCents)
-    setPaydayDay(settingsPaydayDay)
-    setPaydayAmount(settingsPaydayAmount)
-    await refreshData()
-    setSettingsFeedback(
-      paydayAmountCents > 0 ? 'Nómina configurada.' : 'Día guardado. Añade una cantidad para automatizar la nómina.',
-    )
-    setOnboardingCompleted(true)
-    await savePreferences({ theme: isDark ? 'dark' : 'light', highContrast, onboardingCompleted: true })
+    if (!beginSaving('settings')) return
+    try {
+      const paydayAmountCents = parseEuroToCents(settingsPaydayAmount)
+      await savePaydaySettings(settingsPaydayDay, paydayAmountCents)
+      setPaydayDay(settingsPaydayDay)
+      setPaydayAmount(settingsPaydayAmount)
+      await refreshData()
+      setSettingsFeedback(
+        paydayAmountCents > 0 ? 'Nómina configurada.' : 'Día guardado. Añade una cantidad para automatizar la nómina.',
+      )
+      setOnboardingCompleted(true)
+      await savePreferences({ theme: isDark ? 'dark' : 'light', highContrast, onboardingCompleted: true })
+    } catch {
+      setSettingsFeedback('No se ha podido guardar la nómina.')
+    } finally {
+      finishSaving()
+    }
   }
 
   const openTransactionEditor = (transaction: Transaction) => {
+    rememberOpeningFocus()
     setOpenTransactionId(null)
     setSwipeOffsets({})
     setEditingTransaction(transaction)
@@ -840,6 +897,8 @@ const downloadFile = (name: string, contents: string, type: string) => {
       return
     }
 
+    if (!beginSaving('edit')) return
+
     try {
       await updateTransaction(editingTransaction.id, parsed.data, paydayDay)
       setEditingTransaction(null)
@@ -848,8 +907,101 @@ const downloadFile = (name: string, contents: string, type: string) => {
       await refreshData()
     } catch {
       setEditFeedback('No se ha podido actualizar el movimiento.')
+    } finally {
+      finishSaving()
     }
   }
+
+  const handleDeleteMerchantRule = async (rule: MerchantRule) => {
+    if (!window.confirm(`¿Eliminar la regla para ${rule.merchant}? La categoría sugerida dejará de aplicarse.`)) return
+    try {
+      await deleteMerchantRule(rule.id)
+      setFeedback('Regla eliminada.')
+      await refreshData()
+    } catch {
+      setFeedback('No se ha podido eliminar la regla.')
+    }
+  }
+
+  const handleDeletePlannedPayment = async (payment: PlannedPayment) => {
+    if (!window.confirm(`¿Eliminar ${payment.name}? No se borrarán movimientos ya registrados.`)) return
+    try {
+      await deletePlannedPayment(payment.id)
+      setPlanFeedback('Pago recurrente eliminado.')
+      await refreshData()
+    } catch {
+      setPlanFeedback('No se ha podido eliminar el pago recurrente.')
+    }
+  }
+
+  const closeTransactionEditor = () => {
+    setEditingTransaction(null)
+    setEditDraft(null)
+    setEditFeedback('')
+  }
+
+  const closeSettings = () => {
+    setIsSettingsOpen(false)
+    setSettingsFeedback('')
+  }
+
+  useEffect(() => {
+    const activeDialog = isQuickEntryOpen
+      ? quickSheetRef.current
+      : editingTransaction
+        ? editSheetRef.current
+        : isSettingsOpen
+          ? settingsSheetRef.current
+          : null
+
+    if (!activeDialog) {
+      if (wasModalOpenRef.current) {
+        wasModalOpenRef.current = false
+        lastFocusedElementRef.current?.focus()
+        lastFocusedElementRef.current = null
+      }
+      return
+    }
+
+    wasModalOpenRef.current = true
+    const getFocusable = () =>
+      Array.from(
+        activeDialog.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((element) => element.getClientRects().length > 0)
+    const focusInitial = () => {
+      const initial = activeDialog.querySelector<HTMLElement>('[data-initial-focus]')
+      ;(initial ?? getFocusable()[0])?.focus()
+    }
+    const frame = window.requestAnimationFrame(focusInitial)
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        if (isQuickEntryOpen) closeQuickEntry()
+        else if (editingTransaction) closeTransactionEditor()
+        else closeSettings()
+        return
+      }
+      if (event.key !== 'Tab') return
+      const focusable = getFocusable()
+      if (focusable.length === 0) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.cancelAnimationFrame(frame)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [editingTransaction, isQuickEntryOpen, isSettingsOpen])
 
   const handleDeleteTransaction = async (transaction: Transaction) => {
     if (!window.confirm(`¿Eliminar ${transaction.merchant}?`)) {
@@ -1057,7 +1209,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
                 return (
                   <div key={payment.id} className={isDue ? 'planned-payment-row is-due' : 'planned-payment-row'}>
                     <div><strong>{payment.name}</strong><small>{formatCurrency(payment.amountCents)} · {dateLabel}</small></div>
-                    {isDue ? <button className="secondary-action compact-action" type="button" onClick={() => void handleRecordPlannedPayment(payment)}>Registrar</button> : null}
+                    {isDue ? <button className="secondary-action compact-action" type="button" disabled={busyAction === 'planned-record'} onClick={() => void handleRecordPlannedPayment(payment)}>{busyAction === 'planned-record' ? 'Registrando...' : 'Registrar'}</button> : null}
                   </div>
                 )
               })}
@@ -1069,6 +1221,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
               <div>
                 <h2><PieChart size={17} aria-hidden="true" />Gastos del ciclo</h2>
                 <p>{formatCycleLabel(selectedSummaryCycleId)} · {formatCurrency(cycleExpenseCategories.totalCents)}</p>
+                <small className="cycle-range">{formatCycleRange(selectedSummaryCycleId, paydayDay)}</small>
               </div>
               <button
                 className="calendar-button"
@@ -1297,8 +1450,8 @@ const downloadFile = (name: string, contents: string, type: string) => {
             <span>Guardar como pendiente de confirmar</span>
           </label>
 
-          <button className="primary-action" type="submit">
-            Guardar movimiento
+          <button className="primary-action" type="submit" disabled={busyAction === 'entry'}>
+            {busyAction === 'entry' ? 'Guardando...' : 'Guardar movimiento'}
           </button>
         </form>
       ) : null}
@@ -1406,6 +1559,8 @@ const downloadFile = (name: string, contents: string, type: string) => {
             </div>
           </div>
 
+          <div className="configuration-group" aria-labelledby="configuration-base-title">
+            <h3 id="configuration-base-title">Base financiera</h3>
           <section className="configuration-item" aria-label="Tarjetas">
             <div className="configuration-select-row">
               <label>
@@ -1518,20 +1673,27 @@ const downloadFile = (name: string, contents: string, type: string) => {
             ) : null}
           </section>
 
+          </div>
+          <div className="configuration-group" aria-labelledby="configuration-automation-title">
+            <h3 id="configuration-automation-title">Automatización</h3>
+
           <section className="configuration-item" aria-label="Reglas por comercio">
             <div className="section-title"><div><h2><Store size={17} aria-hidden="true" />Reglas por comercio</h2><p>La categoría se sugerirá al escribir ese comercio.</p></div></div>
             {merchantRules.length === 0 ? <p className="muted-copy">Crea una regla desde el registro rápido al guardar un comercio.</p> : (
-              <ul className="simple-list">{merchantRules.map((rule) => <li key={rule.id}><span><strong>{rule.merchant}</strong><small>{categoryMap.get(rule.categoryId)?.name ?? 'Categoría archivada'}</small></span><button className="icon-button small-icon" type="button" aria-label={`Eliminar regla de ${rule.merchant}`} onClick={() => void deleteMerchantRule(rule.id).then(refreshData)}><Trash2 size={16} aria-hidden="true" /></button></li>)}</ul>
+              <ul className="simple-list">{merchantRules.map((rule) => <li key={rule.id}><span><strong>{rule.merchant}</strong><small>{categoryMap.get(rule.categoryId)?.name ?? 'Categoría archivada'}</small></span><button className="icon-button small-icon" type="button" aria-label={`Eliminar regla de ${rule.merchant}`} onClick={() => void handleDeleteMerchantRule(rule)}><Trash2 size={16} aria-hidden="true" /></button></li>)}</ul>
             )}
           </section>
 
           <section className="configuration-item" aria-label="Pagos recurrentes">
             <div className="section-title"><div><h2><Repeat2 size={17} aria-hidden="true" />Pagos recurrentes</h2><p>Se muestran para confirmar; no se registran solos.</p></div><button className="add-icon-button" type="button" aria-label="Añadir pago recurrente" onClick={() => setIsAddingPlan((current) => !current)}><Plus size={19} aria-hidden="true" /></button></div>
-            {isAddingPlan ? <div className="card-creator"><label>Nombre<input autoFocus value={plannedName} placeholder="Netflix" onChange={(event) => setPlannedName(event.target.value)} /></label><label>Importe<input inputMode="decimal" value={plannedAmount} placeholder="12,99" onChange={(event) => setPlannedAmount(event.target.value)} /></label><div className="field-grid"><label>Categoría<select value={plannedCategoryId} onChange={(event) => setPlannedCategoryId(event.target.value)}>{categories.filter((category) => category.allowedTypes.includes('expense')).map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label><label>Tarjeta<select value={plannedPaymentMethodId} onChange={(event) => setPlannedPaymentMethodId(event.target.value)}>{paymentMethods.map((method) => <option key={method.id} value={method.id}>{method.name}</option>)}</select></label></div><div className="field-grid"><label>Frecuencia<select value={plannedFrequency} onChange={(event) => setPlannedFrequency(event.target.value as PlannedPayment['frequency'])}><option value="weekly">Semanal</option><option value="monthly">Mensual</option><option value="yearly">Anual</option></select></label><label>Próxima fecha<input type="date" value={plannedDueOn} onChange={(event) => setPlannedDueOn(event.target.value)} /></label></div><button className="primary-action" type="button" onClick={() => void handleSavePlannedPayment()}>Guardar pago</button></div> : null}
+            {isAddingPlan ? <div className="card-creator"><label>Nombre<input autoFocus value={plannedName} placeholder="Netflix" onChange={(event) => setPlannedName(event.target.value)} /></label><label>Importe<input inputMode="decimal" value={plannedAmount} placeholder="12,99" onChange={(event) => setPlannedAmount(event.target.value)} /></label><div className="field-grid"><label>Categoría<select value={plannedCategoryId} onChange={(event) => setPlannedCategoryId(event.target.value)}>{categories.filter((category) => category.allowedTypes.includes('expense')).map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label><label>Tarjeta<select value={plannedPaymentMethodId} onChange={(event) => setPlannedPaymentMethodId(event.target.value)}>{paymentMethods.map((method) => <option key={method.id} value={method.id}>{method.name}</option>)}</select></label></div><div className="field-grid"><label>Frecuencia<select value={plannedFrequency} onChange={(event) => setPlannedFrequency(event.target.value as PlannedPayment['frequency'])}><option value="weekly">Semanal</option><option value="monthly">Mensual</option><option value="yearly">Anual</option></select></label><label>Próxima fecha<input type="date" value={plannedDueOn} onChange={(event) => setPlannedDueOn(event.target.value)} /></label></div><button className="primary-action" type="button" disabled={busyAction === 'planned'} onClick={() => void handleSavePlannedPayment()}>{busyAction === 'planned' ? 'Guardando...' : 'Guardar pago'}</button></div> : null}
             {planFeedback ? <p className="status-message" role="status">{planFeedback}</p> : null}
-            {plannedPayments.length ? <ul className="simple-list">{plannedPayments.map((payment) => <li key={payment.id}><span><strong>{payment.name}</strong><small>{formatCurrency(payment.amountCents)} · {payment.frequency === 'monthly' ? 'Mensual' : payment.frequency === 'weekly' ? 'Semanal' : 'Anual'} · {payment.nextDueOn}</small></span><div className="list-actions"><button className="text-button" type="button" onClick={() => void togglePlannedPayment(payment.id, !payment.active).then(refreshData)}>{payment.active ? 'Pausar' : 'Activar'}</button><button className="icon-button small-icon" type="button" aria-label={`Eliminar ${payment.name}`} onClick={() => void deletePlannedPayment(payment.id).then(refreshData)}><Trash2 size={16} aria-hidden="true" /></button></div></li>)}</ul> : <p className="muted-copy">Añade las suscripciones o pagos que quieras anticipar.</p>}
+            {plannedPayments.length ? <ul className="simple-list">{plannedPayments.map((payment) => <li key={payment.id}><span><strong>{payment.name}</strong><small>{formatCurrency(payment.amountCents)} · {payment.frequency === 'monthly' ? 'Mensual' : payment.frequency === 'weekly' ? 'Semanal' : 'Anual'} · {payment.nextDueOn}</small></span><div className="list-actions"><button className="text-button" type="button" onClick={() => void togglePlannedPayment(payment.id, !payment.active).then(refreshData)}>{payment.active ? 'Pausar' : 'Activar'}</button><button className="icon-button small-icon" type="button" aria-label={`Eliminar ${payment.name}`} onClick={() => void handleDeletePlannedPayment(payment)}><Trash2 size={16} aria-hidden="true" /></button></div></li>)}</ul> : <p className="muted-copy">Añade las suscripciones o pagos que quieras anticipar.</p>}
           </section>
 
+          </div>
+          <div className="configuration-group" aria-labelledby="configuration-data-title">
+            <h3 id="configuration-data-title">Datos y privacidad</h3>
           <section className="configuration-item" aria-label="Datos locales">
             <div className="section-title"><div><h2><Download size={17} aria-hidden="true" />Datos locales</h2><p>Exporta una copia privada o restáurala en este dispositivo.</p></div></div>
             <div className="backup-actions"><button className="secondary-action" type="button" onClick={() => void handleExportCsv()}><Download size={16} aria-hidden="true" />CSV</button><button className="secondary-action" type="button" onClick={() => void handleExportJson()}><Download size={16} aria-hidden="true" />Copia JSON</button><button className="secondary-action" type="button" onClick={() => importInputRef.current?.click()}><Upload size={16} aria-hidden="true" />Restaurar</button></div>
@@ -1542,6 +1704,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
             </div>
             {demoFeedback ? <p className="status-message" role="status">{demoFeedback}</p> : null}
           </section>
+          </div>
         </section>
       ) : null}
 
@@ -1567,7 +1730,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
 
       {isQuickEntryOpen ? (
         <div className="modal-layer" role="dialog" aria-modal="true" aria-labelledby="quick-entry-title">
-          <section className="quick-sheet">
+          <section ref={quickSheetRef} className="quick-sheet">
             <div className="sheet-heading">
               <div>
                 <p className="eyebrow">Registro rápido</p>
@@ -1594,7 +1757,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
 
             {quickStep === 'type' ? (
               <div className="quick-type-actions">
-                <button className="primary-action" type="button" onClick={() => chooseQuickType('expense')}>
+                <button data-initial-focus className="primary-action" type="button" onClick={() => chooseQuickType('expense')}>
                   Gasto
                 </button>
                 <button className="secondary-action" type="button" onClick={() => chooseQuickType('income')}>
@@ -1658,8 +1821,8 @@ const downloadFile = (name: string, contents: string, type: string) => {
                   Atrás
                 </button>
                 {quickStep === 'category' ? (
-                  <button className="primary-action" type="button" onClick={handleQuickSave}>
-                    Guardar movimiento
+                  <button className="primary-action" type="button" disabled={busyAction === 'quick'} onClick={handleQuickSave}>
+                    {busyAction === 'quick' ? 'Guardando...' : 'Guardar movimiento'}
                   </button>
                 ) : (
                   <button
@@ -1678,7 +1841,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
 
       {editingTransaction && editDraft ? (
         <div className="modal-layer" role="dialog" aria-modal="true" aria-labelledby="edit-transaction-title">
-          <section className="settings-sheet edit-sheet">
+          <section ref={editSheetRef} className="settings-sheet edit-sheet">
             <div className="sheet-heading">
               <div>
                 <p className="eyebrow">Movimiento</p>
@@ -1688,7 +1851,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
                 className="close-button"
                 type="button"
                 aria-label="Cerrar edición"
-                onClick={() => setEditingTransaction(null)}
+                onClick={closeTransactionEditor}
               >
                 Cerrar
               </button>
@@ -1722,6 +1885,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
               Importe
               <input
                 autoFocus
+                data-initial-focus
                 inputMode="decimal"
                 value={editAmount}
                 onChange={(event) => setEditAmount(event.target.value)}
@@ -1783,8 +1947,8 @@ const downloadFile = (name: string, contents: string, type: string) => {
             </label>
 
             {editFeedback ? <p className="status-message error" role="alert">{editFeedback}</p> : null}
-            <button className="primary-action" type="button" onClick={() => void handleSaveEditedTransaction()}>
-              Guardar cambios
+            <button className="primary-action" type="button" disabled={busyAction === 'edit'} onClick={() => void handleSaveEditedTransaction()}>
+              {busyAction === 'edit' ? 'Guardando...' : 'Guardar cambios'}
             </button>
           </section>
         </div>
@@ -1792,13 +1956,13 @@ const downloadFile = (name: string, contents: string, type: string) => {
 
       {isSettingsOpen ? (
         <div className="modal-layer" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-          <section className="settings-sheet">
+          <section ref={settingsSheetRef} className="settings-sheet">
             <div className="sheet-heading">
               <div>
                 <p className="eyebrow">Simple Finance</p>
                 <h2 id="settings-title">Configuración</h2>
               </div>
-              <button className="close-button" type="button" aria-label="Cerrar configuración" onClick={() => setIsSettingsOpen(false)}>
+              <button className="close-button" type="button" aria-label="Cerrar configuración" onClick={closeSettings}>
                 Cerrar
               </button>
             </div>
@@ -1826,6 +1990,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
                   max="31"
                   inputMode="numeric"
                   value={settingsPaydayDay}
+                  data-initial-focus
                   onChange={(event) => setSettingsPaydayDay(Number(event.target.value))}
                 />
               </label>
@@ -1838,8 +2003,8 @@ const downloadFile = (name: string, contents: string, type: string) => {
                   onChange={(event) => setSettingsPaydayAmount(event.target.value)}
                 />
               </label>
-              <button className="primary-action" type="button" onClick={handleSaveSettings}>
-                Guardar nómina
+              <button className="primary-action" type="button" disabled={busyAction === 'settings'} onClick={handleSaveSettings}>
+                {busyAction === 'settings' ? 'Guardando...' : 'Guardar nómina'}
               </button>
               {settingsFeedback ? <p className="status-message" role="status">{settingsFeedback}</p> : null}
             </section>

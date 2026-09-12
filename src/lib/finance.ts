@@ -208,6 +208,35 @@ export const getCycleId = (occurredOn: string, resetDay = 1) => {
   return `${finalCycleDay.getFullYear()}-${String(finalCycleDay.getMonth() + 1).padStart(2, '0')}`
 }
 
+const formatIsoDate = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+
+export const getCycleBounds = (cycleId: string, resetDay = 1) => {
+  const [year, month] = cycleId.split('-').map(Number)
+  const dates = Array.from({ length: 7 }, (_, index) => {
+    const nominalMonth = new Date(year, month - 4 + index, 1)
+    return getPaydayDate(nominalMonth.getFullYear(), nominalMonth.getMonth(), resetDay)
+  })
+    .filter((date, index, values) => index === 0 || date.getTime() !== values[index - 1]?.getTime())
+    .sort((first, second) => first.getTime() - second.getTime())
+
+  const closingIndex = dates.findIndex((payday) => {
+    const finalCycleDay = new Date(payday)
+    finalCycleDay.setDate(finalCycleDay.getDate() - 1)
+    return `${finalCycleDay.getFullYear()}-${String(finalCycleDay.getMonth() + 1).padStart(2, '0')}` === cycleId
+  })
+  const closingPayday = dates[closingIndex]
+  const openingPayday = closingIndex > 0 ? dates[closingIndex - 1] : undefined
+
+  if (!closingPayday || !openingPayday) {
+    return null
+  }
+
+  const end = new Date(closingPayday)
+  end.setDate(end.getDate() - 1)
+  return { start: formatIsoDate(openingPayday), end: formatIsoDate(end) }
+}
+
 export const addFrequencyToDate = (occurredOn: string, frequency: PlannedPaymentFrequency) => {
   const date = new Date(`${occurredOn}T12:00:00`)
   if (frequency === 'weekly') date.setDate(date.getDate() + 7)
