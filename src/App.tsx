@@ -23,6 +23,7 @@ import {
   Plus,
   PieChart,
   Repeat2,
+  Settings,
   Settings2,
   Store,
   ShoppingBasket,
@@ -1143,8 +1144,8 @@ const downloadFile = (name: string, contents: string, type: string) => {
           <p className="eyebrow brand-eyebrow"><span className="brand-mark" aria-hidden="true" />Simple Finance</p>
           <h1>{currentScreen.title}</h1>
         </div>
-        <button className="icon-button" type="button" aria-label="Configuración" onClick={openSettings}>
-          <Settings2 size={19} aria-hidden="true" />
+        <button className="icon-button" type="button" aria-label="Abrir ajustes" onClick={openSettings}>
+          <Settings size={20} aria-hidden="true" />
         </button>
       </header>
 
@@ -1551,11 +1552,11 @@ const downloadFile = (name: string, contents: string, type: string) => {
       ) : null}
 
       {screen === 'cards' ? (
-        <section className="cards-panel screen-stack" aria-label="Configuración personal">
+        <section className="cards-panel screen-stack" aria-label="Configuración financiera">
           <div className="section-title">
             <div>
-              <h2><Settings2 size={17} aria-hidden="true" />Configuración personal</h2>
-              <p>Personaliza las bases de tus movimientos.</p>
+              <h2><Settings2 size={17} aria-hidden="true" />Configuración financiera</h2>
+              <p>Tarjetas, categorías y automatizaciones de tus movimientos.</p>
             </div>
           </div>
 
@@ -1691,19 +1692,6 @@ const downloadFile = (name: string, contents: string, type: string) => {
             {plannedPayments.length ? <ul className="simple-list">{plannedPayments.map((payment) => <li key={payment.id}><span><strong>{payment.name}</strong><small>{formatCurrency(payment.amountCents)} · {payment.frequency === 'monthly' ? 'Mensual' : payment.frequency === 'weekly' ? 'Semanal' : 'Anual'} · {payment.nextDueOn}</small></span><div className="list-actions"><button className="text-button" type="button" onClick={() => void togglePlannedPayment(payment.id, !payment.active).then(refreshData)}>{payment.active ? 'Pausar' : 'Activar'}</button><button className="icon-button small-icon" type="button" aria-label={`Eliminar ${payment.name}`} onClick={() => void handleDeletePlannedPayment(payment)}><Trash2 size={16} aria-hidden="true" /></button></div></li>)}</ul> : <p className="muted-copy">Añade las suscripciones o pagos que quieras anticipar.</p>}
           </section>
 
-          </div>
-          <div className="configuration-group" aria-labelledby="configuration-data-title">
-            <h3 id="configuration-data-title">Datos y privacidad</h3>
-          <section className="configuration-item" aria-label="Datos locales">
-            <div className="section-title"><div><h2><Download size={17} aria-hidden="true" />Datos locales</h2><p>Exporta una copia privada o restáurala en este dispositivo.</p></div></div>
-            <div className="backup-actions"><button className="secondary-action" type="button" onClick={() => void handleExportCsv()}><Download size={16} aria-hidden="true" />CSV</button><button className="secondary-action" type="button" onClick={() => void handleExportJson()}><Download size={16} aria-hidden="true" />Copia JSON</button><button className="secondary-action" type="button" onClick={() => importInputRef.current?.click()}><Upload size={16} aria-hidden="true" />Restaurar</button></div>
-            <input ref={importInputRef} className="visually-hidden" type="file" accept="application/json" onChange={(event) => void handleRestoreBackup(event.target.files?.[0])} />
-            <div className="demo-data-control">
-              <div><strong>Datos de demostración</strong><small>Movimientos ficticios desde enero para probar gráficos, ciclos y filtros.</small></div>
-              <div className="inline-actions"><button className="secondary-action compact-action" type="button" onClick={() => void handleLoadDemoData()}>Cargar datos</button><button className="danger-action compact-action" type="button" onClick={() => void handleRemoveDemoData()}>Quitar datos</button></div>
-            </div>
-            {demoFeedback ? <p className="status-message" role="status">{demoFeedback}</p> : null}
-          </section>
           </div>
         </section>
       ) : null}
@@ -1960,9 +1948,9 @@ const downloadFile = (name: string, contents: string, type: string) => {
             <div className="sheet-heading">
               <div>
                 <p className="eyebrow">Simple Finance</p>
-                <h2 id="settings-title">Configuración</h2>
+                <h2 id="settings-title">Ajustes</h2>
               </div>
-              <button className="close-button" type="button" aria-label="Cerrar configuración" onClick={closeSettings}>
+              <button className="close-button" type="button" aria-label="Cerrar ajustes" onClick={closeSettings}>
                 Cerrar
               </button>
             </div>
@@ -2007,6 +1995,18 @@ const downloadFile = (name: string, contents: string, type: string) => {
                 {busyAction === 'settings' ? 'Guardando...' : 'Guardar nómina'}
               </button>
               {settingsFeedback ? <p className="status-message" role="status">{settingsFeedback}</p> : null}
+            </section>
+
+            <section className="settings-section" aria-labelledby="data-title">
+              <h3 id="data-title">Datos y privacidad</h3>
+              <p className="muted-copy">Exporta una copia privada o restáurala en este dispositivo.</p>
+              <div className="backup-actions"><button className="secondary-action" type="button" onClick={() => void handleExportCsv()}><Download size={16} aria-hidden="true" />CSV</button><button className="secondary-action" type="button" onClick={() => void handleExportJson()}><Download size={16} aria-hidden="true" />Copia JSON</button><button className="secondary-action" type="button" onClick={() => importInputRef.current?.click()}><Upload size={16} aria-hidden="true" />Restaurar</button></div>
+              <input ref={importInputRef} className="visually-hidden" type="file" accept="application/json" onChange={(event) => void handleRestoreBackup(event.target.files?.[0])} />
+              <div className="demo-data-control">
+                <div><strong>Datos de demostración</strong><small>Movimientos ficticios desde enero para probar gráficos, ciclos y filtros.</small></div>
+                <div className="inline-actions"><button className="secondary-action compact-action" type="button" onClick={() => void handleLoadDemoData()}>Cargar datos</button><button className="danger-action compact-action" type="button" onClick={() => void handleRemoveDemoData()}>Quitar datos</button></div>
+              </div>
+              {demoFeedback ? <p className="status-message" role="status">{demoFeedback}</p> : null}
             </section>
           </section>
         </div>

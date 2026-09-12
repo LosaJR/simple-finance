@@ -12,7 +12,9 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
-Se aplicó el primer pase de calidad UX/UI derivado de la auditoría. Los controles de interacción principal cumplen un objetivo táctil mínimo de 44 px, el modo claro refuerza el contraste de texto secundario, acciones y errores sobre superficies translúcidas, y Configuración se organiza en Base financiera, Automatización y Datos y privacidad. Los paneles de registro rápido, edición y ajustes retienen el foco, admiten `Escape` y lo devuelven al control de origen al cerrarse.
+Se aclaró la separación entre Ajustes y Configuración financiera. El botón superior usa ahora un engranaje y abre Ajustes: tema, contraste, nómina y datos locales (exportación, restauración y demostración). La pestaña inferior conserva solo tarjetas, categorías, reglas por comercio y pagos recurrentes.
+
+Se aplicó el primer pase de calidad UX/UI derivado de la auditoría. Los controles de interacción principal cumplen un objetivo táctil mínimo de 44 px, el modo claro refuerza el contraste de texto secundario, acciones y errores sobre superficies translúcidas, y Configuración se organiza en Base financiera y Automatización. Los paneles de registro rápido, edición y ajustes retienen el foco, admiten `Escape` y lo devuelven al control de origen al cerrarse.
 
 Los guardados de movimientos, nómina y pagos recurrentes comunican `Guardando...` y bloquean dobles pulsaciones. Borrar reglas por comercio y pagos recurrentes exige confirmar la acción y aclara qué información histórica permanece. El Resumen muestra el intervalo efectivo de cada ciclo entre fechas de cobro, además de su etiqueta mensual.
 
