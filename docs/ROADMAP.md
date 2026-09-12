@@ -68,12 +68,14 @@ Estado: iniciada.
 - Pendiente: verificar la instalación y los flujos principales desde Safari en iPhone con datos móviles.
 - El repositorio permanece privado y no se despliegan datos; la URL pública de prueba expone únicamente los recursos estáticos de la PWA. El acceso restringido requiere una fase posterior con dominio propio y Cloudflare Access.
 
-## Fase 7 - Puente iOS nativo futuro
+## Fase 7 - Puente Android nativo
 
-Bloqueada hasta macOS, Apple Developer y pruebas en iPhone fisico.
+Planificada después de validar los flujos locales y de cerrar la calidad privada.
 
-- Exponer un App Intent para registrar un movimiento desde Atajos con importe, comercio y tarjeta.
-- Evaluar en dispositivo el disparador de transaccion de Wallet y sus datos disponibles.
+- Integrar Capacitor y crear el proyecto Android sin alterar la capa de dominio web.
+- Preparar firma, paquete AAB y pista de pruebas interna de Google Play.
+- Validar en Android físico instalación, almacenamiento local, navegación, actualizaciones y notificaciones locales autorizadas.
+- Evaluar de forma separada cualquier integración autorizada para proponer movimientos desde el sistema, sin asumir acceso a datos de pago o notificaciones.
 
 ## Fase 8 - Identidad y sincronizacion futura
 
@@ -82,3 +84,11 @@ Estado: planificada tras validar el uso local privado.
 - Diseñar almacenamiento remoto cifrado y sincronización entre dispositivos.
 - Migrar de forma explícita los datos locales existentes, con exportación y borrado de cuenta.
 - Incorporar inicio de sesión con Apple y Google solo sobre esa base de privacidad y recuperación.
+
+## Fase 9 - Puente iOS nativo posterior
+
+Bloqueada hasta macOS, cuenta Apple Developer y pruebas en iPhone físico.
+
+- Integrar Capacitor para iOS conservando la misma capa de dominio.
+- Exponer un App Intent de registro desde Atajos con datos entregados por una fuente autorizada.
+- Evaluar en dispositivo el disparador de transacción de Wallet y sus datos disponibles.

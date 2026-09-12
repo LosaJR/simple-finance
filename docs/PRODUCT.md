@@ -2,7 +2,7 @@
 
 ## Vision
 
-Simple Finance es una herramienta privada para registrar, clasificar y entender finanzas personales desde iPhone. La primera version es una PWA instalable desde Safari; el futuro nativo se abordara con Capacitor y Swift solo cuando exista entorno verificable.
+Simple Finance es una herramienta privada para registrar, clasificar y entender finanzas personales desde móvil. La primera versión es una PWA instalable; la primera distribución nativa será Android mediante Capacitor y Google Play. iOS seguirá como una vía posterior cuando exista un entorno Apple verificable.
 
 ## Usuario inicial
 
@@ -44,11 +44,11 @@ El propietario y un circulo cerrado de testers. No se recopilan datos, no hay ba
 
 ## Limites que deben comunicarse
 
-- La PWA no puede leer Apple Pay ni Wallet.
-- La PWA no puede integrarse con App Intents ni recibir parametros desde Atajos. La futura app iOS si expondra un atajo para registrar un movimiento con importe, comercio y tarjeta cuando esos datos provengan de una fuente autorizada.
-- El disparador de transaccion de Wallet puede iniciar un atajo cuando se usa una tarjeta, pero no debe asumirse que entrega importe ni comercio; se validara en dispositivo antes de diseñar un flujo automatico sobre el.
+- La PWA no puede leer Apple Pay, Wallet ni notificaciones de otras aplicaciones.
+- La futura app Android podrá evaluar integraciones nativas autorizadas para proponer movimientos y avisos, pero no leerá ni enviará datos financieros sin permiso explícito, una política de privacidad y validación en dispositivo físico. La compatibilidad con Google Play se verificará antes de anunciar cualquier automatización.
+- La futura app iOS expondrá un atajo para registrar un movimiento con importe, comercio y tarjeta cuando esos datos provengan de una fuente autorizada. App Intents, Atajos y Wallet no se trasladan a Android: requerirán su implementación y pruebas específicas en iOS.
 - La PWA no puede garantizar recordatorios con la app cerrada sin servicio adicional.
 - El dia de cobro se usa ya para el ciclo, la cuenta atras y el registro local de nomina al abrir la aplicacion. Una notificacion fiable con la app cerrada requiere la futura capa nativa y una prueba en iPhone fisico.
-- Capacidades nativas deben probarse en iPhone fisico antes de declararse disponibles.
+- Las capacidades Android deben probarse en un dispositivo Android físico antes de declararse disponibles. Las capacidades exclusivas de Apple requerirán además pruebas en iPhone físico.
 - El aviso cuando una categoría alcance el 90% de su límite requiere la futura capa nativa de notificaciones y no se anuncia todavía como disponible.
 - No hay cuentas ni inicio de sesión mientras los datos vivan exclusivamente en IndexedDB. El acceso con Apple o Google se abordará junto con sincronización remota cifrada, recuperación de cuenta y controles de privacidad; no se añadirá como una pantalla aislada.
