@@ -32,9 +32,11 @@ Las copias JSON se validan con Zod antes de sustituir el contenido local; el CSV
 
 No hay backend, analitica ni SDKs externos. Los datos quedan en IndexedDB del navegador. No se deben versionar exportaciones reales ni fixtures con datos sensibles.
 
-## Extension futura
+## Extension nativa futura
 
-Capacitor debe envolver la PWA sin romper la capa de dominio. App Intents, Atajos, notificaciones locales, Face ID/PIN, widgets y Apple Watch viven en la fase nativa y requieren macOS, cuenta Apple Developer y pruebas en dispositivo fisico. La app nativa expondra un App Intent de registro de movimiento parametrizado para que Atajos pueda invocarlo; los datos de una transaccion solo se aceptaran cuando una fuente autorizada los entregue.
+Capacitor envolverá la PWA sin romper la capa de dominio. Android será la primera plataforma nativa: el proyecto Android se construirá desde Windows con Android Studio, se firmará para pruebas y se distribuirá primero en una pista de pruebas de Google Play. Los plugins nativos se aislarán detrás de interfaces de la aplicación para que la lógica financiera, Dexie y la interfaz React continúen compartidas.
+
+Notificaciones, autenticación biométrica e integraciones para proponer movimientos se implementarán por plataforma y solo tras permisos explícitos, política de privacidad y pruebas físicas. Android no recibirá una equivalencia ficticia de App Intents o Wallet; iOS conservará su puente posterior con App Intents, Atajos, Face ID, widgets y Apple Watch cuando haya macOS, cuenta Apple Developer y un iPhone de pruebas.
 
 ## Identidad y sincronizacion futura
 

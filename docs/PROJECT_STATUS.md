@@ -4,13 +4,15 @@ Fecha: 2026-09-12
 
 ## Estado actual
 
-La rama `feature/flujo-financiero-diario` se ha consolidado como la base aprobada de Simple Finance y se promueve a `main`. Fase 1 queda completada y Fase 2 continúa con límites, ciclos y comprobación privada en iPhone.
+La rama `feature/flujo-financiero-diario` se ha consolidado como la base aprobada de Simple Finance y se promueve a `main`. Fase 1 queda completada y Fase 2 continúa con límites, ciclos y comprobación privada en móvil. Android será la primera distribución nativa mediante Google Play; iOS queda como puente posterior dependiente de entorno Apple.
 
 Seguimiento visible de fases y porcentajes: https://github.com/LosaJR/simple-finance/issues/13
 
 Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vitest, Playwright, Serena, GitHub Issues, milestones, GitHub Project y CI.
 
 ## Ultima tarea terminada
+
+Se reordenó la estrategia nativa: Android será la primera plataforma publicada y de pruebas, usando Capacitor sobre la misma interfaz React y la misma lógica financiera local. La capa iOS conserva sus capacidades exclusivas como trabajo posterior. La publicación Android requerirá Android Studio, firma, cuenta de Google Play, una política de privacidad y pruebas físicas antes de habilitar funcionalidades nativas o automatizaciones.
 
 Se incorporó el cierre manual de ciclo desde Ajustes. Cierra el extracto con los movimientos del día anterior, inicia uno nuevo en la fecha actual y mantiene el historial disponible. Los cálculos y las copias JSON almacenan estos límites manuales, incluyendo varios cierres dentro del mismo periodo programado. Las pruebas cubren reinicios, mes de febrero, nóminas el día 31 y desplazamientos por fin de semana.
 
@@ -30,7 +32,7 @@ La rama también incorpora una carga opcional de datos ficticios, identificados 
 
 ## Siguiente tarea
 
-Confirmar desde Safari en iPhone, con datos móviles, la versión publicada en `https://simple-finance-379.pages.dev`: instalación de la PWA, navegación inferior, apertura/cierre de hojas, registro rápido, edición, cierre manual de ciclo, controles táctiles y actualización automática. Tras esa comprobación, preparar el checklist privado de la Fase 5 y decidir el siguiente bloque de estadísticas detalladas.
+Confirmar desde Safari en iPhone y desde un dispositivo Android la versión publicada en `https://simple-finance-379.pages.dev`: instalación de la PWA, navegación inferior, apertura/cierre de hojas, registro rápido, edición, cierre manual de ciclo, controles táctiles y actualización automática. Tras esa comprobación, preparar el checklist privado de la Fase 5 y decidir el siguiente bloque de estadísticas detalladas.
 
 ## Verificaciones
 
@@ -44,5 +46,5 @@ Confirmar desde Safari en iPhone, con datos móviles, la versión publicada en `
 
 ## Bloqueos
 
-- Capacidades iOS nativas bloqueadas hasta disponer de macOS, firma Apple y dispositivo fisico.
+- El puente Android requiere Android Studio, cuenta de Google Play, firma y un dispositivo Android físico. Las capacidades iOS nativas siguen bloqueadas hasta disponer de macOS, firma Apple y dispositivo físico.
 - La URL de Pages es pública durante la prueba. No introducir datos financieros reales hasta aplicar un dominio propio y Cloudflare Access.
