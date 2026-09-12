@@ -1387,8 +1387,7 @@ textarea {
   border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--accent);
-  background: var(--field-glass);
-  backdrop-filter: blur(10px);
+  background: transparent;
 }
 
 .compact-activity-filter select,

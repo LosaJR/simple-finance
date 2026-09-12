@@ -12,6 +12,8 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
+Los filtros compactos de Actividad (tarjeta, búsqueda y categoría) eliminan su relleno interior para integrarse visualmente con la vista sin perder borde ni foco accesible.
+
 La publicación móvil usa GitHub Pages en `https://losajr.github.io/simple-finance/`. El repositorio permanece público durante el desarrollo para permitir esta modalidad; la PWA adapta su ruta base, manifiesto y service worker para funcionar desde `/simple-finance/`.
 
 Resumen muestra la versión visible `v1.5` junto a la marca. Se corresponde con la versión técnica `1.5.0` del paquete y sirve para confirmar en móvil que la PWA instalada ha recibido la compilación publicada.
