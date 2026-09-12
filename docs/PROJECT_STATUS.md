@@ -12,8 +12,6 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
-Se prepara un segundo canal de publicación mediante GitHub Pages, independiente de Cloudflare Pages. La PWA adapta su ruta base, manifiesto y service worker para poder instalarse y actualizarse correctamente desde `/simple-finance/`.
-
 Resumen muestra la versión visible `v1.5` junto a la marca. Se corresponde con la versión técnica `1.5.0` del paquete y sirve para confirmar en móvil que la PWA instalada ha recibido la compilación publicada.
 
 Se corrigió el bloqueo de actualización heredado en PWA: el service worker entrante usa ahora activación y toma de control inmediatas. Esto permite sustituir una instalación anterior que detectaba actualizaciones pero las dejaba esperando.
