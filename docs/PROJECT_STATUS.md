@@ -12,6 +12,8 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
+El extracto de una categoría sitúa ahora la fecha compacta al inicio de la fila, antes del signo y el importe. Registrar aplica reglas específicas de WebKit para que el valor del selector nativo de fecha se alinee a la izquierda en iPhone.
+
 Inicio alinea las tres métricas de disponibilidad por filas fijas de encabezado, importe y detalle, incluso cuando un texto ocupa más líneas. En Registrar, Fecha y Tarjeta utilizada se muestran como controles de ancho completo para evitar que el selector nativo de fecha sobresalga de la cuadrícula móvil.
 
 Se normalizaron las alturas, el interlineado y los límites de ancho de los controles móviles. Registrar ya no muestra el aviso inicial de almacenamiento local, ajusta el selector de tipo a sus dos acciones y mantiene el campo de fecha dentro de la cuadrícula. La selección de ciclos no desplaza la gráfica fuera de su espacio y las acciones de Categorías se alinean con el selector.
@@ -26,7 +28,7 @@ Los filtros compactos de Actividad (tarjeta, búsqueda y categoría) eliminan su
 
 La publicación móvil usa GitHub Pages en `https://losajr.github.io/simple-finance/`. El repositorio permanece público durante el desarrollo para permitir esta modalidad; la PWA adapta su ruta base, manifiesto y service worker para funcionar desde `/simple-finance/`.
 
-Resumen muestra la versión visible `v1.10` junto a la marca. Se corresponde con la versión técnica `1.10.0` del paquete y sirve para confirmar en móvil que la PWA instalada ha recibido la compilación publicada.
+Resumen muestra la versión visible `v1.11` junto a la marca. Se corresponde con la versión técnica `1.11.0` del paquete y sirve para confirmar en móvil que la PWA instalada ha recibido la compilación publicada.
 
 Se corrigió el bloqueo de actualización heredado en PWA: el service worker entrante usa ahora activación y toma de control inmediatas. Esto permite sustituir una instalación anterior que detectaba actualizaciones pero las dejaba esperando.
 

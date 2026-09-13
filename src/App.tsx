@@ -91,7 +91,7 @@ import {
   summarizeCycleTrend,
 } from './lib/summary'
 
-const APP_VERSION = '1.10'
+const APP_VERSION = '1.11'
 
 const todayInputValue = () => {
   const today = new Date()
@@ -137,10 +137,7 @@ const formatAmountInput = (amountCents: number) =>
     amountCents / 100,
   )
 
-const formatCompactDate = (isoDate: string) =>
-  new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit' }).format(
-    new Date(`${isoDate}T12:00:00`),
-  )
+const formatCompactDate = (isoDate: string) => `${isoDate.slice(8, 10)}/${isoDate.slice(5, 7)}`
 
 const formatTrendCurrency = (amountCents: number) =>
   `${new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(amountCents / 100)}€`
@@ -1132,7 +1129,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
                 onPointerUp={swipeable ? () => handleSwipeEnd(transaction.id) : undefined}
                 onPointerCancel={swipeable ? () => handleSwipeEnd(transaction.id) : undefined}
               >
-                <div className="transaction-content">
+                <div className={showCompactDate ? 'transaction-content has-compact-date' : 'transaction-content'}>
                   <span className={`transaction-marker ${transaction.type}`}>
                     {transaction.type === 'expense' ? (
                       <Minus size={18} strokeWidth={2.5} aria-hidden="true" />
@@ -1140,6 +1137,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
                       <Plus size={18} strokeWidth={2.5} aria-hidden="true" />
                     )}
                   </span>
+                  {showCompactDate ? <time className="transaction-date">{formatCompactDate(transaction.occurredOn)}</time> : null}
                   <div>
                     <span className="merchant">{transaction.merchant}</span>
                     <span className="metadata">
@@ -1150,7 +1148,6 @@ const downloadFile = (name: string, contents: string, type: string) => {
                   <strong className={transaction.type}>
                     {transaction.type === 'expense' ? '-' : '+'}
                     {formatCurrency(transaction.amountCents)}
-                    {showCompactDate ? <small>{formatCompactDate(transaction.occurredOn)}</small> : null}
                   </strong>
                   <button
                     className="transaction-more"
