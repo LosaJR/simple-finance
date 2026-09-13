@@ -4,7 +4,7 @@ Fecha: 2026-09-13
 
 ## Estado actual
 
-`main` contiene la base aprobada de Simple Finance (v1.11 / 1.11.0). Fase 1 queda completada y Fase 2 continúa con límites, ciclos y comprobación en móvil. Android será la primera distribución nativa mediante Google Play; iOS queda como puente posterior dependiente de entorno Apple.
+La próxima publicación de `main` será Simple Finance v1.12 / 1.12.0. Fase 1 queda completada y Fase 2 continúa con límites, ciclos y comprobación en móvil. Android será la primera distribución nativa mediante Google Play; iOS queda como puente posterior dependiente de entorno Apple.
 
 Seguimiento visible de fases y porcentajes: https://github.com/LosaJR/simple-finance/issues/13
 
@@ -30,7 +30,7 @@ Los filtros compactos de Actividad (tarjeta, búsqueda y categoría) eliminan su
 
 La publicación móvil usa GitHub Pages en `https://losajr.github.io/simple-finance/`. El repositorio permanece público durante el desarrollo para permitir esta modalidad; la PWA adapta su ruta base, manifiesto y service worker para funcionar desde `/simple-finance/`.
 
-Resumen muestra la versión visible `v1.11` junto a la marca. Se corresponde con la versión técnica `1.11.0` del paquete y sirve para confirmar en móvil que la PWA instalada ha recibido la compilación publicada.
+Inicio muestra la versión visible `v1.12` junto a la marca. Se corresponde con la versión técnica `1.12.0` del paquete y permitirá confirmar en móvil que la PWA instalada ha recibido la próxima compilación publicada.
 
 Se corrigió el bloqueo de actualización heredado en PWA: el service worker entrante usa ahora activación y toma de control inmediatas. Esto permite sustituir una instalación anterior que detectaba actualizaciones pero las dejaba esperando.
 
