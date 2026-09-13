@@ -139,9 +139,6 @@ const formatAmountInput = (amountCents: number) =>
 
 const formatCompactDate = (isoDate: string) => `${isoDate.slice(8, 10)}/${isoDate.slice(5, 7)}`
 
-const formatTrendCurrency = (amountCents: number) =>
-  `${new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(amountCents / 100)}€`
-
 const formatCycleLabel = (cycleId: string) =>
   new Intl.DateTimeFormat('es-ES', { month: 'short' })
     .format(new Date(`${cycleId}-01T12:00:00`))
@@ -449,6 +446,19 @@ const downloadFile = (name: string, contents: string, type: string) => {
     })
   }, [paydayDay, transactions])
   const cycleTrend = useMemo(() => summarizeCycleTrend(transactions, paydayDay), [paydayDay, transactions])
+  const selectedActivityCycle = useMemo(() => {
+    if (!activityCycleId) return null
+
+    return transactions.reduce(
+      (summary, transaction) => {
+        if (getScheduledCycleId(transaction.occurredOn, paydayDay) !== activityCycleId) return summary
+        if (transaction.type === 'income') summary.incomeCents += transaction.amountCents
+        if (transaction.type === 'expense') summary.expenseCents += transaction.amountCents
+        return summary
+      },
+      { cycleId: activityCycleId, incomeCents: 0, expenseCents: 0 },
+    )
+  }, [activityCycleId, paydayDay, transactions])
   const latestTrend = cycleTrend.at(-1)
   const previousTrend = cycleTrend.at(-2)
   const largestTrendAmount = Math.max(
@@ -1537,14 +1547,22 @@ const downloadFile = (name: string, contents: string, type: string) => {
                       <span className="trend-expense" style={{ height: `${Math.max((cycle.expenseCents / largestTrendAmount) * 100, cycle.expenseCents ? 8 : 0)}%` }} />
                     </span>
                     <span className="trend-amounts" aria-hidden="true">
-                      <span className="trend-income-amount">+{formatTrendCurrency(cycle.incomeCents)}</span>
-                      <span className="trend-expense-amount">-{formatTrendCurrency(cycle.expenseCents)}</span>
+                      <span className="trend-income-amount">+{formatCurrency(cycle.incomeCents)}</span>
+                      <span className="trend-expense-amount">-{formatCurrency(cycle.expenseCents)}</span>
                     </span>
                     <strong>{formatCycleLabel(cycle.cycleId)}</strong>
                   </button>
                 ))}
               </div>
             ) : <p className="trend-caption">Registra movimientos en distintos ciclos para ver su evolución.</p>}
+            {selectedActivityCycle ? (
+              <p className="selected-cycle-summary" role="status">
+                <strong>Ciclo seleccionado: {formatCycleLabel(selectedActivityCycle.cycleId)}</strong>
+                <span>{formatCycleRange(selectedActivityCycle.cycleId, paydayDay)}</span>
+                <span className="selected-cycle-income">Ingresos +{formatCurrency(selectedActivityCycle.incomeCents)}</span>
+                <span className="selected-cycle-expense">Gastos −{formatCurrency(selectedActivityCycle.expenseCents)}</span>
+              </p>
+            ) : null}
             {cycleTrend.length ? (
               trendExpenseDeltaCents === null ? (
                 <p className="trend-caption">Registra otro ciclo para ver la comparación.</p>
