@@ -91,7 +91,7 @@ import {
   summarizeCycleTrend,
 } from './lib/summary'
 
-const APP_VERSION = '1.8'
+const APP_VERSION = '1.9'
 
 const todayInputValue = () => {
   const today = new Date()
@@ -170,7 +170,7 @@ function App() {
   const [plannedPayments, setPlannedPayments] = useState<PlannedPayment[]>([])
   const [draft, setDraft] = useState<TransactionDraft>(initialDraft)
   const [amount, setAmount] = useState('')
-  const [feedback, setFeedback] = useState('Datos guardados solo en este dispositivo.')
+  const [feedback, setFeedback] = useState('')
   const [homeFeedback, setHomeFeedback] = useState('')
   const [isDark, setIsDark] = useState(true)
   const [highContrast, setHighContrast] = useState(false)
@@ -1394,7 +1394,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
         <form className="entry-panel screen-stack" onSubmit={handleSubmit}>
           <div className="section-title">
             <h2><CirclePlus size={17} aria-hidden="true" />Datos del movimiento</h2>
-            <p>{feedback}</p>
+            {feedback ? <p className="entry-feedback" role="status">{feedback}</p> : null}
           </div>
 
           <div className="segmented" aria-label="Tipo de movimiento">
