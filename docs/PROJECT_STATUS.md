@@ -12,6 +12,8 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
+Se inicia la Fase 5 de calidad privada. El checklist de Safari en iPhone incorpora la comprobación de gastos situados al inicio y final de un ciclo que cruza mes, y confirma que Ajustes solo expone el día de cobro como delimitador automático.
+
 El extracto de una categoría sitúa ahora la fecha compacta al inicio de la fila, antes del signo y el importe. Registrar aplica reglas específicas de WebKit para que el valor del selector nativo de fecha se alinee a la izquierda en iPhone.
 
 La evolución de Actividad muestra los importes de cada barra siempre con céntimos exactos, sin redondeo. Al elegir un ciclo, un resumen persistente identifica el mes, su intervalo efectivo y los totales de ingresos y gastos; la barra activa también refuerza su contorno.

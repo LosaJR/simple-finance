@@ -43,6 +43,8 @@ Estado: iniciada.
 
 ## Fase 3 - Automatizacion personal
 
+Estado: completada.
+
 - Reglas por comercio: disponible localmente.
 - Pendientes de categorizar: disponible como estado revisable; la entrada automatica queda bloqueada hasta la capa nativa.
 - Categorias frecuentes y selector completo.
@@ -50,11 +52,15 @@ Estado: iniciada.
 
 ## Fase 4 - Estadisticas y portabilidad
 
+Estado: completada.
+
 - Gasto por categoria y disponible estimado por ciclo: disponible.
 - Comparativa básica frente al ciclo anterior y evolución visual de los últimos seis ciclos: disponibles.
 - Exportacion CSV y copia/restauracion JSON validada: disponible.
 
 ## Fase 5 - Calidad y pruebas privadas
+
+Estado: iniciada.
 
 - Accesibilidad, estados vacios, errores y pulido visual: primer pase completado (objetivos de 44 px, contraste, foco modal, estados de guardado y confirmaciones de borrado).
 - Checklist iPhone Safari.
