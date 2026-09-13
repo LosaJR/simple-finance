@@ -8,6 +8,8 @@
 - `pnpm e2e`: Playwright con perfil iPhone y escritorio.
 - `pnpm run validate`: lint, unit tests y build en un solo paso.
 
+La primera ejecución de `pnpm e2e` requiere los navegadores de Playwright. Si faltan, instalar con `pnpm exec playwright install chromium webkit` y volver a ejecutar la prueba.
+
 ## Manual iPhone Safari
 
 Pendiente de prueba fisica.
@@ -33,6 +35,7 @@ Checklist inicial:
 - Guardar dos movimientos idénticos de prueba y comprobar que el segundo solicita confirmación.
 - Añadir un pago recurrente, comprobar que aparece como previsto y registrarlo manualmente; confirmar que adelanta la siguiente fecha una sola vez.
 - Buscar actividad por comercio, filtrar por categoría y activar `Solo pendientes`; limpiar filtros al terminar.
+- En escritorio, navegar con `Tab` por las pestañas de Actividad: solo la pestaña activa debe recibir el foco en el recorrido y su panel debe anunciarse como contenido asociado.
 - Exportar un CSV y una copia JSON de datos ficticios; probar restauración solo en un perfil de prueba, pues reemplaza los datos locales.
 - Activar `Contraste reforzado` desde Configuración y comprobar que límites, pendientes y acciones conservan texto explicativo.
 - Desde `Datos locales`, cargar datos de demostración y comprobar que hay actividad entre enero y la fecha actual, con importes y comercios claramente marcados como `Demostración`; después usar `Quitar datos` y confirmar que solo se eliminan esos movimientos.
