@@ -16,6 +16,8 @@ Se inicia la Fase 5 de calidad privada. El checklist de Safari en iPhone incorpo
 
 La plantilla de incidencias privada ya solicita entorno, versión visible, modo de apertura, pasos, resultado esperado/observado y contexto del ciclo cuando corresponda. Obliga a confirmar que se usan datos ficticios, para poder reproducir errores de PWA sin exponer información financiera.
 
+La auditoría de accesibilidad de Actividad completa la relación semántica entre sus pestañas y el contenido filtrado: lectores de pantalla reciben ahora el panel activo y se evita que pestañas inactivas entren en el orden de tabulación.
+
 El extracto de una categoría sitúa ahora la fecha compacta al inicio de la fila, antes del signo y el importe. Registrar aplica reglas específicas de WebKit para que el valor del selector nativo de fecha se alinee a la izquierda en iPhone.
 
 La evolución de Actividad muestra los importes de cada barra siempre con céntimos exactos, sin redondeo. Al elegir un ciclo, un resumen persistente identifica el mes, su intervalo efectivo y los totales de ingresos y gastos; la barra activa también refuerza su contorno.
