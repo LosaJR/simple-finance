@@ -4,13 +4,15 @@ Fecha: 2026-09-13
 
 ## Estado actual
 
-`main` publica Simple Finance v1.13 / 1.13.0. Fase 1 queda completada y Fase 2 continúa con límites, ciclos automáticos por día de cobro y comprobación en móvil. Android será la primera distribución nativa mediante Google Play; iOS queda como puente posterior dependiente de entorno Apple.
+`main` publica Simple Finance v1.14 / 1.14.0. Fases 1 a 4 están completadas; Fases 5 y 6 quedan pendientes de comprobación en dispositivos físicos. Android será la primera distribución nativa mediante Google Play; iOS queda como puente posterior dependiente de entorno Apple.
 
 Seguimiento visible de fases y porcentajes: https://github.com/LosaJR/simple-finance/issues/13
 
 Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vitest, Playwright, GitHub Issues, milestones, GitHub Project y CI.
 
 ## Ultima tarea terminada
+
+Se publicó v1.14 / 1.14.0 el 2026-09-14. Restaura el orden previsto de Actividad: pestañas de tipo, filtros compactos, evolución por ciclos y, por último, movimientos. La causa fue un contenedor semántico añadido durante la auditoría de accesibilidad que anulaba los órdenes de composición móvil; se retiró sin afectar los datos ni los cálculos. `pnpm run validate`, CI y el despliegue de GitHub Pages terminaron correctamente. La URL pública con `?release=v1.14-activity-order` confirmó la nueva versión visible.
 
 Se inicia la Fase 5 de calidad privada. El checklist de Safari en iPhone incorpora la comprobación de gastos situados al inicio y final de un ciclo que cruza mes, y confirma que Ajustes solo expone el día de cobro como delimitador automático.
 
@@ -72,6 +74,7 @@ Confirmar desde Safari en iPhone y desde un dispositivo Android la versión publ
 
 ## Verificaciones
 
+- `pnpm run validate`: correcto antes de publicar v1.14 (lint, 18 pruebas y build).
 - `pnpm run validate`: correcto antes de publicar v1.13 (lint, 18 pruebas y build).
 - `pnpm run validate`: correcto antes de publicar v1.12 (lint, 19 pruebas y build).
 - `pnpm test`, `pnpm lint` y `pnpm build`: correctos el 2026-09-12, incluidos los cálculos de disponible diario y umbrales de límite.
