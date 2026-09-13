@@ -91,7 +91,7 @@ import {
   summarizeCycleTrend,
 } from './lib/summary'
 
-const APP_VERSION = '1.9'
+const APP_VERSION = '1.10'
 
 const todayInputValue = () => {
   const today = new Date()
@@ -1429,36 +1429,35 @@ const downloadFile = (name: string, contents: string, type: string) => {
             />
           </label>
 
-          <div className="field-grid">
-            <label>
-              <span className="field-title"><CalendarDays size={16} aria-hidden="true" />Fecha</span>
-              <input
-                type="date"
-                value={draft.occurredOn}
-                onChange={(event) => setDraft((current) => ({ ...current, occurredOn: event.target.value }))}
-              />
-            </label>
-            <label>
-              <span className="field-title"><CreditCard size={16} aria-hidden="true" />Tarjeta utilizada</span>
-              <select
-                value={draft.paymentMethodId}
-                onChange={(event) => {
-                  if (event.target.value === 'manage-cards') {
-                    navigateTo('cards')
-                    return
-                  }
-                  setDraft((current) => ({ ...current, paymentMethodId: event.target.value }))
-                }}
-              >
-                {paymentMethods.map((method) => (
-                  <option key={method.id} value={method.id}>
-                    {method.name}
-                  </option>
-                ))}
-                <option value="manage-cards">Añadir o gestionar tarjetas...</option>
-              </select>
-            </label>
-          </div>
+          <label>
+            <span className="field-title"><CalendarDays size={16} aria-hidden="true" />Fecha</span>
+            <input
+              type="date"
+              value={draft.occurredOn}
+              onChange={(event) => setDraft((current) => ({ ...current, occurredOn: event.target.value }))}
+            />
+          </label>
+
+          <label>
+            <span className="field-title"><CreditCard size={16} aria-hidden="true" />Tarjeta utilizada</span>
+            <select
+              value={draft.paymentMethodId}
+              onChange={(event) => {
+                if (event.target.value === 'manage-cards') {
+                  navigateTo('cards')
+                  return
+                }
+                setDraft((current) => ({ ...current, paymentMethodId: event.target.value }))
+              }}
+            >
+              {paymentMethods.map((method) => (
+                <option key={method.id} value={method.id}>
+                  {method.name}
+                </option>
+              ))}
+              <option value="manage-cards">Añadir o gestionar tarjetas...</option>
+            </select>
+          </label>
 
           <label>
             <span className="field-title"><Tags size={16} aria-hidden="true" />Categoría</span>

@@ -1614,7 +1614,9 @@ textarea {
 
 .cycle-insights article {
   display: grid;
-  gap: 5px;
+  grid-template-rows: 3.1em 1.35em minmax(3.5em, auto);
+  gap: 4px;
+  align-items: start;
   padding: 13px;
 }
 
@@ -1626,11 +1628,17 @@ textarea {
   color: var(--muted);
   font-size: 0.73rem;
   font-weight: 800;
+  line-height: 1.28;
 }
 
 .cycle-insights strong {
   color: var(--ink);
   font-size: 1rem;
+  line-height: 1.28;
+}
+
+.cycle-insights small {
+  line-height: 1.28;
 }
 
 .planned-payments {
