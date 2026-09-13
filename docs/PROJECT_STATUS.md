@@ -4,7 +4,7 @@ Fecha: 2026-09-13
 
 ## Estado actual
 
-`main` publica Simple Finance v1.12 / 1.12.0. Fase 1 queda completada y Fase 2 continúa con límites, ciclos y comprobación en móvil. Android será la primera distribución nativa mediante Google Play; iOS queda como puente posterior dependiente de entorno Apple.
+La próxima publicación de `main` será Simple Finance v1.13 / 1.13.0. Fase 1 queda completada y Fase 2 continúa con límites, ciclos automáticos por día de cobro y comprobación en móvil. Android será la primera distribución nativa mediante Google Play; iOS queda como puente posterior dependiente de entorno Apple.
 
 Seguimiento visible de fases y porcentajes: https://github.com/LosaJR/simple-finance/issues/13
 
@@ -15,6 +15,8 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 El extracto de una categoría sitúa ahora la fecha compacta al inicio de la fila, antes del signo y el importe. Registrar aplica reglas específicas de WebKit para que el valor del selector nativo de fecha se alinee a la izquierda en iPhone.
 
 La evolución de Actividad muestra los importes de cada barra siempre con céntimos exactos, sin redondeo. Al elegir un ciclo, un resumen persistente identifica el mes, su intervalo efectivo y los totales de ingresos y gastos; la barra activa también refuerza su contorno.
+
+Se eliminó el cierre manual de ciclos de Ajustes y del modelo local. Los ciclos se delimitan exclusivamente entre fechas efectivas de cobro configuradas por cada persona; si existen cierres manuales de una versión anterior, se retiran al abrir la app y los movimientos asociados se devuelven automáticamente a su ciclo de nómina correspondiente.
 
 Inicio alinea las tres métricas de disponibilidad por filas fijas de encabezado, importe y detalle, incluso cuando un texto ocupa más líneas. En Registrar, Fecha y Tarjeta utilizada se muestran como controles de ancho completo para evitar que el selector nativo de fecha sobresalga de la cuadrícula móvil.
 
@@ -30,7 +32,7 @@ Los filtros compactos de Actividad (tarjeta, búsqueda y categoría) eliminan su
 
 La publicación móvil usa GitHub Pages en `https://losajr.github.io/simple-finance/`. El repositorio permanece público durante el desarrollo para permitir esta modalidad; la PWA adapta su ruta base, manifiesto y service worker para funcionar desde `/simple-finance/`.
 
-Inicio muestra la versión visible `v1.12` junto a la marca. Se corresponde con la versión técnica `1.12.0` del paquete; el despliegue de GitHub Pages del 2026-09-13 se completó correctamente y la URL pública con `?release=v1.12` confirmó la versión visible.
+Inicio mostrará la versión visible `v1.13` junto a la marca. Se corresponde con la versión técnica `1.13.0` del paquete y permitirá confirmar la publicación desde móvil.
 
 Se corrigió el bloqueo de actualización heredado en PWA: el service worker entrante usa ahora activación y toma de control inmediatas. Esto permite sustituir una instalación anterior que detectaba actualizaciones pero las dejaba esperando.
 
@@ -41,8 +43,6 @@ Se corrigió la composición móvil de Registrar y Actividad. Registrar reserva 
 Se inició la Fase 4 con una evolución visual en Actividad. Resume hasta seis ciclos recientes con barras de ingresos y gastos, comunica la variación del gasto frente al ciclo anterior y permite abrir el extracto del ciclo al tocar su barra. La agregación por ciclos y los casos de nómina se cubren con pruebas unitarias.
 
 Se reordenó la estrategia nativa: Android será la primera plataforma publicada y de pruebas, usando Capacitor sobre la misma interfaz React y la misma lógica financiera local. La capa iOS conserva sus capacidades exclusivas como trabajo posterior. La publicación Android requerirá Android Studio, firma, cuenta de Google Play, una política de privacidad y pruebas físicas antes de habilitar funcionalidades nativas o automatizaciones.
-
-Se incorporó el cierre manual de ciclo desde Ajustes. Cierra el extracto con los movimientos del día anterior, inicia uno nuevo en la fecha actual y mantiene el historial disponible. Los cálculos y las copias JSON almacenan estos límites manuales, incluyendo varios cierres dentro del mismo periodo programado. Las pruebas cubren reinicios, mes de febrero, nóminas el día 31 y desplazamientos por fin de semana.
 
 Se simplificó la composición visual de las cuatro vistas. Actividad y Configuración financiera ya no usan un recuadro exterior; sus grupos se delimitan por espaciado y separadores. Las secciones de categorías del Resumen también pasan a ser un bloque abierto, mientras que nómina, gráfico y formulario de registro conservan una superficie por ser herramientas focales. Se establecieron márgenes móviles compartidos, una escala tipográfica estable y una separación vertical consistente entre secciones.
 
@@ -60,7 +60,7 @@ La rama también incorpora una carga opcional de datos ficticios, identificados 
 
 ## Siguiente tarea
 
-Confirmar desde Safari en iPhone y desde un dispositivo Android la versión publicada en `https://losajr.github.io/simple-finance/`: instalación de la PWA, navegación inferior, apertura/cierre de hojas, registro rápido, edición, cierre manual de ciclo, controles táctiles y actualización automática. Tras esa comprobación, preparar el checklist privado de la Fase 5 y decidir el siguiente bloque de estadísticas detalladas.
+Confirmar desde Safari en iPhone y desde un dispositivo Android la versión publicada en `https://losajr.github.io/simple-finance/`: instalación de la PWA, navegación inferior, apertura/cierre de hojas, registro rápido, edición, ciclos por día de cobro, controles táctiles y actualización automática. Tras esa comprobación, preparar el checklist privado de la Fase 5 y decidir el siguiente bloque de estadísticas detalladas.
 
 ## Verificaciones
 

@@ -41,7 +41,6 @@ import {
   normalizeMerchant,
   type Category,
   type MerchantRule,
-  type ManualCycleClosure,
   type PaymentMethod,
   type PlannedPayment,
   plannedPaymentDraftSchema,
@@ -51,7 +50,6 @@ import {
 } from './lib/finance'
 import {
   archiveCategory,
-  closeCurrentCycle,
   createDemoDataset,
   createMerchantRule,
   createPaymentMethod,
@@ -91,7 +89,7 @@ import {
   summarizeCycleTrend,
 } from './lib/summary'
 
-const APP_VERSION = '1.12'
+const APP_VERSION = '1.13'
 
 const todayInputValue = () => {
   const today = new Date()
@@ -115,7 +113,7 @@ type AppScreen = 'home' | 'entry' | 'activity' | 'cards'
 type QuickType = 'expense' | 'income'
 type QuickStep = 'type' | 'amount' | 'merchant' | 'category'
 type ConfigurationDialog = 'card' | 'category-add' | 'category-edit' | null
-type BusyAction = 'quick' | 'entry' | 'planned' | 'planned-record' | 'settings' | 'cycle-reset' | 'edit' | null
+type BusyAction = 'quick' | 'entry' | 'planned' | 'planned-record' | 'settings' | 'edit' | null
 
 const activityTabs: { id: ActivityTab; label: string }[] = [
   { id: 'all', label: 'Global' },
@@ -187,7 +185,6 @@ function App() {
   const [isConfirmingCategoryDeletion, setIsConfirmingCategoryDeletion] = useState(false)
   const [paydayDay, setPaydayDay] = useState(1)
   const [paydayAmount, setPaydayAmount] = useState('')
-  const [manualCycleClosures, setManualCycleClosures] = useState<ManualCycleClosure[]>([])
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [settingsPaydayDay, setSettingsPaydayDay] = useState(1)
   const [settingsPaydayAmount, setSettingsPaydayAmount] = useState('')
@@ -251,7 +248,6 @@ function App() {
     setPlannedPayments(nextPlannedPayments)
     setPaydayDay(nextSettings.paydayDay)
     setPaydayAmount(nextSettings.paydayAmountCents ? formatAmountInput(nextSettings.paydayAmountCents) : '')
-    setManualCycleClosures(nextSettings.manualCycleClosures)
     setIsDark(nextSettings.theme !== 'light')
     setHighContrast(nextSettings.highContrast)
     setOnboardingCompleted(nextSettings.onboardingCompleted)
@@ -293,8 +289,8 @@ function App() {
     [categories],
   )
   const currentCycleId = useMemo(
-    () => getCycleId(todayInputValue(), paydayDay, manualCycleClosures),
-    [manualCycleClosures, paydayDay],
+    () => getCycleId(todayInputValue(), paydayDay),
+    [paydayDay],
   )
   const selectedSummaryCycleId = summaryCycleId ?? currentCycleId
   const cycleExpenseCategories = useMemo(() => {
@@ -302,7 +298,7 @@ function App() {
     for (const transaction of transactions) {
       if (
         transaction.type !== 'expense' ||
-        getCycleId(transaction.occurredOn, paydayDay, manualCycleClosures) !== selectedSummaryCycleId
+        getCycleId(transaction.occurredOn, paydayDay) !== selectedSummaryCycleId
       ) {
         continue
       }
@@ -320,16 +316,16 @@ function App() {
       .sort((first, second) => second.amountCents - first.amountCents)
 
     return { entries, totalCents }
-  }, [categoryMap, manualCycleClosures, paydayDay, selectedSummaryCycleId, transactions])
+  }, [categoryMap, paydayDay, selectedSummaryCycleId, transactions])
   const selectedSummaryCategoryTransactions = useMemo(
     () =>
       transactions.filter(
         (transaction) =>
           transaction.type === 'expense' &&
           transaction.categoryId === summaryCategoryId &&
-          getCycleId(transaction.occurredOn, paydayDay, manualCycleClosures) === selectedSummaryCycleId,
+          getCycleId(transaction.occurredOn, paydayDay) === selectedSummaryCycleId,
       ),
-    [manualCycleClosures, paydayDay, selectedSummaryCycleId, summaryCategoryId, transactions],
+    [paydayDay, selectedSummaryCycleId, summaryCategoryId, transactions],
   )
 
 const downloadFile = (name: string, contents: string, type: string) => {
@@ -345,19 +341,19 @@ const downloadFile = (name: string, contents: string, type: string) => {
       .filter(
         (transaction) =>
           transaction.type === 'income' &&
-          getCycleId(transaction.occurredOn, paydayDay, manualCycleClosures) === selectedSummaryCycleId,
+          getCycleId(transaction.occurredOn, paydayDay) === selectedSummaryCycleId,
       )
       .reduce((total, transaction) => total + transaction.amountCents, 0),
-    [manualCycleClosures, paydayDay, selectedSummaryCycleId, transactions],
+    [paydayDay, selectedSummaryCycleId, transactions],
   )
   const plannedCycleCents = useMemo(
     () => plannedPayments
       .filter(
         (payment) =>
-          payment.active && getCycleId(payment.nextDueOn, paydayDay, manualCycleClosures) === selectedSummaryCycleId,
+          payment.active && getCycleId(payment.nextDueOn, paydayDay) === selectedSummaryCycleId,
       )
       .reduce((total, payment) => total + payment.amountCents, 0),
-    [manualCycleClosures, paydayDay, plannedPayments, selectedSummaryCycleId],
+    [paydayDay, plannedPayments, selectedSummaryCycleId],
   )
   const availableEstimateCents = selectedCycleIncomeCents - cycleExpenseCategories.totalCents - plannedCycleCents
   const daysUntilPayday = useMemo(() => getDaysUntilPayday(paydayDay), [paydayDay])
@@ -373,10 +369,10 @@ const downloadFile = (name: string, contents: string, type: string) => {
       .filter(
         (transaction) =>
           transaction.type === 'expense' &&
-          getCycleId(transaction.occurredOn, paydayDay, manualCycleClosures) === previousCycleId,
+          getCycleId(transaction.occurredOn, paydayDay) === previousCycleId,
       )
       .reduce((total, transaction) => total + transaction.amountCents, 0)
-  }, [manualCycleClosures, paydayDay, selectedSummaryCycleId, transactions])
+  }, [paydayDay, selectedSummaryCycleId, transactions])
   const expenseComparisonCents = cycleExpenseCategories.totalCents - previousCycleExpenseCents
   const pendingTransactions = useMemo(
     () => transactions.filter((transaction) => transaction.status === 'pending'),
@@ -389,12 +385,12 @@ const downloadFile = (name: string, contents: string, type: string) => {
             .filter(
               (payment) =>
                 payment.active &&
-                getCycleId(payment.nextDueOn, paydayDay, manualCycleClosures) === currentCycleId,
+                getCycleId(payment.nextDueOn, paydayDay) === currentCycleId,
             )
             .sort((first, second) => first.nextDueOn.localeCompare(second.nextDueOn))
             .slice(0, 3)
         : [],
-    [currentCycleId, manualCycleClosures, paydayDay, plannedPayments, selectedSummaryCycleId],
+    [currentCycleId, paydayDay, plannedPayments, selectedSummaryCycleId],
   )
   const expenseChartBackground = useMemo(() => {
     if (cycleExpenseCategories.entries.length === 0) {
@@ -892,31 +888,6 @@ const downloadFile = (name: string, contents: string, type: string) => {
     }
   }
 
-  const handleManualCycleReset = async () => {
-    if (
-      !window.confirm(
-        'El ciclo actual se cerrará con los movimientos de ayer. Los movimientos de hoy iniciarán un ciclo nuevo y el historial se conservará.',
-      )
-    ) {
-      return
-    }
-    if (!beginSaving('cycle-reset')) return
-
-    try {
-      const closure = await closeCurrentCycle()
-      await refreshData()
-      setSettingsFeedback(
-        closure
-          ? `Ciclo cerrado el ${formatLocalDate(closure.closedOn)}. Los movimientos anteriores siguen disponibles en Actividad.`
-          : 'El ciclo ya empieza hoy o no hay días anteriores que cerrar.',
-      )
-    } catch {
-      setSettingsFeedback('No se ha podido reiniciar el ciclo.')
-    } finally {
-      finishSaving()
-    }
-  }
-
   const openTransactionEditor = (transaction: Transaction) => {
     rememberOpeningFocus()
     setOpenTransactionId(null)
@@ -1266,7 +1237,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
               <div>
                 <h2><PieChart size={17} aria-hidden="true" />Gastos del ciclo</h2>
                 <p>{formatCycleLabel(selectedSummaryCycleId)} · {formatCurrency(cycleExpenseCategories.totalCents)}</p>
-                <small className="cycle-range">{formatCycleRange(selectedSummaryCycleId, paydayDay, manualCycleClosures)}</small>
+                <small className="cycle-range">{formatCycleRange(selectedSummaryCycleId, paydayDay)}</small>
               </div>
               <button
                 className="calendar-button"
@@ -2061,24 +2032,6 @@ const downloadFile = (name: string, contents: string, type: string) => {
                 {busyAction === 'settings' ? 'Guardando...' : 'Guardar nómina'}
               </button>
               {settingsFeedback ? <p className="status-message" role="status">{settingsFeedback}</p> : null}
-            </section>
-
-            <section className="settings-section" aria-labelledby="cycle-reset-title">
-              <h3 id="cycle-reset-title">Ciclo</h3>
-              <p className="muted-copy">Cierra el ciclo con los movimientos de ayer. Hoy empezará un nuevo extracto sin borrar el historial.</p>
-              <button className="secondary-action" type="button" disabled={busyAction === 'cycle-reset'} onClick={() => void handleManualCycleReset()}>
-                <RotateCcw size={16} aria-hidden="true" />
-                {busyAction === 'cycle-reset' ? 'Reiniciando...' : 'Reiniciar ciclo hoy'}
-              </button>
-              {manualCycleClosures.length ? (
-                <ul className="simple-list cycle-closure-list" aria-label="Cierres manuales">
-                  {[...manualCycleClosures].sort((first, second) => second.closedOn.localeCompare(first.closedOn)).map((closure) => (
-                    <li key={closure.id}>
-                      <span><strong>Ciclo cerrado</strong><small>{formatCycleRange(closure.id, paydayDay, manualCycleClosures)}</small></span>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
             </section>
 
             <section className="settings-section" aria-labelledby="data-title">

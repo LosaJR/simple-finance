@@ -29,7 +29,7 @@ El propietario y un circulo cerrado de testers. No se recopilan datos, no hay ba
 - Cuando la aplicacion se abre en la fecha de cobro efectiva o despues, registra una unica nomina como ingreso. Si el dia elegido cae en fin de semana, se desplaza al siguiente dia laborable.
 - Cada ciclo comienza en la fecha efectiva de cobro y termina al comenzar el siguiente. La nomina que abre el ciclo se asigna a ese ciclo, aunque la fecha efectiva caiga al principio del mes siguiente.
 - Categorias ilimitadas; las creadas por la persona sirven tanto para gastos como para ingresos. Cada categoría tiene color e icono visual, y puede tener un límite mensual individual opcional. Iniciales: Ocio, Supermercado, Gasolina, Hogar y Suscripciones.
-- Ciclos con dia de reinicio configurable y cierre manual sin borrar historial.
+- Ciclos automáticos delimitados por el día de cobro configurable de cada persona, sin borrar historial.
 - Vista agregada y por metodo de pago.
 - Reglas por comercio para categorizar transacciones futuras.
 - Recurrentes y avisos activables/desactivables por elemento.
