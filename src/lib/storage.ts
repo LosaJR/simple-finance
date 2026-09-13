@@ -5,12 +5,10 @@ import {
   DEFAULT_PAYMENT_METHODS,
   DEFAULT_SETTINGS,
   getCycleId,
-  getCycleBounds,
   getPaydayDate,
   type AppSettings,
   type Category,
   type MerchantRule,
-  type ManualCycleClosure,
   type PaymentMethod,
   type PlannedPayment,
   type PlannedPaymentDraft,
@@ -109,19 +107,36 @@ export const ensureSeedData = async () => {
   } else if (
     settings.paydayAmountCents === undefined ||
     settings.suppressedPayrollCycleIds === undefined ||
-    settings.manualCycleClosures === undefined ||
     settings.theme === undefined ||
     settings.highContrast === undefined ||
     settings.onboardingCompleted === undefined
   ) {
+    const { manualCycleClosures: _legacyClosures, ...settingsWithoutLegacyClosures } = settings as AppSettings & {
+      manualCycleClosures?: unknown
+    }
     await db.settings.update(DEFAULT_SETTINGS.id, {
+      ...settingsWithoutLegacyClosures,
       paydayAmountCents: settings.paydayAmountCents ?? 0,
       suppressedPayrollCycleIds: settings.suppressedPayrollCycleIds ?? [],
-      manualCycleClosures: settings.manualCycleClosures ?? [],
       theme: settings.theme ?? 'dark',
       highContrast: settings.highContrast ?? false,
       onboardingCompleted: settings.onboardingCompleted ?? true,
     })
+  }
+
+  const settingsWithLegacyClosures = settings as AppSettings & { manualCycleClosures?: unknown }
+  if (settings && settingsWithLegacyClosures.manualCycleClosures !== undefined) {
+    const { manualCycleClosures: _legacyClosures, ...settingsWithoutLegacyClosures } = settingsWithLegacyClosures
+    await db.settings.put(settingsWithoutLegacyClosures)
+    const legacyTransactions = await db.transactions.filter((transaction) => transaction.cycleId.startsWith('manual-')).toArray()
+    if (legacyTransactions.length) {
+      await db.transactions.bulkPut(
+        legacyTransactions.map((transaction) => ({
+          ...transaction,
+          cycleId: getCycleId(transaction.occurredOn, settingsWithoutLegacyClosures.paydayDay),
+        })),
+      )
+    }
   }
 }
 
@@ -275,11 +290,10 @@ const addFrequency = (occurredOn: string, frequency: PlannedPayment['frequency']
 
 export const createTransaction = async (draft: TransactionDraft, resetDay = 1) => {
   const timestamp = new Date().toISOString()
-  const settings = await getSettings()
   const transaction: Transaction = {
     ...draft,
     id: createLocalId(),
-    cycleId: getCycleId(draft.occurredOn, resetDay, settings.manualCycleClosures),
+    cycleId: getCycleId(draft.occurredOn, resetDay),
     createdAt: timestamp,
     updatedAt: timestamp,
   }
@@ -333,7 +347,7 @@ export const createDemoDataset = async (today = new Date()) => {
       categoryId: category.id,
       status: 'posted',
       source: 'manual',
-      cycleId: getCycleId(occurredOn, settings.paydayDay, settings.manualCycleClosures),
+      cycleId: getCycleId(occurredOn, settings.paydayDay),
       createdAt,
       updatedAt: createdAt,
     })
@@ -391,11 +405,10 @@ export const updateTransaction = async (id: string, draft: TransactionDraft, res
   }
 
   const updatedAt = new Date().toISOString()
-  const settings = await getSettings()
   await db.transactions.update(id, {
     ...draft,
     source: existing.source ?? draft.source,
-    cycleId: getCycleId(draft.occurredOn, resetDay, settings.manualCycleClosures),
+    cycleId: getCycleId(draft.occurredOn, resetDay),
     updatedAt,
   })
 }
@@ -439,47 +452,6 @@ export const savePaydaySettings = async (paydayDay: number, paydayAmountCents: n
   })
 }
 
-const formatLocalIsoDate = (date: Date) =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-
-export const closeCurrentCycle = async (today = new Date()): Promise<ManualCycleClosure | null> => {
-  const settings = await getSettings()
-  const closedAt = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-  closedAt.setDate(closedAt.getDate() - 1)
-  const closedOn = formatLocalIsoDate(closedAt)
-  const scheduledCycleId = getCycleId(closedOn, settings.paydayDay)
-  const currentCycleId = getCycleId(formatLocalIsoDate(today), settings.paydayDay, settings.manualCycleClosures)
-  const currentBounds = getCycleBounds(currentCycleId, settings.paydayDay, settings.manualCycleClosures)
-
-  if (!currentBounds || closedOn < currentBounds.start) {
-    return null
-  }
-
-  const closure: ManualCycleClosure = {
-    id: `manual-${closedOn}`,
-    scheduledCycleId,
-    closedOn,
-  }
-  if (settings.manualCycleClosures.some((item) => item.id === closure.id)) {
-    return null
-  }
-
-  const nextClosures = [...settings.manualCycleClosures, closure]
-  await db.transaction('rw', db.settings, db.transactions, async () => {
-    await db.settings.put({ ...settings, manualCycleClosures: nextClosures })
-    const affectedTransactions = await db.transactions
-      .filter(
-        (transaction) =>
-          getCycleId(transaction.occurredOn, settings.paydayDay, settings.manualCycleClosures) === currentCycleId &&
-          transaction.occurredOn <= closedOn,
-      )
-      .toArray()
-    await db.transactions.bulkPut(affectedTransactions.map((transaction) => ({ ...transaction, cycleId: closure.id })))
-  })
-
-  return closure
-}
-
 export const savePreferences = async (preferences: Pick<AppSettings, 'theme' | 'highContrast' | 'onboardingCompleted'>) => {
   await db.settings.put({ ...(await getSettings()), ...preferences })
 }
@@ -490,7 +462,7 @@ const backupSchema = z.object({
   paymentMethods: z.array(z.object({ id: z.string(), name: z.string(), type: z.literal('card'), color: z.string(), lastFour: z.string().optional(), active: z.boolean(), isPrimary: z.boolean() })),
   categories: z.array(z.object({ id: z.string(), name: z.string(), icon: z.string(), color: z.string(), allowedTypes: z.array(z.enum(['expense', 'income'])), limitCents: z.number().int().optional(), active: z.boolean() })),
   transactions: z.array(z.object({ id: z.string(), type: z.enum(['expense', 'income']), amountCents: z.number().int().positive(), merchant: z.string(), occurredOn: z.string(), paymentMethodId: z.string(), categoryId: z.string(), status: z.enum(['posted', 'pending']), source: z.enum(['manual', 'payroll', 'planned', 'automation']).optional(), cycleId: z.string(), createdAt: z.string(), updatedAt: z.string() })),
-  settings: z.object({ id: z.literal('app-settings'), paydayDay: z.number().int(), paydayAmountCents: z.number().int(), suppressedPayrollCycleIds: z.array(z.string()), manualCycleClosures: z.array(z.object({ id: z.string(), scheduledCycleId: z.string(), closedOn: z.string() })).default([]), theme: z.enum(['dark', 'light']), highContrast: z.boolean(), onboardingCompleted: z.boolean() }),
+  settings: z.object({ id: z.literal('app-settings'), paydayDay: z.number().int(), paydayAmountCents: z.number().int(), suppressedPayrollCycleIds: z.array(z.string()), theme: z.enum(['dark', 'light']), highContrast: z.boolean(), onboardingCompleted: z.boolean() }),
   merchantRules: z.array(z.object({ id: z.string(), merchant: z.string(), normalizedMerchant: z.string(), categoryId: z.string(), createdAt: z.string(), updatedAt: z.string() })),
   plannedPayments: z.array(z.object({ id: z.string(), name: z.string(), amountCents: z.number().int().positive(), categoryId: z.string(), paymentMethodId: z.string(), frequency: z.enum(['weekly', 'monthly', 'yearly']), nextDueOn: z.string(), active: z.boolean(), createdAt: z.string(), updatedAt: z.string() })),
 })
@@ -538,7 +510,7 @@ export const ensureScheduledPayroll = async (today = new Date()) => {
   const occurredOn = `${payday.getFullYear()}-${String(payday.getMonth() + 1).padStart(2, '0')}-${String(
     payday.getDate(),
   ).padStart(2, '0')}`
-  const cycleId = getCycleId(occurredOn, settings.paydayDay, settings.manualCycleClosures)
+  const cycleId = getCycleId(occurredOn, settings.paydayDay)
   if (settings.suppressedPayrollCycleIds.includes(cycleId)) {
     return false
   }

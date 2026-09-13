@@ -37,7 +37,7 @@ Estado: iniciada.
 - Límite mensual opcional por categoría: disponible en Configuración y visible en Resumen con importe restante, progreso y estado al 75%, 90% y 100%.
 - Disponible diario: disponible en Resumen para repartir el saldo estimado hasta la próxima nómina.
 - Próximos pagos recurrentes: visibles en Resumen y confirmables solo cuando vencen.
-- Dia de reinicio configurable.
+- Día de cobro configurable como único delimitador de ciclo.
 - Aviso al aproximarse al 90% del límite mediante la futura capa de notificaciones nativas.
 - Pruebas de cambios de mes, fines de semana y reinicios: disponibles.
 
