@@ -89,7 +89,7 @@ import {
   summarizeCycleTrend,
 } from './lib/summary'
 
-const APP_VERSION = '1.13'
+const APP_VERSION = '1.14'
 
 const todayInputValue = () => {
   const today = new Date()
@@ -1556,10 +1556,7 @@ const downloadFile = (name: string, contents: string, type: string) => {
                 className={activityTab === tab.id ? 'active' : ''}
                 type="button"
                 role="tab"
-                id={`activity-tab-${tab.id}`}
-                aria-controls="activity-content"
                 aria-selected={activityTab === tab.id}
-                tabIndex={activityTab === tab.id ? 0 : -1}
                 onClick={() => setActivityTab(tab.id)}
               >
                 {tab.label}
@@ -1567,7 +1564,6 @@ const downloadFile = (name: string, contents: string, type: string) => {
             ))}
           </div>
 
-          <div id="activity-content" role="tabpanel" aria-labelledby={`activity-tab-${activityTab}`}>
           <div className="activity-quick-filters" aria-label="Filtros de actividad">
             <label className="compact-activity-filter">
               <CreditCard size={16} aria-hidden="true" />
@@ -1595,7 +1591,6 @@ const downloadFile = (name: string, contents: string, type: string) => {
           ) : null}
 
           {renderTransactions(visibleTransactions)}
-          </div>
         </section>
       ) : null}
 
