@@ -4,7 +4,7 @@ Fecha: 2026-09-13
 
 ## Estado actual
 
-La próxima publicación de `main` será Simple Finance v1.13 / 1.13.0. Fase 1 queda completada y Fase 2 continúa con límites, ciclos automáticos por día de cobro y comprobación en móvil. Android será la primera distribución nativa mediante Google Play; iOS queda como puente posterior dependiente de entorno Apple.
+`main` publica Simple Finance v1.13 / 1.13.0. Fase 1 queda completada y Fase 2 continúa con límites, ciclos automáticos por día de cobro y comprobación en móvil. Android será la primera distribución nativa mediante Google Play; iOS queda como puente posterior dependiente de entorno Apple.
 
 Seguimiento visible de fases y porcentajes: https://github.com/LosaJR/simple-finance/issues/13
 
@@ -32,7 +32,7 @@ Los filtros compactos de Actividad (tarjeta, búsqueda y categoría) eliminan su
 
 La publicación móvil usa GitHub Pages en `https://losajr.github.io/simple-finance/`. El repositorio permanece público durante el desarrollo para permitir esta modalidad; la PWA adapta su ruta base, manifiesto y service worker para funcionar desde `/simple-finance/`.
 
-Inicio mostrará la versión visible `v1.13` junto a la marca. Se corresponde con la versión técnica `1.13.0` del paquete y permitirá confirmar la publicación desde móvil.
+Inicio muestra la versión visible `v1.13` junto a la marca. Se corresponde con la versión técnica `1.13.0`; el despliegue de GitHub Pages del 2026-09-13 se completó correctamente y la URL pública con `?release=v1.13` confirmó la versión visible y la retirada de `Reiniciar ciclo hoy` de Ajustes.
 
 Se corrigió el bloqueo de actualización heredado en PWA: el service worker entrante usa ahora activación y toma de control inmediatas. Esto permite sustituir una instalación anterior que detectaba actualizaciones pero las dejaba esperando.
 
@@ -64,6 +64,7 @@ Confirmar desde Safari en iPhone y desde un dispositivo Android la versión publ
 
 ## Verificaciones
 
+- `pnpm run validate`: correcto antes de publicar v1.13 (lint, 18 pruebas y build).
 - `pnpm run validate`: correcto antes de publicar v1.12 (lint, 19 pruebas y build).
 - `pnpm test`, `pnpm lint` y `pnpm build`: correctos el 2026-09-12, incluidos los cálculos de disponible diario y umbrales de límite.
 - GitHub Actions `validate` en PR #12: correcto.
