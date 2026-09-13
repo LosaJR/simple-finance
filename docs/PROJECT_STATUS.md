@@ -4,7 +4,7 @@ Fecha: 2026-09-13
 
 ## Estado actual
 
-La próxima publicación de `main` será Simple Finance v1.12 / 1.12.0. Fase 1 queda completada y Fase 2 continúa con límites, ciclos y comprobación en móvil. Android será la primera distribución nativa mediante Google Play; iOS queda como puente posterior dependiente de entorno Apple.
+`main` publica Simple Finance v1.12 / 1.12.0. Fase 1 queda completada y Fase 2 continúa con límites, ciclos y comprobación en móvil. Android será la primera distribución nativa mediante Google Play; iOS queda como puente posterior dependiente de entorno Apple.
 
 Seguimiento visible de fases y porcentajes: https://github.com/LosaJR/simple-finance/issues/13
 
@@ -30,7 +30,7 @@ Los filtros compactos de Actividad (tarjeta, búsqueda y categoría) eliminan su
 
 La publicación móvil usa GitHub Pages en `https://losajr.github.io/simple-finance/`. El repositorio permanece público durante el desarrollo para permitir esta modalidad; la PWA adapta su ruta base, manifiesto y service worker para funcionar desde `/simple-finance/`.
 
-Inicio muestra la versión visible `v1.12` junto a la marca. Se corresponde con la versión técnica `1.12.0` del paquete y permitirá confirmar en móvil que la PWA instalada ha recibido la próxima compilación publicada.
+Inicio muestra la versión visible `v1.12` junto a la marca. Se corresponde con la versión técnica `1.12.0` del paquete; el despliegue de GitHub Pages del 2026-09-13 se completó correctamente y la URL pública con `?release=v1.12` confirmó la versión visible.
 
 Se corrigió el bloqueo de actualización heredado en PWA: el service worker entrante usa ahora activación y toma de control inmediatas. Esto permite sustituir una instalación anterior que detectaba actualizaciones pero las dejaba esperando.
 
@@ -64,6 +64,7 @@ Confirmar desde Safari en iPhone y desde un dispositivo Android la versión publ
 
 ## Verificaciones
 
+- `pnpm run validate`: correcto antes de publicar v1.12 (lint, 19 pruebas y build).
 - `pnpm test`, `pnpm lint` y `pnpm build`: correctos el 2026-09-12, incluidos los cálculos de disponible diario y umbrales de límite.
 - GitHub Actions `validate` en PR #12: correcto.
 - Registro de movimiento, nomina en dia laborable, tarjeta principal, filtro por tarjeta, calendario por ciclos y configuracion con selectores directos: verificados contra un origen HTTP de red local a tamano iPhone; queda pendiente la confirmacion en iPhone fisico.
