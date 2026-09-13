@@ -1,18 +1,20 @@
 # Estado del proyecto
 
-Fecha: 2026-09-12
+Fecha: 2026-09-13
 
 ## Estado actual
 
-La rama `feature/flujo-financiero-diario` se ha consolidado como la base aprobada de Simple Finance y se promueve a `main`. Fase 1 queda completada y Fase 2 continúa con límites, ciclos y comprobación privada en móvil. Android será la primera distribución nativa mediante Google Play; iOS queda como puente posterior dependiente de entorno Apple.
+La próxima publicación de `main` será Simple Finance v1.12 / 1.12.0. Fase 1 queda completada y Fase 2 continúa con límites, ciclos y comprobación en móvil. Android será la primera distribución nativa mediante Google Play; iOS queda como puente posterior dependiente de entorno Apple.
 
 Seguimiento visible de fases y porcentajes: https://github.com/LosaJR/simple-finance/issues/13
 
-Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vitest, Playwright, Serena, GitHub Issues, milestones, GitHub Project y CI.
+Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vitest, Playwright, GitHub Issues, milestones, GitHub Project y CI.
 
 ## Ultima tarea terminada
 
 El extracto de una categoría sitúa ahora la fecha compacta al inicio de la fila, antes del signo y el importe. Registrar aplica reglas específicas de WebKit para que el valor del selector nativo de fecha se alinee a la izquierda en iPhone.
+
+La evolución de Actividad muestra los importes de cada barra siempre con céntimos exactos, sin redondeo. Al elegir un ciclo, un resumen persistente identifica el mes, su intervalo efectivo y los totales de ingresos y gastos; la barra activa también refuerza su contorno.
 
 Inicio alinea las tres métricas de disponibilidad por filas fijas de encabezado, importe y detalle, incluso cuando un texto ocupa más líneas. En Registrar, Fecha y Tarjeta utilizada se muestran como controles de ancho completo para evitar que el selector nativo de fecha sobresalga de la cuadrícula móvil.
 
@@ -28,7 +30,7 @@ Los filtros compactos de Actividad (tarjeta, búsqueda y categoría) eliminan su
 
 La publicación móvil usa GitHub Pages en `https://losajr.github.io/simple-finance/`. El repositorio permanece público durante el desarrollo para permitir esta modalidad; la PWA adapta su ruta base, manifiesto y service worker para funcionar desde `/simple-finance/`.
 
-Resumen muestra la versión visible `v1.11` junto a la marca. Se corresponde con la versión técnica `1.11.0` del paquete y sirve para confirmar en móvil que la PWA instalada ha recibido la compilación publicada.
+Inicio muestra la versión visible `v1.12` junto a la marca. Se corresponde con la versión técnica `1.12.0` del paquete y permitirá confirmar en móvil que la PWA instalada ha recibido la próxima compilación publicada.
 
 Se corrigió el bloqueo de actualización heredado en PWA: el service worker entrante usa ahora activación y toma de control inmediatas. Esto permite sustituir una instalación anterior que detectaba actualizaciones pero las dejaba esperando.
 
@@ -58,19 +60,18 @@ La rama también incorpora una carga opcional de datos ficticios, identificados 
 
 ## Siguiente tarea
 
-Confirmar desde Safari en iPhone y desde un dispositivo Android la versión publicada en `https://simple-finance-379.pages.dev`: instalación de la PWA, navegación inferior, apertura/cierre de hojas, registro rápido, edición, cierre manual de ciclo, controles táctiles y actualización automática. Tras esa comprobación, preparar el checklist privado de la Fase 5 y decidir el siguiente bloque de estadísticas detalladas.
+Confirmar desde Safari en iPhone y desde un dispositivo Android la versión publicada en `https://losajr.github.io/simple-finance/`: instalación de la PWA, navegación inferior, apertura/cierre de hojas, registro rápido, edición, cierre manual de ciclo, controles táctiles y actualización automática. Tras esa comprobación, preparar el checklist privado de la Fase 5 y decidir el siguiente bloque de estadísticas detalladas.
 
 ## Verificaciones
 
 - `pnpm test`, `pnpm lint` y `pnpm build`: correctos el 2026-09-12, incluidos los cálculos de disponible diario y umbrales de límite.
 - GitHub Actions `validate` en PR #12: correcto.
-- Serena `project health-check`: correcto con salida UTF-8.
 - Registro de movimiento, nomina en dia laborable, tarjeta principal, filtro por tarjeta, calendario por ciclos y configuracion con selectores directos: verificados contra un origen HTTP de red local a tamano iPhone; queda pendiente la confirmacion en iPhone fisico.
 - `pnpm e2e`: configurado, pero no ejecutado localmente porque la descarga de navegadores de Playwright desde `cdn.playwright.dev` agoto timeout.
-- Cloudflare Pages: desplegado correctamente en `https://simple-finance-379.pages.dev` desde `main`; los despliegues automáticos de producción están activados.
+- GitHub Pages: desplegado correctamente en `https://losajr.github.io/simple-finance/` desde `main`; los despliegues automáticos de producción están activados.
 - Auditoría UX/UI: completada el 2026-09-12 contra heurísticas de Nielsen, Leyes de UX, guías de Apple y WCAG 2.2. El pase prioritario de contraste, objetivos táctiles, seguridad de acciones, feedback de guardado, foco modal e intervalos de ciclo está incorporado y verificado localmente.
 
 ## Bloqueos
 
 - El puente Android requiere Android Studio, cuenta de Google Play, firma y un dispositivo Android físico. Las capacidades iOS nativas siguen bloqueadas hasta disponer de macOS, firma Apple y dispositivo físico.
-- La URL de Pages es pública durante la prueba. No introducir datos financieros reales hasta aplicar un dominio propio y Cloudflare Access.
+- La URL de GitHub Pages y el repositorio son públicos temporalmente durante el desarrollo. No introducir datos financieros reales en la instancia publicada.

@@ -6,15 +6,15 @@ El estado visible y actualizado de cada fase se mantiene en el issue de GitHub [
 
 ## Fase 0 - Base del proyecto
 
-Estado: en curso.
+Estado: completada.
 
 Criterios:
-- Repositorio privado, documentacion persistente, issues/milestones, Serena y CI basica.
+- Repositorio, documentación persistente, issues/milestones y CI básica.
 - La app arranca localmente y se puede instalar como PWA.
 - `lint`, pruebas y `build` pasan en local y CI.
 
 Issues previstos:
-- #1 Configuracion inicial y repositorio privado.
+- #1 Configuración inicial y repositorio.
 - #2 PWA base instalable y offline.
 - #3 CI, pruebas unitarias y Playwright.
 - #4 Serena y documentacion persistente.
@@ -60,13 +60,13 @@ Estado: iniciada.
 - Checklist iPhone Safari.
 - Plantilla de bugs para testers.
 
-## Fase 6 - Despliegue privado
+## Fase 6 - Despliegue de prueba
 
 - Estado: en curso.
-- Hosting elegido y publicado: Cloudflare Pages con integración GitHub; la guía de configuración está en `docs/DEPLOYMENT.md`.
-- `main` es la base aprobada y la rama de producción de Cloudflare Pages. Cada `push` a `main` reconstruye automáticamente `https://simple-finance-379.pages.dev`.
-- Pendiente: verificar la instalación y los flujos principales desde Safari en iPhone con datos móviles.
-- El repositorio permanece privado y no se despliegan datos; la URL pública de prueba expone únicamente los recursos estáticos de la PWA. El acceso restringido requiere una fase posterior con dominio propio y Cloudflare Access.
+- Hosting elegido y publicado: GitHub Pages; la guía de configuración está en `docs/DEPLOYMENT.md`.
+- `main` es la base aprobada y la rama de producción. Cada `push` a `main` reconstruye automáticamente `https://losajr.github.io/simple-finance/`.
+- Pendiente: verificar la instalación y los flujos principales desde Safari en iPhone y un dispositivo Android, también con datos móviles.
+- El repositorio es público temporalmente para permitir GitHub Pages. La URL de prueba expone únicamente los recursos estáticos de la PWA, pero no se deben introducir datos financieros reales.
 
 ## Fase 7 - Puente Android nativo
 

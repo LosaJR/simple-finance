@@ -1402,7 +1402,7 @@ textarea {
   border-bottom-color: var(--accent);
   color: var(--text);
   background: color-mix(in srgb, var(--nav-active) 68%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 48%, transparent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 70%, transparent);
   transform: none;
 }
 
@@ -1444,9 +1444,7 @@ textarea {
 }
 
 .trend-amounts span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .trend-income-amount {
@@ -1466,6 +1464,34 @@ textarea {
   text-overflow: ellipsis;
   text-transform: capitalize;
   white-space: nowrap;
+}
+
+.selected-cycle-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 9px;
+  align-items: baseline;
+  margin: 0;
+  padding: 9px 10px;
+  border-left: 3px solid var(--accent);
+  color: var(--muted);
+  background: color-mix(in srgb, var(--nav-active) 42%, transparent);
+  font-size: var(--text-meta);
+  line-height: 1.4;
+}
+
+.selected-cycle-summary strong {
+  color: var(--text);
+}
+
+.selected-cycle-income {
+  color: var(--positive);
+  font-weight: 800;
+}
+
+.selected-cycle-expense {
+  color: var(--danger);
+  font-weight: 800;
 }
 
 .activity-panel {

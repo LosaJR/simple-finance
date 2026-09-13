@@ -34,7 +34,7 @@ El código de la PWA y la URL de prueba son públicos durante el desarrollo. No 
 
 Por tanto, los datos de demostración cargados en el navegador de desarrollo no aparecerán por sí solos en el iPhone. En el iPhone se pueden cargar desde `Configuración` > `Datos locales` > `Cargar datos`, o bien exportar una copia JSON de datos ficticios e importarla allí.
 
-No introducir datos financieros reales mientras la URL de prueba sea pública. Cuando la revisión requiera acceso restringido, se añadirá un dominio propio y Cloudflare Access con una política de autenticación; no se considerará una medida de seguridad el hecho de que una URL sea difícil de adivinar.
+No introducir datos financieros reales mientras la URL de prueba sea pública. Cuando la revisión requiera acceso restringido, se añadirá un dominio propio y una capa de autenticación; una URL difícil de adivinar no es una medida de seguridad.
 
 ## Verificacion
 
