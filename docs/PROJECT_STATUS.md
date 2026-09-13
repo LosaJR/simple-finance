@@ -1,6 +1,6 @@
 # Estado del proyecto
 
-Fecha: 2026-09-13
+Fecha: 2026-09-14
 
 ## Estado actual
 
@@ -13,6 +13,8 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 ## Ultima tarea terminada
 
 Se publicó v1.14 / 1.14.0 el 2026-09-14. Restaura el orden previsto de Actividad: pestañas de tipo, filtros compactos, evolución por ciclos y, por último, movimientos. La causa fue un contenedor semántico añadido durante la auditoría de accesibilidad que anulaba los órdenes de composición móvil; se retiró sin afectar los datos ni los cálculos. `pnpm run validate`, CI y el despliegue de GitHub Pages terminaron correctamente. La URL pública con `?release=v1.14-activity-order` confirmó la nueva versión visible.
+
+Se auditó el entorno para iniciar la Fase 7: este equipo no tiene Android Studio, Android SDK ni `adb`, y solo expone Java 8. La integración de Capacitor queda detenida hasta instalar el entorno oficial, aceptar sus licencias y conectar un Android de pruebas; `docs/ANDROID_SETUP.md` deja los pasos y límites preparados.
 
 Se inicia la Fase 5 de calidad privada. El checklist de Safari en iPhone incorpora la comprobación de gastos situados al inicio y final de un ciclo que cruza mes, y confirma que Ajustes solo expone el día de cobro como delimitador automático.
 
@@ -70,7 +72,7 @@ La rama también incorpora una carga opcional de datos ficticios, identificados 
 
 ## Siguiente tarea
 
-Confirmar desde Safari en iPhone y desde un dispositivo Android la versión publicada en `https://losajr.github.io/simple-finance/`: instalación de la PWA, navegación inferior, apertura/cierre de hojas, registro rápido, edición, ciclos por día de cobro, controles táctiles y actualización automática. Tras esa comprobación, preparar el checklist privado de la Fase 5 y decidir el siguiente bloque de estadísticas detalladas.
+Confirmar desde Safari en iPhone y desde un dispositivo Android la versión publicada en `https://losajr.github.io/simple-finance/`: instalación de la PWA, navegación inferior, apertura/cierre de hojas, registro rápido, edición, ciclos por día de cobro, controles táctiles y actualización automática. Para iniciar la Fase 7, instalar Android Studio, SDK y Platform-Tools conforme a `docs/ANDROID_SETUP.md`, y conectar un Android físico de pruebas.
 
 ## Verificaciones
 
