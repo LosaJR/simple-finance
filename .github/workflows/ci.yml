@@ -63,4 +63,4 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build Android debug APK
-        run: pnpm android:sync && cd android && ./gradlew assembleDebug --console=plain
+        run: pnpm android:sync && chmod +x android/gradlew && cd android && ./gradlew assembleDebug --console=plain
