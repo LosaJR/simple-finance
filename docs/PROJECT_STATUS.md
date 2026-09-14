@@ -12,6 +12,8 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
+Se preparó la firma local opcional para el puente Android el 2026-09-14. La configuración separa por completo las credenciales del repositorio (`android/signing.properties` y cualquier archivo `.jks` permanecen ignorados por Git) y se validó un AAB de release sin firmar, sin instalarlo ni distribuirlo. La clave definitiva todavía no se ha creado: requiere decidir cómo se custodiarán su ubicación y contraseña antes de poder generar un paquete instalable o subirlo a una pista interna. La aplicación pública no ha cambiado y se mantiene en v1.17 / 1.17.0.
+
 Se publicó v1.17 / 1.17.0 el 2026-09-14 tras una pasada comparativa en Android. Android System WebView 109 no representaba correctamente `color-mix()`, dejando transparentes los fondos y bordes de selección. La interfaz usa ahora colores directos compatibles para los ciclos seleccionados de Actividad, navegación inferior, calendarios, avisos, límites y controles. En el AYN Thor se revisaron Inicio, Registrar, Actividad —incluida la selección de ciclo— y Configuración; navegación, formularios, gráficos y estados visuales se comportan como se espera. `pnpm run validate`, CI de GitHub y despliegue de producción terminaron correctamente. La URL pública con `?release=v1.17-webview-compat-check` confirmó la versión visible.
 
 Se publicó v1.16 / 1.16.0 el 2026-09-14. La pulsación prolongada ya no selecciona ni ofrece copiar el contenido normal de la interfaz; los campos editables conservan la selección, corrección y pegado nativos. `pnpm run validate`, CI de GitHub (validación y APK Android) y el despliegue de producción terminaron correctamente. La versión se instaló en el AYN Thor y se comprobó allí con una pulsación prolongada sobre texto de Inicio; la URL pública con `?release=v1.16-no-copy-check` confirmó la versión visible.
@@ -80,7 +82,7 @@ La rama también incorpora una carga opcional de datos ficticios, identificados 
 
 ## Siguiente tarea
 
-Completar el checklist de Safari en iPhone y los flujos restantes en Android físico desde `https://losajr.github.io/simple-finance/`: instalación de la PWA, navegación inferior, apertura/cierre de hojas, registro rápido, edición, ciclos por día de cobro, controles táctiles y actualización automática. El puente Android ya compila, se instala y abre en el AYN Thor; el siguiente hito nativo será preparar una firma de prueba y el paquete AAB, sin publicar todavía en Google Play.
+Completar el checklist de Safari en iPhone y los flujos restantes en Android físico desde `https://losajr.github.io/simple-finance/`: instalación de la PWA, navegación inferior, apertura/cierre de hojas, registro rápido, edición, ciclos por día de cobro, controles táctiles y actualización automática. El puente Android ya compila, se instala y abre en el AYN Thor; el AAB de release sin firmar también está validado. El siguiente hito nativo es crear y custodiar una clave de firma de prueba para generar el AAB instalable, sin publicar todavía en Google Play.
 
 ## Verificaciones
 
@@ -98,6 +100,7 @@ Completar el checklist de Safari en iPhone y los flujos restantes en Android fí
 - v1.15: las barras de Actividad se verificaron en el AYN Thor (Android 13, Android System WebView 109) y la versión visible se confirmó en `https://losajr.github.io/simple-finance/?release=v1.15-android-chart`.
 - v1.16: la selección de texto normal quedó bloqueada en el AYN Thor y la versión visible se confirmó en `https://losajr.github.io/simple-finance/?release=v1.16-no-copy-check`.
 - v1.17: auditoría visual de Inicio, Registrar, Actividad y Configuración en el AYN Thor; se corrigieron los colores de selección incompatibles con Android System WebView 109 y la versión visible se confirmó en `https://losajr.github.io/simple-finance/?release=v1.17-webview-compat-check`.
+- Android AAB: el empaquetado de release sin firma terminó correctamente el 2026-09-14; queda pendiente crear la clave local antes de producir un artefacto distribuible.
 - Auditoría UX/UI: completada el 2026-09-12 contra heurísticas de Nielsen, Leyes de UX, guías de Apple y WCAG 2.2. El pase prioritario de contraste, objetivos táctiles, seguridad de acciones, feedback de guardado, foco modal e intervalos de ciclo está incorporado y verificado localmente.
 
 ## Bloqueos
