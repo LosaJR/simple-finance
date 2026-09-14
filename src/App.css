@@ -1426,11 +1426,11 @@ textarea {
 }
 
 .trend-income {
-  background: color-mix(in srgb, var(--positive) 78%, var(--field));
+  background: var(--positive);
 }
 
 .trend-expense {
-  background: color-mix(in srgb, var(--danger) 72%, var(--field));
+  background: var(--danger);
 }
 
 .trend-amounts {
