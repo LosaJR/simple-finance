@@ -65,6 +65,23 @@
   box-sizing: border-box;
 }
 
+/* La interfaz se comporta como una aplicación: las pulsaciones largas no seleccionan
+   etiquetas, importes ni elementos de navegación. Los campos editables recuperan la
+   selección nativa para corregir y pegar datos con normalidad. */
+#root {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input,
+textarea,
+[contenteditable='true'] {
+  -webkit-touch-callout: default;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 body {
   min-width: 320px;
   min-height: 100svh;
