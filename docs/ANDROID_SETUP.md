@@ -19,7 +19,9 @@ Esta guía prepara el entorno para la Fase 7. No publica una aplicación, no cre
 
 ## Siguiente bloque técnico
 
-Con el entorno preparado, el proyecto podrá añadir Capacitor y el módulo Android en una rama aislada. Antes de generar una compilación distribuible se confirmarán el identificador del paquete, la firma local protegida y el modo de distribución. Las claves o archivos de firma nunca se guardan en Git.
+Con el entorno preparado, el proyecto puede añadir Capacitor y el módulo Android en una rama aislada. El identificador confirmado es `com.losajr.simplefinance`; antes de generar una compilación distribuible se confirmarán la firma local protegida y el modo de distribución. Las claves o archivos de firma nunca se guardan en Git.
+
+Para actualizar los recursos web dentro del proyecto Android, ejecutar `pnpm android:sync`. Para abrirlo en Android Studio, ejecutar `pnpm android:open`. Las compilaciones locales deben usar un JDK 21, no Java 8 ni el JBR 25 incluido en la versión actual de Android Studio.
 
 ## Límites
 
