@@ -23,6 +23,8 @@ Con el entorno preparado, el proyecto puede añadir Capacitor y el módulo Andro
 
 Para actualizar los recursos web dentro del proyecto Android, ejecutar `pnpm android:sync`. Para abrirlo en Android Studio, ejecutar `pnpm android:open`. Las compilaciones locales deben usar un JDK 21, no Java 8 ni el JBR 25 incluido en la versión actual de Android Studio.
 
+La aplicación usa pantalla completa inmersiva en Android: al abrirse, oculta de forma temporal la barra de estado y la navegación del sistema para reservar la pantalla a la interfaz financiera. Un deslizamiento desde un borde las muestra momentáneamente; no se desactiva la navegación ni el acceso a las notificaciones.
+
 ## Límites
 
 - No se habilitarán notificaciones, lectura de pagos ni automatizaciones sin permiso explícito y prueba en dispositivo.
