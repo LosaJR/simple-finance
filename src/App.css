@@ -52,10 +52,10 @@
 
 .app-version {
   padding: 2px 6px;
-  border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+  border: 1px solid var(--line);
   border-radius: 4px;
   color: var(--muted);
-  background: color-mix(in srgb, var(--surface) 54%, transparent);
+  background: var(--surface-glass);
   font-size: 0.62rem;
   font-weight: 800;
   line-height: 1;
@@ -112,7 +112,7 @@
   border-radius: 8px;
   padding: 0;
   color: var(--accent);
-  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  background: var(--surface-glass);
   box-shadow: 0 2px 8px rgba(42, 47, 40, 0.05);
 }
 
@@ -128,7 +128,7 @@
 .cards-panel,
 .compact-panel,
 .payday-banner {
-  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+  border: 1px solid var(--line);
   border-radius: 8px;
   background: linear-gradient(145deg, var(--surface-glass), var(--surface-tint));
   box-shadow: var(--shadow);
@@ -191,7 +191,7 @@
   place-items: center;
   border-radius: 8px;
   color: var(--accent);
-  background: color-mix(in srgb, var(--nav-active) 76%, var(--surface));
+  background: var(--nav-active);
 }
 
 .metric.primary .summary-symbol {
@@ -333,7 +333,7 @@ label,
   display: grid;
   gap: 20px;
   padding: 20px;
-  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+  border: 1px solid var(--line);
   border-radius: 8px;
   background: linear-gradient(145deg, var(--surface-glass), var(--surface-tint));
   box-shadow: var(--shadow);
@@ -370,7 +370,7 @@ label,
   gap: 4px;
   border-radius: 50%;
   background: var(--surface-glass);
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--surface-glass) 84%, transparent);
+  box-shadow: 0 0 0 6px var(--surface-glass);
   backdrop-filter: blur(12px);
 }
 
@@ -864,12 +864,12 @@ textarea {
 
 .transaction-marker.expense {
   color: var(--danger);
-  background: color-mix(in srgb, var(--danger) 12%, var(--field));
+  background: var(--field);
 }
 
 .transaction-marker.income {
   color: var(--positive);
-  background: color-mix(in srgb, var(--positive) 12%, var(--field));
+  background: var(--field);
 }
 
 .swipe-actions {
@@ -991,8 +991,8 @@ textarea {
   gap: 2px;
   width: 100%;
   padding: 8px var(--page-gutter) calc(env(safe-area-inset-bottom) + 8px);
-  border-top: 1px solid color-mix(in srgb, var(--line-strong) 72%, transparent);
-  background: color-mix(in srgb, var(--surface-glass) 88%, transparent);
+  border-top: 1px solid var(--line-strong);
+  background: var(--surface-glass);
   box-shadow: var(--nav-shadow);
   backdrop-filter: blur(18px);
 }
@@ -1013,7 +1013,7 @@ textarea {
 
 .bottom-nav button.active {
   color: var(--text);
-  background: color-mix(in srgb, var(--nav-active) 78%, var(--surface-glass));
+  background: var(--nav-active);
 }
 
 .bottom-nav button svg {
@@ -1055,7 +1055,7 @@ textarea {
 
 .monthly-calendar button.active {
   border-color: var(--accent);
-  background: color-mix(in srgb, var(--nav-active) 78%, var(--field-glass));
+  background: var(--nav-active);
 }
 
 .monthly-calendar strong {
@@ -1156,10 +1156,10 @@ textarea {
   width: 44px;
   height: 44px;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--line-strong) 84%, transparent);
+  border: 1px solid var(--line-strong);
   border-radius: 8px;
   color: var(--accent);
-  background: color-mix(in srgb, var(--field-glass) 88%, var(--surface-glass));
+  background: var(--field-glass);
   backdrop-filter: blur(10px);
   cursor: pointer;
 }
@@ -1185,7 +1185,7 @@ textarea {
   padding: 20px;
   margin: 0 auto;
   overflow-y: auto;
-  border: 1px solid color-mix(in srgb, var(--line-strong) 86%, transparent);
+  border: 1px solid var(--line-strong);
   border-radius: 8px;
   background: linear-gradient(145deg, var(--surface-glass), var(--surface-tint));
   box-shadow: var(--nav-shadow);
@@ -1262,7 +1262,7 @@ textarea {
 
 .quick-categories button {
   min-height: 50px;
-  border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
+  border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--text);
   background: var(--field-glass);
@@ -1401,8 +1401,8 @@ textarea {
 .trend-chart button.active {
   border-bottom-color: var(--accent);
   color: var(--text);
-  background: color-mix(in srgb, var(--nav-active) 68%, transparent);
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 70%, transparent);
+  background: var(--nav-active);
+  box-shadow: inset 0 0 0 2px var(--accent);
   transform: none;
 }
 
@@ -1475,7 +1475,7 @@ textarea {
   padding: 9px 10px;
   border-left: 3px solid var(--accent);
   color: var(--muted);
-  background: color-mix(in srgb, var(--nav-active) 42%, transparent);
+  background: var(--nav-active);
   font-size: var(--text-meta);
   line-height: 1.4;
 }
@@ -1555,7 +1555,7 @@ textarea {
 .onboarding-panel,
 .planned-payments,
 .cycle-insights {
-  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+  border: 1px solid var(--line);
   border-radius: 8px;
   background: linear-gradient(145deg, var(--surface-glass), var(--surface-tint));
   box-shadow: var(--shadow);
@@ -1598,9 +1598,9 @@ textarea {
 
 .undo-banner {
   justify-content: center;
-  border-color: color-mix(in srgb, var(--positive) 48%, var(--line));
+  border-color: var(--positive);
   color: var(--positive);
-  background: color-mix(in srgb, var(--positive) 10%, var(--field-glass));
+  background: var(--field-glass);
   font-weight: 800;
 }
 
@@ -1717,7 +1717,7 @@ textarea {
 }
 
 .planned-payment-row.is-due {
-  border-color: color-mix(in srgb, var(--danger) 42%, var(--line));
+  border-color: var(--danger);
 }
 
 .planned-payment-row div,
@@ -1741,11 +1741,11 @@ textarea {
 }
 
 .category-spending-copy .limit-status.attention {
-  color: color-mix(in srgb, var(--accent) 56%, var(--danger));
+  color: var(--warning);
 }
 
 .category-spending-copy .limit-status.near-limit {
-  color: color-mix(in srgb, var(--danger) 76%, var(--accent));
+  color: var(--near-limit);
 }
 
 .category-spending-copy .limit-status.exceeded {
@@ -1753,11 +1753,11 @@ textarea {
 }
 
 .limit-track.attention {
-  color: color-mix(in srgb, var(--accent) 56%, var(--danger));
+  color: var(--warning);
 }
 
 .limit-track.near-limit {
-  color: color-mix(in srgb, var(--danger) 76%, var(--accent));
+  color: var(--near-limit);
 }
 
 .limit-track.exceeded {
@@ -1824,11 +1824,11 @@ textarea {
   align-items: center;
   justify-content: center;
   min-height: 44px;
-  border: 1px solid color-mix(in srgb, var(--danger) 46%, var(--line));
+  border: 1px solid var(--danger);
   border-radius: 8px;
   padding: 0 11px;
   color: var(--danger);
-  background: color-mix(in srgb, var(--danger) 8%, var(--field-glass));
+  background: var(--field-glass);
   font: inherit;
   font-weight: 800;
 }

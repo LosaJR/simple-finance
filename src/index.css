@@ -11,6 +11,8 @@
   --accent: #1f6f65;
   --positive: #28795e;
   --danger: #9f4145;
+  --warning: #8a5a12;
+  --near-limit: #a24a40;
   --line: #cadbd4;
   --line-strong: #afc9c0;
   --shadow: 0 10px 24px rgba(13, 57, 67, 0.11);
@@ -47,6 +49,8 @@
   --accent: #87d8b7;
   --positive: #8fd5ac;
   --danger: #f1a29d;
+  --warning: #f1c36c;
+  --near-limit: #f1a29d;
   --line: #285361;
   --line-strong: #3d6972;
   --shadow: 0 10px 24px rgba(0, 13, 20, 0.36);
@@ -124,6 +128,6 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--accent) 38%, transparent);
+  outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
