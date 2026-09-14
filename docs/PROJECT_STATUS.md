@@ -4,13 +4,15 @@ Fecha: 2026-09-14
 
 ## Estado actual
 
-`main` publica Simple Finance v1.14 / 1.14.0. Fases 1 a 4 están completadas; Fases 5 y 6 quedan pendientes de comprobación en dispositivos físicos. Android será la primera distribución nativa mediante Google Play; iOS queda como puente posterior dependiente de entorno Apple.
+`main` publica Simple Finance v1.15 / 1.15.0. Fases 1 a 4 están completadas; Fases 5 y 6 quedan pendientes de comprobación en dispositivos físicos. Android será la primera distribución nativa mediante Google Play; iOS queda como puente posterior dependiente de entorno Apple.
 
 Seguimiento visible de fases y porcentajes: https://github.com/LosaJR/simple-finance/issues/13
 
 Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vitest, Playwright, GitHub Issues, milestones, GitHub Project y CI.
 
 ## Ultima tarea terminada
+
+Se publicó v1.15 / 1.15.0 el 2026-09-14. Corrige la gráfica de evolución de Actividad en Android: el Android System WebView 109 del AYN Thor interpretaba `color-mix()` como un fondo transparente, aunque las barras conservaban su altura y sus datos. Las barras de ingresos y gastos usan ahora los colores sólidos compatibles de la aplicación. `pnpm run validate`, CI de GitHub (validación y APK Android) y el despliegue de producción terminaron correctamente. En el AYN Thor físico se verificaron visualmente las barras y la URL pública con `?release=v1.15-android-chart` confirmó la versión visible.
 
 Se publicó v1.14 / 1.14.0 el 2026-09-14. Restaura el orden previsto de Actividad: pestañas de tipo, filtros compactos, evolución por ciclos y, por último, movimientos. La causa fue un contenedor semántico añadido durante la auditoría de accesibilidad que anulaba los órdenes de composición móvil; se retiró sin afectar los datos ni los cálculos. `pnpm run validate`, CI y el despliegue de GitHub Pages terminaron correctamente. La URL pública con `?release=v1.14-activity-order` confirmó la nueva versión visible.
 
@@ -72,11 +74,12 @@ La rama también incorpora una carga opcional de datos ficticios, identificados 
 
 ## Siguiente tarea
 
-Confirmar desde Safari en iPhone y desde un dispositivo Android la versión publicada en `https://losajr.github.io/simple-finance/`: instalación de la PWA, navegación inferior, apertura/cierre de hojas, registro rápido, edición, ciclos por día de cobro, controles táctiles y actualización automática. Para iniciar la Fase 7, instalar Android Studio, SDK y Platform-Tools conforme a `docs/ANDROID_SETUP.md`, y conectar un Android físico de pruebas.
+Completar el checklist de Safari en iPhone y los flujos restantes en Android físico desde `https://losajr.github.io/simple-finance/`: instalación de la PWA, navegación inferior, apertura/cierre de hojas, registro rápido, edición, ciclos por día de cobro, controles táctiles y actualización automática. El puente Android ya compila, se instala y abre en el AYN Thor; el siguiente hito nativo será preparar una firma de prueba y el paquete AAB, sin publicar todavía en Google Play.
 
 ## Verificaciones
 
 - `pnpm run validate`: correcto antes de publicar v1.14 (lint, 18 pruebas y build).
+- `pnpm run validate`: correcto antes de publicar v1.15 (lint, 18 pruebas y build).
 - `pnpm run validate`: correcto antes de publicar v1.13 (lint, 18 pruebas y build).
 - `pnpm run validate`: correcto antes de publicar v1.12 (lint, 19 pruebas y build).
 - `pnpm test`, `pnpm lint` y `pnpm build`: correctos el 2026-09-12, incluidos los cálculos de disponible diario y umbrales de límite.
@@ -84,6 +87,7 @@ Confirmar desde Safari en iPhone y desde un dispositivo Android la versión publ
 - Registro de movimiento, nomina en dia laborable, tarjeta principal, filtro por tarjeta, calendario por ciclos y configuracion con selectores directos: verificados contra un origen HTTP de red local a tamano iPhone; queda pendiente la confirmacion en iPhone fisico.
 - `pnpm e2e`: configurado, pero no ejecutado localmente porque la descarga de navegadores de Playwright desde `cdn.playwright.dev` agoto timeout.
 - GitHub Pages: desplegado correctamente en `https://losajr.github.io/simple-finance/` desde `main`; los despliegues automáticos de producción están activados.
+- v1.15: las barras de Actividad se verificaron en el AYN Thor (Android 13, Android System WebView 109) y la versión visible se confirmó en `https://losajr.github.io/simple-finance/?release=v1.15-android-chart`.
 - Auditoría UX/UI: completada el 2026-09-12 contra heurísticas de Nielsen, Leyes de UX, guías de Apple y WCAG 2.2. El pase prioritario de contraste, objetivos táctiles, seguridad de acciones, feedback de guardado, foco modal e intervalos de ciclo está incorporado y verificado localmente.
 
 ## Bloqueos
