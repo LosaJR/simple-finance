@@ -12,6 +12,8 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
+El contenedor Android usa ahora pantalla completa inmersiva durante las pruebas locales: oculta las barras de estado y navegación, que siguen disponibles temporalmente mediante un deslizamiento desde el borde. Se compiló, instaló y comprobó visualmente en el AYN Thor; este ajuste nativo todavía no es una nueva publicación ni incrementa la versión v1.15.
+
 Se publicó v1.15 / 1.15.0 el 2026-09-14. Corrige la gráfica de evolución de Actividad en Android: el Android System WebView 109 del AYN Thor interpretaba `color-mix()` como un fondo transparente, aunque las barras conservaban su altura y sus datos. Las barras de ingresos y gastos usan ahora los colores sólidos compatibles de la aplicación. `pnpm run validate`, CI de GitHub (validación y APK Android) y el despliegue de producción terminaron correctamente. En el AYN Thor físico se verificaron visualmente las barras y la URL pública con `?release=v1.15-android-chart` confirmó la versión visible.
 
 Se publicó v1.14 / 1.14.0 el 2026-09-14. Restaura el orden previsto de Actividad: pestañas de tipo, filtros compactos, evolución por ciclos y, por último, movimientos. La causa fue un contenedor semántico añadido durante la auditoría de accesibilidad que anulaba los órdenes de composición móvil; se retiró sin afectar los datos ni los cálculos. `pnpm run validate`, CI y el despliegue de GitHub Pages terminaron correctamente. La URL pública con `?release=v1.14-activity-order` confirmó la nueva versión visible.
