@@ -4,7 +4,7 @@ Fecha: 2026-09-14
 
 ## Estado actual
 
-`main` publica Simple Finance v1.15 / 1.15.0. Fases 1 a 4 están completadas; Fases 5 y 6 quedan pendientes de comprobación en dispositivos físicos. Android será la primera distribución nativa mediante Google Play; iOS queda como puente posterior dependiente de entorno Apple.
+`main` publica Simple Finance v1.16 / 1.16.0. Fases 1 a 4 están completadas; Fases 5 y 6 quedan pendientes de comprobación en dispositivos físicos. Android será la primera distribución nativa mediante Google Play; iOS queda como puente posterior dependiente de entorno Apple.
 
 Seguimiento visible de fases y porcentajes: https://github.com/LosaJR/simple-finance/issues/13
 
@@ -12,7 +12,9 @@ Proyecto inicializado con React, Vite, TypeScript estricto, Dexie, Zod, PWA, Vit
 
 ## Ultima tarea terminada
 
-El contenedor Android usa ahora pantalla completa inmersiva durante las pruebas locales: oculta las barras de estado y navegación, que siguen disponibles temporalmente mediante un deslizamiento desde el borde. Se compiló, instaló y comprobó visualmente en el AYN Thor; este ajuste nativo todavía no es una nueva publicación ni incrementa la versión v1.15.
+Se publicó v1.16 / 1.16.0 el 2026-09-14. La pulsación prolongada ya no selecciona ni ofrece copiar el contenido normal de la interfaz; los campos editables conservan la selección, corrección y pegado nativos. `pnpm run validate`, CI de GitHub (validación y APK Android) y el despliegue de producción terminaron correctamente. La versión se instaló en el AYN Thor y se comprobó allí con una pulsación prolongada sobre texto de Inicio; la URL pública con `?release=v1.16-no-copy-check` confirmó la versión visible.
+
+El contenedor Android usa ahora pantalla completa inmersiva durante las pruebas locales: oculta las barras de estado y navegación, que siguen disponibles temporalmente mediante un deslizamiento desde el borde. Se compiló, instaló y comprobó visualmente en el AYN Thor; el ajuste no requirió una publicación separada, pero está incluido en el código que acompaña a v1.16.
 
 Se publicó v1.15 / 1.15.0 el 2026-09-14. Corrige la gráfica de evolución de Actividad en Android: el Android System WebView 109 del AYN Thor interpretaba `color-mix()` como un fondo transparente, aunque las barras conservaban su altura y sus datos. Las barras de ingresos y gastos usan ahora los colores sólidos compatibles de la aplicación. `pnpm run validate`, CI de GitHub (validación y APK Android) y el despliegue de producción terminaron correctamente. En el AYN Thor físico se verificaron visualmente las barras y la URL pública con `?release=v1.15-android-chart` confirmó la versión visible.
 
@@ -81,6 +83,7 @@ Completar el checklist de Safari en iPhone y los flujos restantes en Android fí
 ## Verificaciones
 
 - `pnpm run validate`: correcto antes de publicar v1.14 (lint, 18 pruebas y build).
+- `pnpm run validate`: correcto antes de publicar v1.16 (lint, 18 pruebas y build).
 - `pnpm run validate`: correcto antes de publicar v1.15 (lint, 18 pruebas y build).
 - `pnpm run validate`: correcto antes de publicar v1.13 (lint, 18 pruebas y build).
 - `pnpm run validate`: correcto antes de publicar v1.12 (lint, 19 pruebas y build).
@@ -90,6 +93,7 @@ Completar el checklist de Safari en iPhone y los flujos restantes en Android fí
 - `pnpm e2e`: configurado, pero no ejecutado localmente porque la descarga de navegadores de Playwright desde `cdn.playwright.dev` agoto timeout.
 - GitHub Pages: desplegado correctamente en `https://losajr.github.io/simple-finance/` desde `main`; los despliegues automáticos de producción están activados.
 - v1.15: las barras de Actividad se verificaron en el AYN Thor (Android 13, Android System WebView 109) y la versión visible se confirmó en `https://losajr.github.io/simple-finance/?release=v1.15-android-chart`.
+- v1.16: la selección de texto normal quedó bloqueada en el AYN Thor y la versión visible se confirmó en `https://losajr.github.io/simple-finance/?release=v1.16-no-copy-check`.
 - Auditoría UX/UI: completada el 2026-09-12 contra heurísticas de Nielsen, Leyes de UX, guías de Apple y WCAG 2.2. El pase prioritario de contraste, objetivos táctiles, seguridad de acciones, feedback de guardado, foco modal e intervalos de ciclo está incorporado y verificado localmente.
 
 ## Bloqueos
