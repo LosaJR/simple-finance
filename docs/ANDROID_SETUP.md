@@ -25,6 +25,12 @@ Para actualizar los recursos web dentro del proyecto Android, ejecutar `pnpm and
 
 La aplicación usa pantalla completa inmersiva en Android: al abrirse, oculta de forma temporal la barra de estado y la navegación del sistema para reservar la pantalla a la interfaz financiera. Un deslizamiento desde un borde las muestra momentáneamente; no se desactiva la navegación ni el acceso a las notificaciones.
 
+## Firma y paquete de prueba
+
+El proyecto puede crear un AAB de comprobación desde la raíz con `./android/gradlew.bat -p android bundleRelease` en Windows. Sin una configuración local de firma el archivo resultante queda sin firmar y sirve únicamente para validar el empaquetado. No se instala ni se sube a Google Play.
+
+Para generar una versión distribuible, crea una clave en una ubicación privada fuera del repositorio y copia `android/signing.properties.example` como `android/signing.properties`. Indica allí la ruta absoluta de la clave, su alias y las contraseñas. En Windows se puede usar una ruta con barras normales, como `C:/ruta/segura/simple-finance-release.jks`. El archivo y cualquier `.jks` están excluidos de Git. Tras ello, el mismo comando genera el AAB firmado. Conserva una copia de la clave y sus contraseñas: perderlas impediría actualizar una aplicación ya publicada.
+
 ## Límites
 
 - No se habilitarán notificaciones, lectura de pagos ni automatizaciones sin permiso explícito y prueba en dispositivo.

@@ -1,0 +1,6 @@
+# Copia este archivo como android/signing.properties y rellénalo solo en tu equipo.
+# No guardes ni este archivo local ni el .jks en Git.
+storeFile=C:/ruta/segura/simple-finance-release.jks
+storePassword=
+keyAlias=simple-finance
+keyPassword=
